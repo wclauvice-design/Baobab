@@ -26,10 +26,40 @@ async function main() {
     },
   });
 
-  await prisma.user.upsert({
+  const buyer = await prisma.user.upsert({
     where: { phone: '+2250700000003' },
     update: {},
     create: { phone: '+2250700000003', role: Role.BUYER, country: 'CI' },
+  });
+
+  await prisma.address.upsert({
+    where: { id: 'seed-address-buyer-1' },
+    update: {},
+    create: {
+      id: 'seed-address-buyer-1',
+      buyerId: buyer.id,
+      label: 'Domicile',
+      fullAddress: 'Cocody Angré, Rue des Jardins, Villa 12',
+      city: 'Abidjan',
+      isDefault: true,
+    },
+  });
+
+  await prisma.coupon.upsert({
+    where: { id: 'seed-coupon-buyer-1' },
+    update: {},
+    create: {
+      id: 'seed-coupon-buyer-1',
+      buyerId: buyer.id,
+      label: 'Bienvenue sur Baobab',
+      discountAmount: 1000,
+    },
+  });
+
+  await prisma.follow.upsert({
+    where: { buyerId_sellerId: { buyerId: buyer.id, sellerId: seller.id } },
+    update: {},
+    create: { buyerId: buyer.id, sellerId: seller.id },
   });
 
   const categories = await Promise.all(

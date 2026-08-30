@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../lib/cart';
 import { api, ApiError } from '../lib/api';
@@ -7,11 +7,21 @@ import { formatXof } from '../lib/format';
 type DeliveryMode = 'STANDARD' | 'EXPRESS';
 type Provider = 'MANUAL_ORANGE_MONEY' | 'CASH_ON_DELIVERY';
 
+interface SavedAddress {
+  id: string;
+  label: string;
+  fullAddress: string;
+  city: string;
+  isDefault: boolean;
+}
+
 const CASH_ON_DELIVERY_FEE = 1000;
 
 export function Checkout() {
   const { items, total, clear } = useCart();
   const navigate = useNavigate();
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState('');
   const [address, setAddress] = useState('');
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>('STANDARD');
   const [provider, setProvider] = useState<Provider>('MANUAL_ORANGE_MONEY');
@@ -20,6 +30,27 @@ export function Checkout() {
 
   const deliveryFee = provider === 'CASH_ON_DELIVERY' ? CASH_ON_DELIVERY_FEE : 0;
   const grandTotal = total + deliveryFee;
+
+  useEffect(() => {
+    api.get<SavedAddress[]>('/addresses').then((list) => {
+      setSavedAddresses(list);
+      const preferred = list.find((a) => a.isDefault) ?? list[0];
+      if (preferred) {
+        setSelectedAddressId(preferred.id);
+        setAddress(`${preferred.fullAddress}, ${preferred.city}`);
+      }
+    });
+  }, []);
+
+  function handleSelectAddress(id: string) {
+    setSelectedAddressId(id);
+    if (id === 'custom') {
+      setAddress('');
+      return;
+    }
+    const found = savedAddresses.find((a) => a.id === id);
+    if (found) setAddress(`${found.fullAddress}, ${found.city}`);
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -51,17 +82,35 @@ export function Checkout() {
       <h1 className="mb-4 text-xl font-bold">Finaliser la commande</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <label className="text-sm text-slate-300">
-          Adresse de livraison
-          <textarea
-            required
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Quartier, rue, ville, indications..."
-            rows={3}
-            className="mt-1 w-full rounded-xl2 border border-base-700 bg-base-800 px-4 py-3 text-sm placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
-          />
-        </label>
+        <div>
+          <label className="text-sm text-slate-300">
+            Adresse de livraison
+            {savedAddresses.length > 0 && (
+              <select
+                value={selectedAddressId}
+                onChange={(e) => handleSelectAddress(e.target.value)}
+                className="mt-1 w-full rounded-xl2 border border-base-700 bg-base-800 px-4 py-3 text-sm text-slate-100 focus:border-amber-500 focus:outline-none"
+              >
+                {savedAddresses.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.label} — {a.fullAddress}, {a.city}
+                  </option>
+                ))}
+                <option value="custom">Autre adresse…</option>
+              </select>
+            )}
+          </label>
+          {(savedAddresses.length === 0 || selectedAddressId === 'custom') && (
+            <textarea
+              required
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Quartier, rue, ville, indications..."
+              rows={3}
+              className="mt-2 w-full rounded-xl2 border border-base-700 bg-base-800 px-4 py-3 text-sm placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+            />
+          )}
+        </div>
 
         <div>
           <p className="mb-2 text-sm text-slate-300">Mode de livraison</p>

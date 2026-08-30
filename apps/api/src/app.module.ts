@@ -10,6 +10,8 @@ import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { AddressesModule } from './addresses/addresses.module';
+import { CouponsModule } from './coupons/coupons.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { ReviewsModule } from './reviews/reviews.module';
     PaymentsModule,
     NotificationsModule,
     ReviewsModule,
+    AddressesModule,
+    CouponsModule,
   ],
 })
 export class AppModule {}

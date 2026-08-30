@@ -22,4 +22,10 @@ export class ReviewsController {
   findForProduct(@Param('productId') productId: string) {
     return this.reviewsService.findForProduct(productId);
   }
+
+  @Get('mine')
+  @UseGuards(JwtAuthGuard)
+  findMine(@CurrentUser() user: AuthUser) {
+    return this.reviewsService.findMine(user.id);
+  }
 }

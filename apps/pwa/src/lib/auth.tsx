@@ -5,6 +5,7 @@ interface User {
   id: string;
   phone: string;
   role: 'BUYER' | 'SELLER' | 'ADMIN';
+  creditBalance?: string | number;
 }
 
 interface AuthContextValue {

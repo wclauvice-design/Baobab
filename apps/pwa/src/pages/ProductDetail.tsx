@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { formatXof } from '../lib/format';
 import { useCart } from '../lib/cart';
+import { useAuth } from '../lib/auth';
+import { recordView } from '../lib/history';
 
 interface Review {
   id: string;
@@ -19,20 +21,39 @@ interface ProductDetailData {
   stock: number;
   images: string[];
   category: { name: string };
-  seller: { shopName: string; city: string } | null;
+  seller: { id: string; shopName: string; city: string } | null;
   reviews: Review[];
+}
+
+interface FollowEntry {
+  sellerId: string;
 }
 
 export function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState<ProductDetailData | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followBusy, setFollowBusy] = useState(false);
   const { addItem } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (id) api.get<ProductDetailData>(`/products/${id}`).then(setProduct);
+    if (!id) return;
+    api.get<ProductDetailData>(`/products/${id}`).then((data) => {
+      setProduct(data);
+      recordView(data.id);
+    });
   }, [id]);
+
+  useEffect(() => {
+    if (!product?.seller || user?.role !== 'BUYER') return;
+    api
+      .get<FollowEntry[]>('/sellers/following')
+      .then((list) => setIsFollowing(list.some((f) => f.sellerId === product.seller!.id)))
+      .catch(() => {});
+  }, [product?.seller, user?.role]);
 
   if (!product) return <div className="p-6 text-sm text-slate-500">Chargement…</div>;
 
@@ -42,6 +63,22 @@ export function ProductDetail() {
       quantity,
     );
     navigate('/cart');
+  }
+
+  async function toggleFollow() {
+    if (!product?.seller) return;
+    setFollowBusy(true);
+    try {
+      if (isFollowing) {
+        await api.delete(`/sellers/${product.seller.id}/follow`);
+        setIsFollowing(false);
+      } else {
+        await api.post(`/sellers/${product.seller.id}/follow`);
+        setIsFollowing(true);
+      }
+    } finally {
+      setFollowBusy(false);
+    }
   }
 
   return (
@@ -60,9 +97,24 @@ export function ProductDetail() {
         </span>
         <h1 className="mt-1 text-xl font-bold">{product.name}</h1>
         {product.seller && (
-          <p className="mt-1 text-xs text-slate-400">
-            Vendu par {product.seller.shopName} · {product.seller.city}
-          </p>
+          <div className="mt-1 flex items-center justify-between">
+            <p className="text-xs text-slate-400">
+              Vendu par {product.seller.shopName} · {product.seller.city}
+            </p>
+            {user?.role === 'BUYER' && (
+              <button
+                onClick={toggleFollow}
+                disabled={followBusy}
+                className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-medium disabled:opacity-50 ${
+                  isFollowing
+                    ? 'border-base-700 text-slate-400'
+                    : 'border-emerald-500 text-emerald-400'
+                }`}
+              >
+                {isFollowing ? 'Suivi ✓' : '+ Suivre'}
+              </button>
+            )}
+          </div>
         )}
         <p className="mt-3 font-heading text-2xl font-semibold text-amber-400">
           {formatXof(Number(product.price))}

@@ -66,4 +66,27 @@ export class SellersService {
       revenue,
     };
   }
+
+  async follow(buyerId: string, sellerId: string) {
+    const seller = await this.prisma.seller.findUnique({ where: { id: sellerId } });
+    if (!seller) throw new NotFoundException('Vendeur introuvable');
+
+    return this.prisma.follow.upsert({
+      where: { buyerId_sellerId: { buyerId, sellerId } },
+      update: {},
+      create: { buyerId, sellerId },
+    });
+  }
+
+  async unfollow(buyerId: string, sellerId: string) {
+    await this.prisma.follow.deleteMany({ where: { buyerId, sellerId } });
+  }
+
+  listFollowing(buyerId: string) {
+    return this.prisma.follow.findMany({
+      where: { buyerId },
+      include: { seller: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

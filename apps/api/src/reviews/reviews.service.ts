@@ -30,4 +30,12 @@ export class ReviewsService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  findMine(buyerId: string) {
+    return this.prisma.review.findMany({
+      where: { buyerId },
+      include: { product: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

@@ -57,18 +57,55 @@ enum NotificationChannel {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  phone     String   @unique
-  role      Role     @default(BUYER)
-  country   String?
-  language  String   @default("fr")
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  phone         String   @unique
+  role          Role     @default(BUYER)
+  country       String?
+  language      String   @default("fr")
+  creditBalance Decimal  @default(0) @db.Decimal(12, 2)
+  createdAt     DateTime @default(now())
 
   seller        Seller?
   orders        Order[]
   reviews       Review[]
   notifications Notification[]
   paymentAudits PaymentAudit[]
+  addresses     Address[]
+  follows       Follow[]
+  coupons       Coupon[]
+}
+
+model Address {
+  id          String   @id @default(cuid())
+  buyerId     String
+  buyer       User     @relation(fields: [buyerId], references: [id])
+  label       String
+  fullAddress String
+  city        String
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Follow {
+  id        String   @id @default(cuid())
+  buyerId   String
+  buyer     User     @relation(fields: [buyerId], references: [id])
+  sellerId  String
+  seller    Seller   @relation(fields: [sellerId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([buyerId, sellerId])
+}
+
+model Coupon {
+  id             String    @id @default(cuid())
+  buyerId        String
+  buyer          User      @relation(fields: [buyerId], references: [id])
+  label          String
+  discountAmount Decimal   @db.Decimal(12, 2)
+  isUsed         Boolean   @default(false)
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
 }
 
 model OtpCode {
@@ -92,6 +129,7 @@ model Seller {
   createdAt DateTime     @default(now())
 
   products Product[]
+  follows  Follow[]
 }
 
 model Category {

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { Role, SellerStatus } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -36,5 +36,20 @@ export class SellersController {
   @Roles(Role.ADMIN)
   setStatus(@Param('id') id: string, @Body('status') status: SellerStatus) {
     return this.sellersService.setStatus(id, status);
+  }
+
+  @Get('sellers/following')
+  listFollowing(@CurrentUser() user: AuthUser) {
+    return this.sellersService.listFollowing(user.id);
+  }
+
+  @Post('sellers/:id/follow')
+  follow(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.sellersService.follow(user.id, id);
+  }
+
+  @Delete('sellers/:id/follow')
+  unfollow(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.sellersService.unfollow(user.id, id);
   }
 }

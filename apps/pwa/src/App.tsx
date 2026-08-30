@@ -10,6 +10,12 @@ import { Payment } from './pages/Payment';
 import { OrderHistory } from './pages/OrderHistory';
 import { OrderDetail } from './pages/OrderDetail';
 import { Account } from './pages/Account';
+import { Addresses } from './pages/Addresses';
+import { Following } from './pages/Following';
+import { MyReviews } from './pages/MyReviews';
+import { BrowsingHistory } from './pages/BrowsingHistory';
+import { Messages } from './pages/Messages';
+import { Settings } from './pages/Settings';
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { user, loading } = useAuth();
@@ -40,6 +46,12 @@ export default function App() {
         <Route path="/orders/:id" element={<RequireAuth><OrderDetail /></RequireAuth>} />
         <Route path="/orders/:id/payment" element={<RequireAuth><Payment /></RequireAuth>} />
         <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
+        <Route path="/account/addresses" element={<RequireAuth><Addresses /></RequireAuth>} />
+        <Route path="/account/following" element={<RequireAuth><Following /></RequireAuth>} />
+        <Route path="/account/reviews" element={<RequireAuth><MyReviews /></RequireAuth>} />
+        <Route path="/account/history" element={<RequireAuth><BrowsingHistory /></RequireAuth>} />
+        <Route path="/account/messages" element={<RequireAuth><Messages /></RequireAuth>} />
+        <Route path="/account/settings" element={<RequireAuth><Settings /></RequireAuth>} />
       </Routes>
       {!hideNav && user && <BottomNav />}
     </>
