@@ -1,0 +1,17 @@
+{
+  "name": "baobab",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,pwa,admin -c blue,green,magenta \"npm run start:dev -w apps/api\" \"npm run dev -w apps/pwa\" \"npm run dev -w apps/admin\"",
+    "build": "npm run build -w packages/shared && npm run build -w apps/api && npm run build -w apps/pwa && npm run build -w apps/admin",
+    "db:migrate": "npm run prisma:migrate -w apps/api",
+    "db:seed": "npm run prisma:seed -w apps/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
