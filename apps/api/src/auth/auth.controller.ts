@@ -16,4 +16,10 @@ export class AuthController {
   verifyOtp(@Body() dto: VerifyOtpDto) {
     return this.authService.verifyOtp(dto.phone, dto.code);
   }
+
+  // Temporaire — voir la note dans AuthService.devLogin().
+  @Post('dev-login')
+  devLogin(@Body('phone') phone: string) {
+    return this.authService.devLogin(phone);
+  }
 }

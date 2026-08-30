@@ -12,6 +12,7 @@ interface AuthContextValue {
   loading: boolean;
   requestOtp: (phone: string) => Promise<void>;
   verifyOtp: (phone: string, code: string) => Promise<void>;
+  devLogin: (phone: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -46,13 +47,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(res.user);
   }
 
+  // Temporaire — voir AuthService.devLogin() côté API.
+  async function devLogin(phone: string) {
+    const res = await api.post<{ accessToken: string; user: User }>('/auth/dev-login', { phone });
+    setToken(res.accessToken);
+    setUser(res.user);
+  }
+
   function logout() {
     clearToken();
     setUser(null);
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, requestOtp, verifyOtp, logout }}>
+    <AuthContext.Provider value={{ user, loading, requestOtp, verifyOtp, devLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );

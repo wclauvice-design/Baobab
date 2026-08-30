@@ -54,7 +54,9 @@ packages/
 
 ## Connexion (mode développement)
 
-Aucun fournisseur SMS n'est branché : le code OTP est simplement affiché dans les logs du serveur API (`ConsoleSmsProvider`). Cherchez une ligne `OTP for +225...: 1234` dans le terminal de l'API après avoir demandé un code.
+Aucun fournisseur SMS n'est branché : le code OTP est simplement affiché dans les logs du serveur API (`ConsoleSmsProvider`). Cherchez une ligne `OTP for +225...: 1234` dans le terminal de l'API (ou l'onglet "Deploy Logs" de Railway en production) après avoir demandé un code.
+
+**Connexion rapide sans code (temporaire)** : tant qu'aucun vrai fournisseur SMS n'est branché, l'écran de connexion de la PWA et du back-office affiche des boutons "Admin / Vendeur / Acheteur (test)" qui connectent directement l'un des 3 comptes de seed sans passer par l'OTP. Ce chemin passe par `POST /auth/dev-login`, verrouillé par la variable d'environnement `ENABLE_DEV_LOGIN` et une liste blanche des 3 numéros de seed (voir `AuthService.devLogin`) — à retirer (ce endpoint + ces boutons) une fois un vrai `SmsProvider` en place.
 
 De même, les notifications SMS/WhatsApp (confirmation de commande, validation de paiement) sont loggées dans la console par `ConsoleNotificationProvider` plutôt qu'envoyées réellement.
 

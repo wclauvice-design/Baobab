@@ -8,3 +8,5 @@ apps/api/prisma/dev.db
 /Baobab/
 .claude/
 *.tsbuildinfo
+apps/api/prisma/seed.js
+apps/api/prisma/seed.js.map

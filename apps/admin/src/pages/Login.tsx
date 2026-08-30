@@ -9,8 +9,21 @@ export function Login() {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const { requestOtp, verifyOtp } = useAuth();
+  const { requestOtp, verifyOtp, devLogin } = useAuth();
   const navigate = useNavigate();
+
+  async function handleDevLogin(devPhone: string) {
+    setError(null);
+    setBusy(true);
+    try {
+      await devLogin(devPhone);
+      navigate('/');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Erreur réseau');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function handleRequestOtp(e: FormEvent) {
     e.preventDefault();
@@ -64,6 +77,30 @@ export function Login() {
           >
             Recevoir le code
           </button>
+
+          <div className="mt-4 rounded-lg border border-dashed border-emerald-300 bg-emerald-50 p-4">
+            <p className="mb-2 text-xs text-emerald-700">
+              Connexion rapide (temporaire, à retirer avant lancement)
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => handleDevLogin('+2250700000001')}
+                className="rounded-lg bg-emerald-100 px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-200 disabled:opacity-50"
+              >
+                Admin (test)
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => handleDevLogin('+2250700000002')}
+                className="rounded-lg bg-emerald-100 px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-200 disabled:opacity-50"
+              >
+                Vendeur (test)
+              </button>
+            </div>
+          </div>
         </form>
       ) : (
         <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
