@@ -11,6 +11,7 @@ interface ProductRow {
   id: string;
   name: string;
   price: number;
+  compareAtPrice?: number | null;
   stock: number;
   category: { name: string };
 }
@@ -31,10 +32,12 @@ export function Products() {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     try {
+      const compareAtPrice = form.get('compareAtPrice');
       await api.post('/products', {
         name: form.get('name'),
         description: form.get('description'),
         price: Number(form.get('price')),
+        compareAtPrice: compareAtPrice ? Number(compareAtPrice) : undefined,
         stock: Number(form.get('stock')),
         categoryId: form.get('categoryId'),
       });
@@ -86,6 +89,12 @@ export function Products() {
             className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
+        <input
+          name="compareAtPrice"
+          type="number"
+          placeholder="Prix barré (optionnel, pour une promo)"
+          className="mb-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        />
         <select
           name="categoryId"
           required
@@ -116,7 +125,14 @@ export function Products() {
               <tr key={p.id} className="border-t border-slate-100">
                 <td className="px-4 py-3 font-medium">{p.name}</td>
                 <td className="px-4 py-3">{p.category.name}</td>
-                <td className="px-4 py-3">{formatXof(Number(p.price))}</td>
+                <td className="px-4 py-3">
+                  {formatXof(Number(p.price))}
+                  {p.compareAtPrice && Number(p.compareAtPrice) > Number(p.price) && (
+                    <span className="ml-1 text-xs text-slate-400 line-through">
+                      {formatXof(Number(p.compareAtPrice))}
+                    </span>
+                  )}
+                </td>
                 <td className="px-4 py-3">
                   <input
                     type="number"

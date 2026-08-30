@@ -86,7 +86,8 @@ async function main() {
     {
       name: 'Sac à main tissé raphia',
       description: "Sac artisanal tissé main, fabriqué par des coopératives locales.",
-      price: 12000,
+      price: 9000,
+      compareAtPrice: 12000,
       stock: 20,
       categoryId: categories[0].id,
       sellerId: seller.id,
@@ -104,7 +105,8 @@ async function main() {
     {
       name: 'Enceinte Bluetooth portable',
       description: '10h autonomie, résistante à la poussière.',
-      price: 18000,
+      price: 14500,
+      compareAtPrice: 18000,
       stock: 30,
       categoryId: categories[2].id,
       sellerId: null,
@@ -123,7 +125,13 @@ async function main() {
 
   for (const p of products) {
     const existing = await prisma.product.findFirst({ where: { name: p.name } });
-    if (!existing) {
+    if (existing) {
+      // Ne touche pas au stock : il reflète les vraies commandes passées en test.
+      await prisma.product.update({
+        where: { id: existing.id },
+        data: { price: p.price, compareAtPrice: p.compareAtPrice ?? null, description: p.description },
+      });
+    } else {
       await prisma.product.create({ data: p });
     }
   }

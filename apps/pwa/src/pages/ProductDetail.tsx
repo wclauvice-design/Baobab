@@ -18,11 +18,15 @@ interface ProductDetailData {
   name: string;
   description: string;
   price: number;
+  compareAtPrice?: number | null;
   stock: number;
   images: string[];
   category: { name: string };
   seller: { id: string; shopName: string; city: string } | null;
   reviews: Review[];
+  avgRating: number | null;
+  reviewCount: number;
+  soldCount: number;
 }
 
 interface FollowEntry {
@@ -59,7 +63,14 @@ export function ProductDetail() {
 
   function handleAddToCart() {
     addItem(
-      { productId: product!.id, name: product!.name, price: Number(product!.price), image: product!.images[0] },
+      {
+        productId: product!.id,
+        name: product!.name,
+        price: Number(product!.price),
+        image: product!.images[0],
+        sellerId: product!.seller?.id ?? null,
+        shopName: product!.seller?.shopName ?? 'Baobab',
+      },
       quantity,
     );
     navigate('/cart');
@@ -116,9 +127,32 @@ export function ProductDetail() {
             )}
           </div>
         )}
-        <p className="mt-3 font-heading text-2xl font-semibold text-amber-400">
-          {formatXof(Number(product.price))}
-        </p>
+        {(product.avgRating || product.soldCount > 0) && (
+          <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
+            {product.avgRating && (
+              <span className="flex items-center gap-1 text-amber-400">
+                ★ {product.avgRating.toFixed(1)}
+                <span className="text-slate-500">({product.reviewCount})</span>
+              </span>
+            )}
+            {product.soldCount > 0 && <span>{product.soldCount} vendu{product.soldCount > 1 ? 's' : ''}</span>}
+          </div>
+        )}
+        <div className="mt-3 flex items-center gap-2">
+          <p className="font-heading text-2xl font-semibold text-amber-400">
+            {formatXof(Number(product.price))}
+          </p>
+          {product.compareAtPrice && Number(product.compareAtPrice) > Number(product.price) && (
+            <>
+              <p className="text-sm text-slate-500 line-through">
+                {formatXof(Number(product.compareAtPrice))}
+              </p>
+              <span className="rounded-md bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                -{Math.round((1 - Number(product.price) / Number(product.compareAtPrice)) * 100)}%
+              </span>
+            </>
+          )}
+        </div>
         <p className="mt-3 text-sm leading-relaxed text-slate-300">{product.description}</p>
 
         <div className="mt-5 flex items-center gap-3">

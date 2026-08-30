@@ -18,7 +18,8 @@ interface SavedAddress {
 const CASH_ON_DELIVERY_FEE = 1000;
 
 export function Checkout() {
-  const { items, total, clear } = useCart();
+  const { items, selectedTotal, clearSelected } = useCart();
+  const checkoutItems = items.filter((i) => i.selected);
   const navigate = useNavigate();
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState('');
@@ -29,7 +30,7 @@ export function Checkout() {
   const [busy, setBusy] = useState(false);
 
   const deliveryFee = provider === 'CASH_ON_DELIVERY' ? CASH_ON_DELIVERY_FEE : 0;
-  const grandTotal = total + deliveryFee;
+  const grandTotal = selectedTotal + deliveryFee;
 
   useEffect(() => {
     api.get<SavedAddress[]>('/addresses').then((list) => {
@@ -58,7 +59,7 @@ export function Checkout() {
     setBusy(true);
     try {
       const order = await api.post<{ id: string }>('/orders', {
-        items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+        items: checkoutItems.map((i) => ({ productId: i.productId, quantity: i.quantity })),
         deliveryAddress: address,
         deliveryMode,
         provider,
@@ -68,13 +69,29 @@ export function Checkout() {
         merchantNumber?: string;
       }>(`/orders/${order.id}/payment/initiate`, { provider });
       sessionStorage.setItem(`baobab_payment_${order.id}`, JSON.stringify(initiation));
-      clear();
+      clearSelected();
       navigate(`/orders/${order.id}/payment`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Erreur réseau');
     } finally {
       setBusy(false);
     }
+  }
+
+  if (checkoutItems.length === 0) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-16 text-center">
+        <p className="text-sm text-slate-400">
+          Aucun article sélectionné. Retournez au panier pour en choisir.
+        </p>
+        <button
+          onClick={() => navigate('/cart')}
+          className="mt-4 text-sm text-amber-400 underline"
+        >
+          Retour au panier
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -171,8 +188,8 @@ export function Checkout() {
         <div className="fixed inset-x-0 bottom-16 z-10 mx-auto max-w-md border-t border-base-700 bg-base-900/95 px-4 py-4 backdrop-blur">
           <div className="mb-3 flex flex-col gap-1 text-sm">
             <div className="flex items-center justify-between text-slate-400">
-              <span>Sous-total</span>
-              <span>{formatXof(total)}</span>
+              <span>Sous-total ({checkoutItems.length} article{checkoutItems.length > 1 ? 's' : ''})</span>
+              <span>{formatXof(selectedTotal)}</span>
             </div>
             {deliveryFee > 0 && (
               <div className="flex items-center justify-between text-slate-400">

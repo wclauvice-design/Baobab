@@ -146,10 +146,11 @@ model Product {
   seller      Seller?  @relation(fields: [sellerId], references: [id])
   categoryId  String
   category    Category @relation(fields: [categoryId], references: [id])
-  name        String
-  description String
-  price       Decimal  @db.Decimal(12, 2)
-  currency    String   @default("XOF")
+  name           String
+  description    String
+  price          Decimal  @db.Decimal(12, 2)
+  compareAtPrice Decimal? @db.Decimal(12, 2)
+  currency       String   @default("XOF")
   stock       Int      @default(0)
   images      String[]
   createdAt   DateTime @default(now())

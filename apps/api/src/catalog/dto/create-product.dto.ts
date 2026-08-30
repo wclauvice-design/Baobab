@@ -12,6 +12,11 @@ export class CreateProductDto {
   @Min(0)
   price: number;
 
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  compareAtPrice?: number;
+
   @IsInt()
   @Min(0)
   stock: number;
