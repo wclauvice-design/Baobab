@@ -4,6 +4,7 @@ import { useCart } from '../lib/cart';
 import { formatXof } from '../lib/format';
 import { api } from '../lib/api';
 import { Product, ProductCard } from '../components/ProductCard';
+import { BaobabMark, IconBag, IconShop } from '../components/icons';
 
 export function Cart() {
   const { items, updateQuantity, removeItem, toggleSelected, setAllSelected, selectedTotal, selectedCount } =
@@ -22,8 +23,8 @@ export function Cart() {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-base-800 text-4xl">
-          🛒
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-base-800 text-amber-400">
+          <IconBag className="h-8 w-8" />
         </span>
         <p className="mt-4 text-slate-400">Votre panier est vide.</p>
         <Link to="/" className="btn-primary mt-4 inline-flex">
@@ -67,7 +68,9 @@ export function Cart() {
                   })}
                   className="accent-amber-500"
                 />
-                <span className="text-xs font-medium text-slate-300">🏪 {shopName}</span>
+                <span className="flex items-center gap-1.5 text-xs font-medium text-slate-300">
+                  <IconShop className="h-3.5 w-3.5 text-emerald-400" /> {shopName}
+                </span>
               </div>
               <ul className="flex flex-col gap-3">
                 {shopItems.map((item) => (
@@ -78,11 +81,11 @@ export function Cart() {
                       onChange={() => toggleSelected(item.productId)}
                       className="mt-6 accent-amber-500"
                     />
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-base-700 text-xl">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-base-700">
                       {item.image ? (
                         <img src={item.image} alt={item.name} className="h-full w-full rounded-lg object-cover" />
                       ) : (
-                        '🧺'
+                        <BaobabMark className="h-7 w-7 opacity-30" />
                       )}
                     </div>
                     <div className="flex flex-1 flex-col">

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { api, ApiError } from '../lib/api';
 import { formatXof } from '../lib/format';
+import { IconChat, IconHeart, IconHistory, IconLocation, IconOrders, IconSettings, IconStar } from '../components/icons';
 
 const SUPPORT_WHATSAPP_NUMBER = '2250700000000';
 
@@ -11,12 +12,12 @@ interface Coupon {
 }
 
 const MENU_ITEMS = [
-  { to: '/orders', icon: '📦', label: 'Mes commandes', tint: 'from-amber-500/20 to-amber-600/5 text-amber-400' },
-  { to: '/account/messages', icon: '💬', label: 'Messages', tint: 'from-sky-500/20 to-sky-600/5 text-sky-400' },
-  { to: '/account/reviews', icon: '⭐', label: 'Mes avis', tint: 'from-amber-500/20 to-amber-600/5 text-amber-400' },
-  { to: '/account/history', icon: '🕘', label: 'Historique', tint: 'from-violet-500/20 to-violet-600/5 text-violet-400' },
-  { to: '/account/addresses', icon: '📍', label: 'Adresses', tint: 'from-emerald-500/20 to-emerald-600/5 text-emerald-400' },
-  { to: '/account/following', icon: '❤️', label: 'Abonnements', tint: 'from-rose-500/20 to-rose-600/5 text-rose-400' },
+  { to: '/orders', Icon: IconOrders, label: 'Mes commandes', tint: 'from-amber-500/20 to-amber-600/5 text-amber-400' },
+  { to: '/account/messages', Icon: IconChat, label: 'Messages', tint: 'from-sky-500/20 to-sky-600/5 text-sky-400' },
+  { to: '/account/reviews', Icon: IconStar, label: 'Mes avis', tint: 'from-amber-500/20 to-amber-600/5 text-amber-400' },
+  { to: '/account/history', Icon: IconHistory, label: 'Historique', tint: 'from-violet-500/20 to-violet-600/5 text-violet-400' },
+  { to: '/account/addresses', Icon: IconLocation, label: 'Adresses', tint: 'from-emerald-500/20 to-emerald-600/5 text-emerald-400' },
+  { to: '/account/following', Icon: IconHeart, label: 'Abonnements', tint: 'from-rose-500/20 to-rose-600/5 text-rose-400' },
 ];
 
 export function Account() {
@@ -65,16 +66,16 @@ export function Account() {
             target="_blank"
             rel="noreferrer"
             title="Contacter le support"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-base-800 text-lg transition-transform duration-200 hover:-translate-y-0.5"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-base-800 text-slate-300 transition-transform duration-200 hover:-translate-y-0.5 hover:text-amber-400"
           >
-            💬
+            <IconChat className="h-4 w-4" />
           </a>
           <Link
             to="/account/settings"
             title="Paramètres"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-base-800 text-lg transition-transform duration-200 hover:-translate-y-0.5"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-base-800 text-slate-300 transition-transform duration-200 hover:-translate-y-0.5 hover:text-amber-400"
           >
-            ⚙️
+            <IconSettings className="h-4 w-4" />
           </Link>
         </div>
       </div>
@@ -101,8 +102,8 @@ export function Account() {
             to={item.to}
             className="card-interactive flex flex-col items-center gap-1.5 py-4 text-center"
           >
-            <span className={`flex h-9 w-9 items-center justify-center rounded-xl2 bg-gradient-to-br text-lg ${item.tint}`}>
-              {item.icon}
+            <span className={`flex h-9 w-9 items-center justify-center rounded-xl2 bg-gradient-to-br ${item.tint}`}>
+              <item.Icon className="h-4 w-4" />
             </span>
             <span className="text-[11px] text-slate-300">{item.label}</span>
           </Link>

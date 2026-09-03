@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { ApiError } from '../lib/api';
+import { BaobabMark, BaobabWordmark } from '../components/icons';
 
 export function Login() {
   const [step, setStep] = useState<'phone' | 'code'>('phone');
@@ -58,11 +59,9 @@ export function Login() {
       <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-flame opacity-20 blur-[80px]" />
 
       <div className="relative mb-8 animate-fade-up">
-        <span className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-flame text-2xl shadow-glow">
-          🌳
-        </span>
-        <h1 className="bg-flame bg-clip-text text-4xl font-bold text-transparent">Baobab</h1>
-        <p className="mt-2 text-sm text-slate-400">
+        <BaobabMark className="mb-3 h-14 w-14 drop-shadow-[0_8px_20px_rgba(240,147,15,0.35)]" />
+        <BaobabWordmark textClassName="text-4xl" />
+        <p className="mt-3 text-sm text-slate-400">
           La marketplace indépendante d'Afrique de l'Ouest.
         </p>
       </div>

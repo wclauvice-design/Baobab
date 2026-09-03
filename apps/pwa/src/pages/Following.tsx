@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { PageLoader } from '../components/PageLoader';
+import { IconShop } from '../components/icons';
 
 interface FollowEntry {
   id: string;
@@ -47,7 +48,7 @@ export function Following() {
             <li key={f.id} className="card flex items-center justify-between p-4">
               <div className="flex items-center gap-3">
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl2 bg-gradient-to-br from-rose-500/20 to-rose-600/5 text-rose-400">
-                  🏪
+                  <IconShop className="h-4 w-4" />
                 </span>
                 <div>
                   <p className="text-sm font-medium">{f.seller.shopName}</p>

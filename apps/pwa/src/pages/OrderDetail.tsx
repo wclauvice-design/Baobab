@@ -3,17 +3,19 @@ import { useParams } from 'react-router-dom';
 import { api, ApiError } from '../lib/api';
 import { formatXof } from '../lib/format';
 import { PageLoader } from '../components/PageLoader';
+import { IconCheck, IconClock, IconClose, IconHome, IconHourglass, IconOrders, IconTruck } from '../components/icons';
+import { ComponentType } from 'react';
 
 const PIPELINE = ['PENDING_PAYMENT', 'CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED'] as const;
 
-const STATUS_META: Record<string, { icon: string; label: string; description: string }> = {
-  PENDING_PAYMENT: { icon: '🕐', label: 'Commande créée', description: 'En attente de paiement' },
-  CONFIRMED: { icon: '✅', label: 'Paiement confirmé', description: 'Votre commande est confirmée' },
-  PREPARING: { icon: '📦', label: 'En préparation', description: 'Le vendeur prépare votre colis' },
-  SHIPPED: { icon: '🚚', label: 'Expédiée', description: 'Votre colis est en route' },
-  DELIVERED: { icon: '🏠', label: 'Livrée', description: 'Colis livré' },
-  CANCELLED: { icon: '❌', label: 'Annulée', description: 'La commande a été annulée' },
-  EXPIRED: { icon: '⌛', label: 'Expirée', description: 'Le délai de paiement a été dépassé' },
+const STATUS_META: Record<string, { Icon: ComponentType<{ className?: string }>; label: string; description: string }> = {
+  PENDING_PAYMENT: { Icon: IconClock, label: 'Commande créée', description: 'En attente de paiement' },
+  CONFIRMED: { Icon: IconCheck, label: 'Paiement confirmé', description: 'Votre commande est confirmée' },
+  PREPARING: { Icon: IconOrders, label: 'En préparation', description: 'Le vendeur prépare votre colis' },
+  SHIPPED: { Icon: IconTruck, label: 'Expédiée', description: 'Votre colis est en route' },
+  DELIVERED: { Icon: IconHome, label: 'Livrée', description: 'Colis livré' },
+  CANCELLED: { Icon: IconClose, label: 'Annulée', description: 'La commande a été annulée' },
+  EXPIRED: { Icon: IconHourglass, label: 'Expirée', description: 'Le délai de paiement a été dépassé' },
 };
 
 const STATUS_LABELS: Record<string, string> = Object.fromEntries(
@@ -59,11 +61,11 @@ function Timeline({ order }: { order: OrderData }) {
           return (
             <li key={event.id} className="flex gap-3">
               <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
                   isFinal ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'
                 }`}
               >
-                {meta?.icon ?? '•'}
+                {meta?.Icon ? <meta.Icon className="h-4 w-4" /> : null}
               </span>
               <div>
                 <p className={`text-sm font-medium ${isFinal ? 'text-red-400' : 'text-slate-200'}`}>
@@ -91,11 +93,11 @@ function Timeline({ order }: { order: OrderData }) {
           <li key={status} className="flex gap-3">
             <div className="flex flex-col items-center">
               <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
                   done ? 'bg-emerald-500/20 text-emerald-400 shadow-glow-emerald' : 'bg-base-700 text-slate-500'
                 }`}
               >
-                {meta.icon}
+                <meta.Icon className="h-4 w-4" />
               </span>
               {i < PIPELINE.length - 1 && (
                 <span className={`w-0.5 flex-1 ${i < currentIndex ? 'bg-emerald-400' : 'bg-base-700'}`} />

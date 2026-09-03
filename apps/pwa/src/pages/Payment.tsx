@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
+import { IconCheck, IconHourglass, IconWarning } from '../components/icons';
 
 interface PaymentStatusResponse {
   orderStatus: string;
@@ -35,16 +36,16 @@ export function Payment() {
     <div className="mx-auto max-w-md px-4 pb-24 pt-10 text-center">
       {paymentStatus === 'CONFIRMED' ? (
         <>
-          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-4xl shadow-glow-emerald">
-            ✅
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400 shadow-glow-emerald">
+            <IconCheck className="h-8 w-8" />
           </span>
           <h1 className="mt-4 text-xl font-bold text-emerald-400">Paiement confirmé</h1>
           <p className="mt-2 text-sm text-slate-400">Votre commande est en préparation.</p>
         </>
       ) : paymentStatus === 'FAILED' || paymentStatus === 'EXPIRED' ? (
         <>
-          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-500/15 text-4xl">
-            ⚠️
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-500/15 text-red-400">
+            <IconWarning className="h-8 w-8" />
           </span>
           <h1 className="mt-4 text-xl font-bold text-red-400">Paiement non confirmé</h1>
           <p className="mt-2 text-sm text-slate-400">
@@ -53,9 +54,9 @@ export function Payment() {
         </>
       ) : (
         <>
-          <div className="relative mx-auto flex h-16 w-16 items-center justify-center">
+          <div className="relative mx-auto flex h-16 w-16 items-center justify-center text-amber-400">
             <div className="absolute inset-0 animate-spin rounded-full border-2 border-base-700 border-t-amber-400" />
-            <span className="text-2xl">⏳</span>
+            <IconHourglass className="h-6 w-6" />
           </div>
           <h1 className="mt-4 text-xl font-bold">Paiement en cours de vérification</h1>
           <p className="mt-2 text-sm text-slate-400">Confirmation sous 5 à 15 minutes.</p>

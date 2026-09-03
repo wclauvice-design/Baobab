@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { PageLoader } from '../components/PageLoader';
+import { IconStar } from '../components/icons';
 
 interface MyReview {
   id: string;
@@ -42,9 +43,10 @@ export function MyReviews() {
               <Link to={`/products/${r.product.id}`} className="text-sm font-medium hover:underline">
                 {r.product.name}
               </Link>
-              <div className="mt-1 text-amber-400">
-                {'★'.repeat(r.rating)}
-                {'☆'.repeat(5 - r.rating)}
+              <div className="mt-1 flex gap-0.5 text-amber-400">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <IconStar key={i} className="h-3.5 w-3.5" filled={i < r.rating} />
+                ))}
               </div>
               {r.comment && <p className="mt-1 text-sm text-slate-300">{r.comment}</p>}
               <p className="mt-1 text-xs text-slate-500">

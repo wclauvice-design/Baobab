@@ -6,6 +6,7 @@ import { useCart } from '../lib/cart';
 import { useAuth } from '../lib/auth';
 import { recordView } from '../lib/history';
 import { PageLoader } from '../components/PageLoader';
+import { BaobabMark, IconHeart, IconStar } from '../components/icons';
 
 interface Review {
   id: string;
@@ -39,8 +40,8 @@ function ImageGallery({ images, name }: { images: string[]; name: string }) {
 
   if (images.length === 0) {
     return (
-      <div className="flex aspect-square items-center justify-center bg-gradient-to-br from-base-700 to-base-800 text-5xl">
-        <span className="opacity-60">🧺</span>
+      <div className="flex aspect-square items-center justify-center bg-gradient-to-br from-base-700 to-base-800">
+        <BaobabMark className="h-16 w-16 opacity-30" />
       </div>
     );
   }
@@ -168,13 +169,14 @@ export function ProductDetail() {
               <button
                 onClick={toggleFollow}
                 disabled={followBusy}
-                className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-medium transition-all duration-200 disabled:opacity-50 ${
+                className={`flex shrink-0 items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-medium transition-all duration-200 disabled:opacity-50 ${
                   isFollowing
                     ? 'border-base-700 text-slate-400'
                     : 'border-emerald-500 text-emerald-400 hover:bg-emerald-500/10 hover:shadow-glow-emerald'
                 }`}
               >
-                {isFollowing ? 'Suivi ✓' : '+ Suivre'}
+                <IconHeart className="h-3 w-3" filled={isFollowing} />
+                {isFollowing ? 'Suivi' : 'Suivre'}
               </button>
             )}
           </div>
@@ -183,7 +185,7 @@ export function ProductDetail() {
           <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
             {product.avgRating && (
               <span className="flex items-center gap-1 text-amber-400">
-                ★ {product.avgRating.toFixed(1)}
+                <IconStar className="h-3.5 w-3.5" /> {product.avgRating.toFixed(1)}
                 <span className="text-slate-500">({product.reviewCount})</span>
               </span>
             )}
@@ -235,7 +237,11 @@ export function ProductDetail() {
             <ul className="flex flex-col gap-3">
               {product.reviews.map((r) => (
                 <li key={r.id} className="card p-3 text-sm">
-                  <div className="mb-1 text-amber-400">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</div>
+                  <div className="mb-1 flex gap-0.5 text-amber-400">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <IconStar key={i} className="h-3.5 w-3.5" filled={i < r.rating} />
+                    ))}
+                  </div>
                   {r.comment && <p className="text-slate-300">{r.comment}</p>}
                 </li>
               ))}
