@@ -6,9 +6,6 @@ import { SMS_PROVIDER, SmsProvider } from './sms/sms-provider.interface';
 
 const OTP_TTL_MINUTES = 5;
 
-// Numéros de seed autorisés pour /auth/dev-login — voir la note dans devLogin().
-const DEV_LOGIN_ALLOWED_PHONES = ['+2250700000001', '+2250700000002', '+2250700000003'];
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -53,14 +50,15 @@ export class AuthService {
   }
 
   /**
-   * Connexion sans OTP pour les comptes de seed, le temps de brancher un vrai
-   * fournisseur SMS. Gardé derrière ENABLE_DEV_LOGIN + une liste blanche de
-   * numéros pour ne pas devenir une porte dérobée générale. À supprimer
-   * (ce module + le bouton correspondant côté PWA/admin) une fois un
-   * SmsProvider réel en place.
+   * Connexion sans OTP pour n'importe quel numéro, le temps de brancher un
+   * vrai fournisseur SMS. Volontairement ouverte à tous les numéros pendant
+   * cette phase de test (pas de liste blanche) — reste gardée derrière
+   * ENABLE_DEV_LOGIN, qui doit être désactivé avant tout lancement public.
+   * À supprimer (cette méthode + l'écran de connexion correspondant côté
+   * PWA/admin) une fois un SmsProvider réel en place.
    */
   async devLogin(phone: string) {
-    if (this.config.get('ENABLE_DEV_LOGIN') !== 'true' || !DEV_LOGIN_ALLOWED_PHONES.includes(phone)) {
+    if (this.config.get('ENABLE_DEV_LOGIN') !== 'true') {
       throw new ForbiddenException();
     }
 
