@@ -54,80 +54,83 @@ export function Login() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6">
-      <h1 className="mb-1 text-3xl font-bold text-slate-100">Baobab</h1>
-      <p className="mb-8 text-sm text-slate-400">
-        La marketplace indépendante d'Afrique de l'Ouest.
-      </p>
+    <div className="relative mx-auto flex min-h-screen max-w-md flex-col justify-center overflow-hidden px-6">
+      <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-flame opacity-20 blur-[80px]" />
 
-      {step === 'phone' ? (
-        <form onSubmit={handleRequestOtp} className="flex flex-col gap-4">
-          <label className="text-sm text-slate-300">
-            Numéro de téléphone
-            <input
-              type="tel"
-              required
-              placeholder="+225 07 00 00 00 00"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="mt-1 w-full rounded-xl2 border border-base-700 bg-base-800 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
-            />
-          </label>
-          {error && <p className="text-sm text-red-400">{error}</p>}
-          <button
-            disabled={busy}
-            className="rounded-xl2 bg-amber-500 px-4 py-3 font-semibold text-base-950 shadow-glow transition hover:bg-amber-400 disabled:opacity-50"
-          >
-            Recevoir le code
-          </button>
+      <div className="relative mb-8 animate-fade-up">
+        <span className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-flame text-2xl shadow-glow">
+          🌳
+        </span>
+        <h1 className="bg-flame bg-clip-text text-4xl font-bold text-transparent">Baobab</h1>
+        <p className="mt-2 text-sm text-slate-400">
+          La marketplace indépendante d'Afrique de l'Ouest.
+        </p>
+      </div>
 
-          <div className="mt-4 rounded-xl2 border border-dashed border-emerald-700 bg-emerald-500/5 p-4">
-            <p className="mb-2 text-xs text-emerald-400">
-              Connexion rapide (temporaire, à retirer avant lancement)
+      <div className="relative animate-fade-up rounded-2xl border border-white/[0.06] bg-surface p-5 shadow-card" style={{ animationDelay: '80ms' }}>
+        {step === 'phone' ? (
+          <form onSubmit={handleRequestOtp} className="flex flex-col gap-4">
+            <label className="text-sm text-slate-300">
+              Numéro de téléphone
+              <input
+                type="tel"
+                required
+                placeholder="+225 07 00 00 00 00"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="input mt-1"
+              />
+            </label>
+            {error && <p className="text-sm text-red-400">{error}</p>}
+            <button disabled={busy} className="btn-primary">
+              Recevoir le code
+            </button>
+
+            <div className="mt-2 rounded-xl2 border border-dashed border-emerald-700/60 bg-emerald-500/5 p-4">
+              <p className="mb-2 text-xs text-emerald-400">
+                Connexion rapide (temporaire, à retirer avant lancement)
+              </p>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => handleDevLogin('+2250700000003')}
+                className="w-full rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
+              >
+                Acheteur (test)
+              </button>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
+            <p className="text-sm text-slate-400">
+              Code envoyé à {phone}. (Astuce : en développement, regardez la console du serveur API.)
             </p>
+            <label className="text-sm text-slate-300">
+              Code reçu
+              <input
+                type="text"
+                required
+                inputMode="numeric"
+                placeholder="1234"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                className="input mt-1 tracking-[0.5em]"
+              />
+            </label>
+            {error && <p className="text-sm text-red-400">{error}</p>}
+            <button disabled={busy} className="btn-primary">
+              Valider
+            </button>
             <button
               type="button"
-              disabled={busy}
-              onClick={() => handleDevLogin('+2250700000003')}
-              className="w-full rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50"
+              onClick={() => setStep('phone')}
+              className="text-sm text-slate-400 underline"
             >
-              Acheteur (test)
+              Changer de numéro
             </button>
-          </div>
-        </form>
-      ) : (
-        <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
-          <p className="text-sm text-slate-400">
-            Code envoyé à {phone}. (Astuce : en développement, regardez la console du serveur API.)
-          </p>
-          <label className="text-sm text-slate-300">
-            Code reçu
-            <input
-              type="text"
-              required
-              inputMode="numeric"
-              placeholder="1234"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className="mt-1 w-full rounded-xl2 border border-base-700 bg-base-800 px-4 py-3 tracking-[0.5em] text-slate-100 focus:border-amber-500 focus:outline-none"
-            />
-          </label>
-          {error && <p className="text-sm text-red-400">{error}</p>}
-          <button
-            disabled={busy}
-            className="rounded-xl2 bg-amber-500 px-4 py-3 font-semibold text-base-950 shadow-glow transition hover:bg-amber-400 disabled:opacity-50"
-          >
-            Valider
-          </button>
-          <button
-            type="button"
-            onClick={() => setStep('phone')}
-            className="text-sm text-slate-400 underline"
-          >
-            Changer de numéro
-          </button>
-        </form>
-      )}
+          </form>
+        )}
+      </div>
     </div>
   );
 }

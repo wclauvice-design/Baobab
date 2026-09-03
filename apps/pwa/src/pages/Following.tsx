@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
+import { PageLoader } from '../components/PageLoader';
 
 interface FollowEntry {
   id: string;
@@ -35,7 +36,7 @@ export function Following() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-500">Chargement…</p>
+        <PageLoader />
       ) : follows.length === 0 ? (
         <p className="text-sm text-slate-500">
           Vous ne suivez aucune boutique. Suivez un vendeur depuis une fiche produit.
@@ -43,10 +44,15 @@ export function Following() {
       ) : (
         <ul className="flex flex-col gap-3">
           {follows.map((f) => (
-            <li key={f.id} className="flex items-center justify-between rounded-xl2 bg-base-800 p-4">
-              <div>
-                <p className="text-sm font-medium">{f.seller.shopName}</p>
-                <p className="text-xs text-slate-400">{f.seller.city}</p>
+            <li key={f.id} className="card flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl2 bg-gradient-to-br from-rose-500/20 to-rose-600/5 text-rose-400">
+                  🏪
+                </span>
+                <div>
+                  <p className="text-sm font-medium">{f.seller.shopName}</p>
+                  <p className="text-xs text-slate-400">{f.seller.city}</p>
+                </div>
               </div>
               <button onClick={() => unfollow(f.sellerId)} className="text-xs text-slate-400 underline">
                 Ne plus suivre

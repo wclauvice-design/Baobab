@@ -11,12 +11,12 @@ interface Coupon {
 }
 
 const MENU_ITEMS = [
-  { to: '/orders', icon: '📦', label: 'Mes commandes' },
-  { to: '/account/messages', icon: '💬', label: 'Messages' },
-  { to: '/account/reviews', icon: '⭐', label: 'Mes avis' },
-  { to: '/account/history', icon: '🕘', label: 'Historique' },
-  { to: '/account/addresses', icon: '📍', label: 'Adresses' },
-  { to: '/account/following', icon: '❤️', label: 'Abonnements' },
+  { to: '/orders', icon: '📦', label: 'Mes commandes', tint: 'from-amber-500/20 to-amber-600/5 text-amber-400' },
+  { to: '/account/messages', icon: '💬', label: 'Messages', tint: 'from-sky-500/20 to-sky-600/5 text-sky-400' },
+  { to: '/account/reviews', icon: '⭐', label: 'Mes avis', tint: 'from-amber-500/20 to-amber-600/5 text-amber-400' },
+  { to: '/account/history', icon: '🕘', label: 'Historique', tint: 'from-violet-500/20 to-violet-600/5 text-violet-400' },
+  { to: '/account/addresses', icon: '📍', label: 'Adresses', tint: 'from-emerald-500/20 to-emerald-600/5 text-emerald-400' },
+  { to: '/account/following', icon: '❤️', label: 'Abonnements', tint: 'from-rose-500/20 to-rose-600/5 text-rose-400' },
 ];
 
 export function Account() {
@@ -50,9 +50,14 @@ export function Account() {
   return (
     <div className="mx-auto max-w-md px-4 pb-24 pt-6">
       <div className="mb-4 flex items-start justify-between">
-        <div>
-          <h1 className="text-xl font-bold">Mon compte</h1>
-          <p className="text-sm text-slate-400">{user?.phone}</p>
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-flame text-lg font-bold text-base-950 shadow-glow">
+            {(user?.phone ?? '?').slice(-2)}
+          </span>
+          <div>
+            <h1 className="text-xl font-bold">Mon compte</h1>
+            <p className="text-sm text-slate-400">{user?.phone}</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <a
@@ -60,31 +65,31 @@ export function Account() {
             target="_blank"
             rel="noreferrer"
             title="Contacter le support"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-base-800 text-lg"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-base-800 text-lg transition-transform duration-200 hover:-translate-y-0.5"
           >
             💬
           </a>
           <Link
             to="/account/settings"
             title="Paramètres"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-base-800 text-lg"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-base-800 text-lg transition-transform duration-200 hover:-translate-y-0.5"
           >
             ⚙️
           </Link>
         </div>
       </div>
 
-      <div className="rounded-xl2 bg-base-800 p-4">
+      <div className="relative overflow-hidden rounded-xl2 bg-flame p-4 text-base-950 shadow-glow">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-400">Solde crédit</p>
-            <p className="font-heading text-lg font-semibold text-amber-400">
+            <p className="text-xs font-medium opacity-70">Solde crédit</p>
+            <p className="font-heading text-xl font-bold tabular-nums">
               {formatXof(Number(user?.creditBalance ?? 0))}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-slate-400">Coupons &amp; offres</p>
-            <p className="font-heading text-lg font-semibold text-emerald-400">{couponCount}</p>
+            <p className="text-xs font-medium opacity-70">Coupons &amp; offres</p>
+            <p className="font-heading text-xl font-bold tabular-nums">{couponCount}</p>
           </div>
         </div>
       </div>
@@ -94,16 +99,18 @@ export function Account() {
           <Link
             key={item.to}
             to={item.to}
-            className="flex flex-col items-center gap-1.5 rounded-xl2 bg-base-800 py-4 text-center"
+            className="card-interactive flex flex-col items-center gap-1.5 py-4 text-center"
           >
-            <span className="text-xl">{item.icon}</span>
+            <span className={`flex h-9 w-9 items-center justify-center rounded-xl2 bg-gradient-to-br text-lg ${item.tint}`}>
+              {item.icon}
+            </span>
             <span className="text-[11px] text-slate-300">{item.label}</span>
           </Link>
         ))}
       </div>
 
       {user?.role === 'BUYER' && (
-        <div className="mt-4 rounded-xl2 bg-base-800 p-4">
+        <div className="mt-4 rounded-xl2 border border-violet-500/20 bg-violet-500/[0.04] p-4">
           <p className="mb-2 text-sm text-slate-300">Vous vendez des produits ?</p>
           {showSellerForm ? (
             <form onSubmit={registerSeller} className="flex flex-col gap-2">
@@ -119,15 +126,12 @@ export function Account() {
                 placeholder="Ville"
                 className="rounded-lg bg-base-700 px-3 py-2 text-sm placeholder:text-slate-500"
               />
-              <button className="mt-1 self-start rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-base-950">
+              <button className="btn-primary mt-1 self-start px-4 py-2 text-sm">
                 Devenir vendeur partenaire
               </button>
             </form>
           ) : (
-            <button
-              onClick={() => setShowSellerForm(true)}
-              className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-base-950"
-            >
+            <button onClick={() => setShowSellerForm(true)} className="btn-primary px-4 py-2 text-sm">
               Devenir vendeur partenaire
             </button>
           )}

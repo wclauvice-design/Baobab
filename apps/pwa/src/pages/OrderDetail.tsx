@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api, ApiError } from '../lib/api';
 import { formatXof } from '../lib/format';
+import { PageLoader } from '../components/PageLoader';
 
 const PIPELINE = ['PENDING_PAYMENT', 'CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED'] as const;
 
@@ -137,7 +138,7 @@ export function OrderDetail() {
     }
   }
 
-  if (!order) return <div className="p-6 text-sm text-slate-500">Chargement…</div>;
+  if (!order) return <PageLoader />;
 
   const itemsTotal = Number(order.totalAmount) - Number(order.deliveryFee ?? 0);
 
@@ -146,27 +147,27 @@ export function OrderDetail() {
       <h1 className="mb-1 text-xl font-bold">Commande {order.id.slice(-6).toUpperCase()}</h1>
       <p className="mb-6 text-sm text-slate-400">{STATUS_LABELS[order.status] ?? order.status}</p>
 
-      <div className="mb-6 rounded-xl2 bg-base-800 p-4">
+      <div className="card mb-6 p-4">
         <Timeline order={order} />
       </div>
 
-      <div className="rounded-xl2 bg-base-800 p-4">
+      <div className="card p-4">
         <p className="mb-2 text-sm text-slate-300">Livraison ({order.deliveryMode === 'EXPRESS' ? 'Express' : 'Standard'})</p>
         <p className="text-sm text-slate-400">{order.deliveryAddress}</p>
       </div>
 
       <ul className="mt-4 flex flex-col gap-3">
         {order.items.map((item) => (
-          <li key={item.id} className="rounded-xl2 bg-base-800 p-4">
+          <li key={item.id} className="card p-4">
             <div className="flex items-center justify-between text-sm">
               <span>{item.product.name} × {item.quantity}</span>
-              <span className="text-amber-400">{formatXof(Number(item.unitPrice) * item.quantity)}</span>
+              <span className="tabular-nums text-amber-400">{formatXof(Number(item.unitPrice) * item.quantity)}</span>
             </div>
 
             {order.status === 'DELIVERED' && !reviewSent[item.productId] && (
               <form
                 onSubmit={(e) => submitReview(e, item.productId)}
-                className="mt-3 flex flex-col gap-2 border-t border-base-700 pt-3"
+                className="mt-3 flex flex-col gap-2 border-t border-white/[0.06] pt-3"
               >
                 <select name="rating" defaultValue="5" className="rounded-lg bg-base-700 px-2 py-1 text-sm">
                   {[5, 4, 3, 2, 1].map((n) => (
@@ -179,7 +180,7 @@ export function OrderDetail() {
                   rows={2}
                   className="rounded-lg bg-base-700 px-2 py-1 text-sm placeholder:text-slate-500"
                 />
-                <button className="self-start rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-base-950">
+                <button className="btn-primary self-start px-3 py-1.5 text-xs">
                   Envoyer l'avis
                 </button>
               </form>
@@ -191,20 +192,20 @@ export function OrderDetail() {
         ))}
       </ul>
 
-      <div className="mt-4 flex flex-col gap-1 rounded-xl2 bg-base-800 p-4 text-sm">
+      <div className="card mt-4 flex flex-col gap-1 p-4 text-sm">
         <div className="flex items-center justify-between text-slate-400">
           <span>Sous-total</span>
-          <span>{formatXof(itemsTotal)}</span>
+          <span className="tabular-nums">{formatXof(itemsTotal)}</span>
         </div>
         {Number(order.deliveryFee) > 0 && (
           <div className="flex items-center justify-between text-slate-400">
             <span>Frais de livraison</span>
-            <span>{formatXof(Number(order.deliveryFee))}</span>
+            <span className="tabular-nums">{formatXof(Number(order.deliveryFee))}</span>
           </div>
         )}
         <div className="flex items-center justify-between pt-1">
           <span className="text-slate-400">Total</span>
-          <span className="font-heading text-lg font-semibold text-amber-400">
+          <span className="font-heading text-lg font-semibold tabular-nums text-amber-400">
             {formatXof(Number(order.totalAmount))}
           </span>
         </div>

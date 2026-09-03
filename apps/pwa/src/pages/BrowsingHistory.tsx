@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { clearHistory, getHistory } from '../lib/history';
-import { Product, ProductCard } from '../components/ProductCard';
+import { Product, ProductCard, ProductCardSkeleton } from '../components/ProductCard';
 
 export function BrowsingHistory() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -39,7 +39,11 @@ export function BrowsingHistory() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-500">Chargement…</p>
+        <div className="grid grid-cols-2 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
+        </div>
       ) : products.length === 0 ? (
         <p className="text-sm text-slate-500">Aucun produit consulté récemment.</p>
       ) : (

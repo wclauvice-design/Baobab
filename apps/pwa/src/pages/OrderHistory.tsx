@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { formatXof } from '../lib/format';
+import { PageLoader } from '../components/PageLoader';
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING_PAYMENT: 'En attente de paiement',
@@ -11,6 +12,16 @@ const STATUS_LABELS: Record<string, string> = {
   DELIVERED: 'Livrée',
   CANCELLED: 'Annulée',
   EXPIRED: 'Expirée',
+};
+
+const STATUS_TINT: Record<string, string> = {
+  PENDING_PAYMENT: 'text-amber-400',
+  CONFIRMED: 'text-sky-400',
+  PREPARING: 'text-sky-400',
+  SHIPPED: 'text-violet-400',
+  DELIVERED: 'text-emerald-400',
+  CANCELLED: 'text-red-400',
+  EXPIRED: 'text-red-400',
 };
 
 interface OrderSummary {
@@ -28,7 +39,7 @@ export function OrderHistory() {
     api.get<OrderSummary[]>('/orders').then(setOrders).finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="p-6 text-sm text-slate-500">Chargement…</div>;
+  if (loading) return <PageLoader />;
 
   return (
     <div className="mx-auto max-w-md px-4 pb-24 pt-6">
@@ -41,7 +52,7 @@ export function OrderHistory() {
             <li key={o.id}>
               <Link
                 to={`/orders/${o.id}`}
-                className="flex items-center justify-between rounded-xl2 bg-base-800 p-4"
+                className="card-interactive flex items-center justify-between p-4"
               >
                 <div>
                   <p className="text-sm font-medium">Commande {o.id.slice(-6).toUpperCase()}</p>
@@ -50,10 +61,12 @@ export function OrderHistory() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-amber-400">
+                  <p className="text-sm font-semibold tabular-nums text-amber-400">
                     {formatXof(Number(o.totalAmount))}
                   </p>
-                  <p className="text-xs text-slate-400">{STATUS_LABELS[o.status] ?? o.status}</p>
+                  <p className={`text-xs font-medium ${STATUS_TINT[o.status] ?? 'text-slate-400'}`}>
+                    {STATUS_LABELS[o.status] ?? o.status}
+                  </p>
                 </div>
               </Link>
             </li>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
+import { PageLoader } from '../components/PageLoader';
 
 interface MyReview {
   id: string;
@@ -29,7 +30,7 @@ export function MyReviews() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-500">Chargement…</p>
+        <PageLoader />
       ) : reviews.length === 0 ? (
         <p className="text-sm text-slate-500">
           Vous n'avez pas encore laissé d'avis. Ils apparaissent ici après la livraison d'une commande.
@@ -37,7 +38,7 @@ export function MyReviews() {
       ) : (
         <ul className="flex flex-col gap-3">
           {reviews.map((r) => (
-            <li key={r.id} className="rounded-xl2 bg-base-800 p-4">
+            <li key={r.id} className="card p-4">
               <Link to={`/products/${r.product.id}`} className="text-sm font-medium hover:underline">
                 {r.product.name}
               </Link>

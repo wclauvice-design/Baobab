@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, ApiError } from '../lib/api';
+import { PageLoader } from '../components/PageLoader';
 
 interface Address {
   id: string;
@@ -79,11 +80,11 @@ export function Addresses() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-500">Chargement…</p>
+        <PageLoader />
       ) : (
         <ul className="flex flex-col gap-3">
           {addresses.map((a) => (
-            <li key={a.id} className="rounded-xl2 bg-base-800 p-4">
+            <li key={a.id} className="card p-4">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="flex items-center gap-2 text-sm font-medium">
@@ -120,10 +121,7 @@ export function Addresses() {
       )}
 
       {showForm ? (
-        <form
-          onSubmit={handleSubmit}
-          className="mt-4 flex flex-col gap-3 rounded-xl2 border border-base-700 bg-base-800 p-4"
-        >
+        <form onSubmit={handleSubmit} className="card mt-4 flex flex-col gap-3 p-4">
           <input
             name="label"
             required
@@ -152,7 +150,7 @@ export function Addresses() {
           </label>
           {error && <p className="text-sm text-red-400">{error}</p>}
           <div className="flex gap-2">
-            <button className="flex-1 rounded-lg bg-amber-500 px-3 py-2 text-sm font-semibold text-base-950">
+            <button className="btn-primary flex-1 px-3 py-2 text-sm">
               {editing ? 'Enregistrer' : 'Ajouter'}
             </button>
             <button
@@ -170,7 +168,7 @@ export function Addresses() {
       ) : (
         <button
           onClick={startCreate}
-          className="mt-4 w-full rounded-xl2 border border-dashed border-base-700 py-3 text-sm text-amber-400"
+          className="mt-4 w-full rounded-xl2 border border-dashed border-base-700 py-3 text-sm text-amber-400 transition-colors hover:border-amber-500/50 hover:bg-amber-500/5"
         >
           + Ajouter une adresse
         </button>

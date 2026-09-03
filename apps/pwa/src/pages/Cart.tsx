@@ -22,9 +22,11 @@ export function Cart() {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <p className="text-4xl">🛒</p>
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-base-800 text-4xl">
+          🛒
+        </span>
         <p className="mt-4 text-slate-400">Votre panier est vide.</p>
-        <Link to="/" className="mt-4 inline-block text-amber-400 underline">
+        <Link to="/" className="btn-primary mt-4 inline-flex">
           Découvrir le catalogue
         </Link>
       </div>
@@ -55,7 +57,7 @@ export function Cart() {
         {Array.from(groups.entries()).map(([shopName, shopItems]) => {
           const groupSelected = shopItems.every((i) => i.selected);
           return (
-            <div key={shopName} className="rounded-xl2 bg-base-800 p-3">
+            <div key={shopName} className="card p-3">
               <div className="mb-2 flex items-center gap-2 border-b border-base-700 pb-2">
                 <input
                   type="checkbox"
@@ -131,17 +133,17 @@ export function Cart() {
         </div>
       )}
 
-      <div className="fixed inset-x-0 bottom-16 z-10 mx-auto max-w-md border-t border-base-700 bg-base-900/95 px-4 py-4 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-16 z-10 mx-auto max-w-md border-t border-white/[0.06] bg-base-900/90 px-4 py-4 shadow-card backdrop-blur-xl">
         <div className="mb-3 flex items-center justify-between text-sm">
           <span className="text-slate-400">Total ({selectedCount} article{selectedCount > 1 ? 's' : ''})</span>
-          <span className="font-heading text-lg font-semibold text-amber-400">
+          <span className="font-heading text-lg font-semibold tabular-nums text-amber-400">
             {formatXof(selectedTotal)}
           </span>
         </div>
         <button
           onClick={() => navigate('/checkout')}
           disabled={selectedCount === 0}
-          className="w-full rounded-xl2 bg-amber-500 py-3 font-semibold text-base-950 shadow-glow transition hover:bg-amber-400 disabled:opacity-50"
+          className="btn-primary w-full"
         >
           Commander{selectedCount > 0 ? ` (${selectedCount})` : ''}
         </button>

@@ -8,8 +8,10 @@ export function Messages() {
         <h1 className="text-xl font-bold">Messages</h1>
       </div>
 
-      <div className="rounded-xl2 bg-base-800 p-6 text-center">
-        <p className="text-3xl">💬</p>
+      <div className="card p-6 text-center">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500/20 to-sky-600/5 text-3xl">
+          💬
+        </span>
         <p className="mt-3 text-sm text-slate-400">
           La messagerie avec les vendeurs arrive bientôt. En attendant, contactez le support via
           WhatsApp depuis la page Compte.

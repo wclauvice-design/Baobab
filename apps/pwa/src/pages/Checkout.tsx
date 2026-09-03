@@ -84,10 +84,7 @@ export function Checkout() {
         <p className="text-sm text-slate-400">
           Aucun article sélectionné. Retournez au panier pour en choisir.
         </p>
-        <button
-          onClick={() => navigate('/cart')}
-          className="mt-4 text-sm text-amber-400 underline"
-        >
+        <button onClick={() => navigate('/cart')} className="btn-primary mt-4">
           Retour au panier
         </button>
       </div>
@@ -106,7 +103,7 @@ export function Checkout() {
               <select
                 value={selectedAddressId}
                 onChange={(e) => handleSelectAddress(e.target.value)}
-                className="mt-1 w-full rounded-xl2 border border-base-700 bg-base-800 px-4 py-3 text-sm text-slate-100 focus:border-amber-500 focus:outline-none"
+                className="input mt-1 text-sm"
               >
                 {savedAddresses.map((a) => (
                   <option key={a.id} value={a.id}>
@@ -124,7 +121,7 @@ export function Checkout() {
               onChange={(e) => setAddress(e.target.value)}
               placeholder="Quartier, rue, ville, indications..."
               rows={3}
-              className="mt-2 w-full rounded-xl2 border border-base-700 bg-base-800 px-4 py-3 text-sm placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+              className="input mt-2 text-sm"
             />
           )}
         </div>
@@ -137,10 +134,10 @@ export function Checkout() {
                 type="button"
                 key={mode}
                 onClick={() => setDeliveryMode(mode)}
-                className={`rounded-xl2 border px-4 py-3 text-sm ${
+                className={`rounded-xl2 border px-4 py-3 text-sm transition-all duration-200 ${
                   deliveryMode === mode
-                    ? 'border-amber-500 bg-amber-500/10 text-amber-400'
-                    : 'border-base-700 text-slate-300'
+                    ? 'border-amber-500 bg-amber-500/10 text-amber-400 shadow-glow'
+                    : 'border-base-700 text-slate-300 hover:border-base-600'
                 }`}
               >
                 {mode === 'STANDARD' ? 'Standard' : 'Express'}
@@ -155,10 +152,10 @@ export function Checkout() {
             <button
               type="button"
               onClick={() => setProvider('MANUAL_ORANGE_MONEY')}
-              className={`rounded-xl2 border px-4 py-3 text-left text-sm ${
+              className={`rounded-xl2 border px-4 py-3 text-left text-sm transition-all duration-200 ${
                 provider === 'MANUAL_ORANGE_MONEY'
-                  ? 'border-amber-500 bg-amber-500/10 text-amber-400'
-                  : 'border-base-700 text-slate-300'
+                  ? 'border-amber-500 bg-amber-500/10 text-amber-400 shadow-glow'
+                  : 'border-base-700 text-slate-300 hover:border-base-600'
               }`}
             >
               Orange Money
@@ -169,10 +166,10 @@ export function Checkout() {
             <button
               type="button"
               onClick={() => setProvider('CASH_ON_DELIVERY')}
-              className={`rounded-xl2 border px-4 py-3 text-left text-sm ${
+              className={`rounded-xl2 border px-4 py-3 text-left text-sm transition-all duration-200 ${
                 provider === 'CASH_ON_DELIVERY'
-                  ? 'border-amber-500 bg-amber-500/10 text-amber-400'
-                  : 'border-base-700 text-slate-300'
+                  ? 'border-amber-500 bg-amber-500/10 text-amber-400 shadow-glow'
+                  : 'border-base-700 text-slate-300 hover:border-base-600'
               }`}
             >
               Paiement à la livraison
@@ -185,29 +182,26 @@ export function Checkout() {
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 
-        <div className="fixed inset-x-0 bottom-16 z-10 mx-auto max-w-md border-t border-base-700 bg-base-900/95 px-4 py-4 backdrop-blur">
+        <div className="fixed inset-x-0 bottom-16 z-10 mx-auto max-w-md border-t border-white/[0.06] bg-base-900/90 px-4 py-4 shadow-card backdrop-blur-xl">
           <div className="mb-3 flex flex-col gap-1 text-sm">
             <div className="flex items-center justify-between text-slate-400">
               <span>Sous-total ({checkoutItems.length} article{checkoutItems.length > 1 ? 's' : ''})</span>
-              <span>{formatXof(selectedTotal)}</span>
+              <span className="tabular-nums">{formatXof(selectedTotal)}</span>
             </div>
             {deliveryFee > 0 && (
               <div className="flex items-center justify-between text-slate-400">
                 <span>Frais de livraison</span>
-                <span>{formatXof(deliveryFee)}</span>
+                <span className="tabular-nums">{formatXof(deliveryFee)}</span>
               </div>
             )}
             <div className="flex items-center justify-between">
               <span className="text-slate-400">Total</span>
-              <span className="font-heading text-lg font-semibold text-amber-400">
+              <span className="font-heading text-lg font-semibold tabular-nums text-amber-400">
                 {formatXof(grandTotal)}
               </span>
             </div>
           </div>
-          <button
-            disabled={busy}
-            className="w-full rounded-xl2 bg-amber-500 py-3 font-semibold text-base-950 shadow-glow transition hover:bg-amber-400 disabled:opacity-50"
-          >
+          <button disabled={busy} className="btn-primary w-full">
             {busy ? 'Traitement…' : 'Confirmer la commande'}
           </button>
         </div>

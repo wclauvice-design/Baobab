@@ -5,6 +5,7 @@ import { formatXof } from '../lib/format';
 import { useCart } from '../lib/cart';
 import { useAuth } from '../lib/auth';
 import { recordView } from '../lib/history';
+import { PageLoader } from '../components/PageLoader';
 
 interface Review {
   id: string;
@@ -33,6 +34,51 @@ interface FollowEntry {
   sellerId: string;
 }
 
+function ImageGallery({ images, name }: { images: string[]; name: string }) {
+  const [active, setActive] = useState(0);
+
+  if (images.length === 0) {
+    return (
+      <div className="flex aspect-square items-center justify-center bg-gradient-to-br from-base-700 to-base-800 text-5xl">
+        <span className="opacity-60">🧺</span>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div
+        className="flex aspect-square snap-x snap-mandatory overflow-x-auto bg-gradient-to-br from-base-700 to-base-800"
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          setActive(Math.round(el.scrollLeft / el.clientWidth));
+        }}
+      >
+        {images.map((url, i) => (
+          <img
+            key={url}
+            src={url}
+            alt={`${name} ${i + 1}`}
+            className="h-full w-full shrink-0 snap-center object-cover"
+          />
+        ))}
+      </div>
+      {images.length > 1 && (
+        <div className="flex justify-center gap-1.5 py-2">
+          {images.map((url, i) => (
+            <span
+              key={url}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === active ? 'w-4 bg-amber-400' : 'w-1.5 bg-base-700'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState<ProductDetailData | null>(null);
@@ -59,7 +105,7 @@ export function ProductDetail() {
       .catch(() => {});
   }, [product?.seller, user?.role]);
 
-  if (!product) return <div className="p-6 text-sm text-slate-500">Chargement…</div>;
+  if (!product) return <PageLoader />;
 
   function handleAddToCart() {
     addItem(
@@ -92,13 +138,19 @@ export function ProductDetail() {
     }
   }
 
+  const discount =
+    product.compareAtPrice && Number(product.compareAtPrice) > Number(product.price)
+      ? Math.round((1 - Number(product.price) / Number(product.compareAtPrice)) * 100)
+      : null;
+
   return (
     <div className="mx-auto max-w-md pb-28">
-      <div className="flex aspect-square items-center justify-center bg-base-800 text-5xl">
-        {product.images[0] ? (
-          <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
-        ) : (
-          <span>🧺</span>
+      <div className="relative">
+        <ImageGallery images={product.images} name={product.name} />
+        {discount && (
+          <span className="absolute left-3 top-3 rounded-md bg-flame px-2 py-1 text-xs font-bold text-base-950 shadow-glow">
+            -{discount}%
+          </span>
         )}
       </div>
 
@@ -116,10 +168,10 @@ export function ProductDetail() {
               <button
                 onClick={toggleFollow}
                 disabled={followBusy}
-                className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-medium disabled:opacity-50 ${
+                className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-medium transition-all duration-200 disabled:opacity-50 ${
                   isFollowing
                     ? 'border-base-700 text-slate-400'
-                    : 'border-emerald-500 text-emerald-400'
+                    : 'border-emerald-500 text-emerald-400 hover:bg-emerald-500/10 hover:shadow-glow-emerald'
                 }`}
               >
                 {isFollowing ? 'Suivi ✓' : '+ Suivre'}
@@ -139,34 +191,29 @@ export function ProductDetail() {
           </div>
         )}
         <div className="mt-3 flex items-center gap-2">
-          <p className="font-heading text-2xl font-semibold text-amber-400">
+          <p className="font-heading text-2xl font-semibold tabular-nums text-amber-400">
             {formatXof(Number(product.price))}
           </p>
-          {product.compareAtPrice && Number(product.compareAtPrice) > Number(product.price) && (
-            <>
-              <p className="text-sm text-slate-500 line-through">
-                {formatXof(Number(product.compareAtPrice))}
-              </p>
-              <span className="rounded-md bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                -{Math.round((1 - Number(product.price) / Number(product.compareAtPrice)) * 100)}%
-              </span>
-            </>
+          {discount && (
+            <p className="text-sm tabular-nums text-slate-500 line-through">
+              {formatXof(Number(product.compareAtPrice))}
+            </p>
           )}
         </div>
         <p className="mt-3 text-sm leading-relaxed text-slate-300">{product.description}</p>
 
         <div className="mt-5 flex items-center gap-3">
-          <div className="flex items-center rounded-xl2 border border-base-700">
+          <div className="flex items-center rounded-xl2 border border-base-700 bg-base-800/60">
             <button
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              className="px-3 py-2 text-slate-300"
+              className="px-3 py-2 text-slate-300 transition-colors hover:text-amber-400"
             >
               −
             </button>
-            <span className="w-8 text-center">{quantity}</span>
+            <span className="w-8 text-center tabular-nums">{quantity}</span>
             <button
               onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-              className="px-3 py-2 text-slate-300"
+              className="px-3 py-2 text-slate-300 transition-colors hover:text-amber-400"
             >
               +
             </button>
@@ -174,7 +221,7 @@ export function ProductDetail() {
           <button
             onClick={handleAddToCart}
             disabled={product.stock === 0}
-            className="flex-1 rounded-xl2 bg-amber-500 py-3 font-semibold text-base-950 shadow-glow transition hover:bg-amber-400 disabled:opacity-50"
+            className="btn-primary flex-1"
           >
             {product.stock === 0 ? 'Rupture de stock' : 'Ajouter au panier'}
           </button>
@@ -187,7 +234,7 @@ export function ProductDetail() {
           ) : (
             <ul className="flex flex-col gap-3">
               {product.reviews.map((r) => (
-                <li key={r.id} className="rounded-xl2 bg-base-800 p-3 text-sm">
+                <li key={r.id} className="card p-3 text-sm">
                   <div className="mb-1 text-amber-400">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</div>
                   {r.comment && <p className="text-slate-300">{r.comment}</p>}
                 </li>

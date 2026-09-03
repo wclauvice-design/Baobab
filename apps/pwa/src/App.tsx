@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './lib/auth';
 import { BottomNav } from './components/BottomNav';
+import { PageLoader } from './components/PageLoader';
 import { Login } from './pages/Login';
 import { Catalog } from './pages/Catalog';
 import { ProductDetail } from './pages/ProductDetail';
@@ -21,7 +22,7 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) return <div className="p-6 text-sm text-slate-500">Chargement…</div>;
+  if (loading) return <PageLoader />;
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
   return children;
 }
@@ -31,7 +32,7 @@ export default function App() {
   const location = useLocation();
   const hideNav = location.pathname === '/login';
 
-  if (loading) return <div className="p-6 text-sm text-slate-500">Chargement…</div>;
+  if (loading) return <PageLoader />;
 
   return (
     <>
