@@ -14,6 +14,7 @@ interface ProductRow {
   price: number;
   compareAtPrice?: number | null;
   stock: number;
+  images: string[];
   category: { name: string };
   seller: { shopName: string } | null;
 }
@@ -62,6 +63,20 @@ export function Catalog() {
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Erreur réseau');
     }
+  }
+
+  async function uploadImage(productId: string, file: File) {
+    try {
+      await api.upload(`/products/${productId}/images`, file);
+      load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Erreur réseau');
+    }
+  }
+
+  async function removeImage(productId: string, url: string) {
+    await api.delete(`/products/${productId}/images`, { url });
+    load();
   }
 
   return (
@@ -141,6 +156,7 @@ export function Catalog() {
           <thead className="bg-slate-100 text-left text-xs uppercase text-slate-500">
             <tr>
               <th className="px-4 py-3">Produit</th>
+              <th className="px-4 py-3">Photos</th>
               <th className="px-4 py-3">Catégorie</th>
               <th className="px-4 py-3">Vendeur</th>
               <th className="px-4 py-3">Prix</th>
@@ -151,6 +167,35 @@ export function Catalog() {
             {products.map((p) => (
               <tr key={p.id} className="border-t border-slate-100">
                 <td className="px-4 py-3 font-medium">{p.name}</td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {p.images.map((url) => (
+                      <div key={url} className="group relative h-10 w-10 shrink-0">
+                        <img src={url} alt="" className="h-10 w-10 rounded-md object-cover" />
+                        <button
+                          onClick={() => removeImage(p.id, url)}
+                          title="Retirer cette photo"
+                          className="absolute -right-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] leading-none text-white group-hover:flex"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                    <label className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-dashed border-slate-300 text-slate-400 hover:border-amber-400 hover:text-amber-500">
+                      +
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) uploadImage(p.id, file);
+                          e.target.value = '';
+                        }}
+                      />
+                    </label>
+                  </div>
+                </td>
                 <td className="px-4 py-3">{p.category.name}</td>
                 <td className="px-4 py-3">{p.seller?.shopName ?? 'Baobab (direct)'}</td>
                 <td className="px-4 py-3">

@@ -40,10 +40,34 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json();
 }
 
+async function uploadRequest<T>(path: string, file: File): Promise<T> {
+  const token = getToken();
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ message: res.statusText }));
+    const message = Array.isArray(body.message) ? body.message.join(', ') : body.message;
+    throw new ApiError(res.status, message || 'Une erreur est survenue');
+  }
+
+  if (res.status === 204) return undefined as T;
+  return res.json();
+}
+
 export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: 'POST', body: body ? JSON.stringify(body) : undefined }),
   patch: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: 'PATCH', body: body ? JSON.stringify(body) : undefined }),
+  delete: <T>(path: string, body?: unknown) =>
+    request<T>(path, { method: 'DELETE', body: body ? JSON.stringify(body) : undefined }),
+  upload: <T>(path: string, file: File) => uploadRequest<T>(path, file),
 };

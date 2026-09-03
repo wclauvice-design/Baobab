@@ -1,4 +1,18 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -7,6 +21,8 @@ import { CurrentUser, AuthUser } from '../common/decorators/current-user.decorat
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 @Controller('products')
 export class ProductsController {
@@ -41,5 +57,36 @@ export class ProductsController {
   @Roles(Role.SELLER, Role.ADMIN)
   update(@CurrentUser() user: AuthUser, @Param('id') id: string, @Body() dto: UpdateProductDto) {
     return this.productsService.update(user.id, user.role as Role, id, dto);
+  }
+
+  @Post(':id/images')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.SELLER, Role.ADMIN)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 5 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+          return cb(new BadRequestException('Format non supporté (jpg, png, webp uniquement)'), false);
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  addImage(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('Fichier manquant');
+    return this.productsService.addImage(user.id, user.role as Role, id, file);
+  }
+
+  @Delete(':id/images')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.SELLER, Role.ADMIN)
+  removeImage(@CurrentUser() user: AuthUser, @Param('id') id: string, @Body('url') url: string) {
+    if (!url) throw new BadRequestException('URL manquante');
+    return this.productsService.removeImage(user.id, user.role as Role, id, url);
   }
 }

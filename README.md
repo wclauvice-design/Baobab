@@ -60,6 +60,24 @@ Aucun fournisseur SMS n'est branché : le code OTP est simplement affiché dans 
 
 De même, les notifications SMS/WhatsApp (confirmation de commande, validation de paiement) sont loggées dans la console par `ConsoleNotificationProvider` plutôt qu'envoyées réellement.
 
+## Photos produits
+
+L'upload de photos (côté vendeur et back-office admin, sur la liste des produits) envoie le fichier vers un bucket Supabase Storage — le même projet Supabase que la base de données, pas un nouveau service.
+
+Pour l'activer :
+
+1. Dans le dashboard Supabase du projet → **Storage** → créer un bucket nommé `product-images`, marqué **Public**.
+2. Dans **Project Settings → API**, récupérer l'URL du projet et la clé `service_role` (jamais la clé `anon`, elle ne suffit pas à écrire dans le bucket).
+3. Renseigner dans `apps/api/.env` (ou les variables Railway en production) :
+
+   ```
+   SUPABASE_URL="https://xxxx.supabase.co"
+   SUPABASE_SERVICE_ROLE_KEY="..."
+   SUPABASE_STORAGE_BUCKET="product-images"
+   ```
+
+Sans ces variables, le reste de l'app fonctionne normalement — seul l'envoi de photo renvoie une erreur explicite.
+
 ## Parcours de test suggéré
 
 1. Se connecter côté PWA avec `+2250700000003` (acheteur), récupérer le code OTP dans les logs API.

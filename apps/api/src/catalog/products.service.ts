@@ -3,10 +3,14 @@ import { OrderStatus, Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { SupabaseStorageService } from './supabase-storage.service';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private storage: SupabaseStorageService,
+  ) {}
 
   async findAll(params: { search?: string; categoryId?: string }) {
     const products = await this.prisma.product.findMany({
@@ -49,6 +53,23 @@ export class ProductsService {
   async update(userId: string, role: Role, productId: string, dto: UpdateProductDto) {
     await this.assertOwnership(userId, role, productId);
     return this.prisma.product.update({ where: { id: productId }, data: dto });
+  }
+
+  async addImage(userId: string, role: Role, productId: string, file: Express.Multer.File) {
+    await this.assertOwnership(userId, role, productId);
+    const url = await this.storage.uploadProductImage(file, productId);
+    return this.prisma.product.update({
+      where: { id: productId },
+      data: { images: { push: url } },
+    });
+  }
+
+  async removeImage(userId: string, role: Role, productId: string, url: string) {
+    const product = await this.assertOwnership(userId, role, productId);
+    return this.prisma.product.update({
+      where: { id: productId },
+      data: { images: product.images.filter((i) => i !== url) },
+    });
   }
 
   async findMineOrAll(userId: string, role: Role) {
@@ -109,12 +130,13 @@ export class ProductsService {
   }
 
   private async assertOwnership(userId: string, role: Role, productId: string) {
-    if (role === Role.ADMIN) return;
-    const seller = await this.prisma.seller.findUnique({ where: { userId } });
     const product = await this.prisma.product.findUnique({ where: { id: productId } });
     if (!product) throw new NotFoundException('Produit introuvable');
+    if (role === Role.ADMIN) return product;
+    const seller = await this.prisma.seller.findUnique({ where: { userId } });
     if (!seller || product.sellerId !== seller.id) {
       throw new ForbiddenException("Vous ne gérez pas ce produit");
     }
+    return product;
   }
 }
