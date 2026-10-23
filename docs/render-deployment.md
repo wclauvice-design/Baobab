@@ -13,7 +13,9 @@ Pour les photos, reprendre les variables SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 
 ## Vercel
 
-Après validation de `/health`, renseigner VITE_API_URL avec le domaine HTTPS réellement attribué par Render, sans suffixe /api, dans les deux projets. Redéployer les deux projets : cette variable est intégrée au JavaScript lors du build.
+Les interfaces de production utilisent `/api`. Les fichiers `apps/pwa/vercel.json` et `apps/admin/vercel.json` transmettent ces requêtes vers `https://baobab-api-7w7h.onrender.com`, sans préfixe /api côté backend. Les réponses API ne sont pas mises en cache par le proxy. Les anciennes variables VITE_API_URL ne sont plus utilisées en production ; elles restent disponibles pour le développement local. Un push sur main redéploie les deux projets via leur intégration Git existante. Ne publier le changement de destination qu'après validation de `/health`.
+
+Service Render : `srv-dbdl4jqvcj2c7385do1g`, espace `My Workspace`, région Singapore. Le service a été créé directement via le connecteur Render ; render.yaml reste une configuration de référence, pas un Blueprint synchronisé. La création via ce connecteur applique le contrôle TCP par défaut : le contrôle HTTP /health peut être sélectionné dans les réglages Render.
 Les dossiers frontend sont apps/pwa et apps/admin, avec la sortie dist. Conserver les paramètres monorepo existants.
 
 ## Validation
@@ -21,7 +23,7 @@ Les dossiers frontend sont apps/pwa et apps/admin, avec la sortie dist. Conserve
 - GET /health : 200 et status ok.
 - GET /products : réponse JSON.
 - OPTIONS /auth/dev-login avec Origin de chaque frontend et Access-Control-Request-Method POST : origine autorisée.
-- Vérifier les bundles publiés : nouvelle URL Render et absence de l'ancienne URL Railway.
+- Vérifier les bundles publiés : appels relatifs /api et absence de l'ancienne URL Railway.
 - Vérifier la connexion et /users/me avec un compte de test autorisé, sans toucher aux commandes ni aux paiements.
 
 Ne considérer la migration comme terminée qu'après validation sur les domaines publics.

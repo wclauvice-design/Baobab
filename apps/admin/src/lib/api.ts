@@ -1,4 +1,7 @@
-const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
+// Production uses the Vercel proxy; local development may target a custom API.
+const API_BASE = import.meta.env.PROD
+  ? '/api'
+  : (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
 const TOKEN_KEY = 'baobab_admin_token';
 
 export function getToken() {
