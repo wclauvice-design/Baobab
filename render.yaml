@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: baobab-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build -w packages/shared && npm run build -w apps/api
+    startCommand: npm run prisma:migrate:deploy -w apps/api && npm run start:prod -w apps/api
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ENABLE_DEV_LOGIN
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://baobab-kohl.vercel.app,https://baobab-admin-psi.vercel.app
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: ORDER_EXPIRATION_MINUTES
+        value: "45"
+      - key: ORANGE_MONEY_MERCHANT_NUMBER
+        sync: false

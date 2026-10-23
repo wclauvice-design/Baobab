@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
 const TOKEN_KEY = 'baobab_admin_token';
 
 export function getToken() {
@@ -19,9 +19,35 @@ export class ApiError extends Error {
   }
 }
 
+async function fetchApi(path: string, options: RequestInit): Promise<Response> {
+  try {
+    return await fetch(`${API_BASE}${path}`, options);
+  } catch {
+    throw new ApiError(0, 'Impossible de joindre le serveur. Vérifiez votre connexion et réessayez dans quelques instants.');
+  }
+}
+
+async function readResponse<T>(res: Response): Promise<T> {
+  const text = await res.text();
+  let body: any;
+  try {
+    body = text ? JSON.parse(text) : undefined;
+  } catch {
+    throw new ApiError(res.status, 'Le serveur a renvoyé une réponse invalide. Veuillez réessayer plus tard.');
+  }
+  if (!res.ok) {
+    const detail = body?.message;
+    const message = typeof detail === 'object' && detail !== null && !Array.isArray(detail)
+      ? detail.message : detail;
+    throw new ApiError(res.status, Array.isArray(message) ? message.join(', ')
+      : typeof message === 'string' ? message : 'Le serveur est temporairement indisponible.');
+  }
+  return body as T;
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetchApi(path, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -30,14 +56,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     },
   });
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ message: res.statusText }));
-    const message = Array.isArray(body.message) ? body.message.join(', ') : body.message;
-    throw new ApiError(res.status, message || 'Une erreur est survenue');
-  }
-
-  if (res.status === 204) return undefined as T;
-  return res.json();
+  return readResponse<T>(res);
 }
 
 async function uploadRequest<T>(path: string, file: File): Promise<T> {
@@ -45,20 +64,13 @@ async function uploadRequest<T>(path: string, file: File): Promise<T> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetchApi(path, {
     method: 'POST',
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     body: formData,
   });
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ message: res.statusText }));
-    const message = Array.isArray(body.message) ? body.message.join(', ') : body.message;
-    throw new ApiError(res.status, message || 'Une erreur est survenue');
-  }
-
-  if (res.status === 204) return undefined as T;
-  return res.json();
+  return readResponse<T>(res);
 }
 
 export const api = {
