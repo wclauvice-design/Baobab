@@ -19,6 +19,35 @@ export class ProductsService {
     private storage: SupabaseStorageService,
   ) {}
 
+  private computeProductScore(p: any): number {
+    let score = 0;
+    // 1. Photos réelles téléversées : priorité absolue
+    if (p.images && Array.isArray(p.images) && p.images.length > 0) {
+      score += 1000 + Math.min(p.images.length, 5) * 50;
+    }
+    // 2. Piliers marchands à forte désirabilité en Afrique de l'Ouest
+    const nameLower = (p.name || '').toLowerCase();
+    const catLower = (p.category?.name || '').toLowerCase();
+    const subLower = (p.subcategory || '').toLowerCase();
+
+    if (/toyota|hilux|land cruiser|prado|jetour|sinotruk/i.test(nameLower)) {
+      score += 650;
+    } else if (/solaire|batterie|onduleur|deye|lifepo4/i.test(nameLower) || /solaire/i.test(catLower)) {
+      score += 600;
+    } else if (/climatis|split|inverter|tropicalis|gree|midea/i.test(nameLower) || /clim/i.test(subLower)) {
+      score += 550;
+    } else if (/iphone|galaxy|camon|infinix|thinkpad|macbook/i.test(nameLower)) {
+      score += 500;
+    } else if (/groupe|electrogene|motopompe|souder|inverter/i.test(nameLower)) {
+      score += 450;
+    }
+
+    // 3. Facilité d'achat : vente à l'unité
+    if (p.minimumOrder === 1) score += 40;
+
+    return score;
+  }
+
   async findAll(params: {
     search?: string;
     categoryId?: string;
@@ -29,6 +58,7 @@ export class ProductsService {
     maxPrice?: string;
     sort?: string;
   }) {
+    const isFeatured = !params.sort || params.sort === "featured";
     const products = await this.prisma.product.findMany({
       where: {
         moderation: "PUBLISHED",
@@ -60,10 +90,17 @@ export class ProductsService {
           : params.sort === "price-desc"
             ? { price: "desc" }
             : { createdAt: "desc" },
-      take: 200,
+      take: 250,
     });
 
-    return (await this.attachStats(products)).map((p) => this.publicProduct(p));
+    const attached = await this.attachStats(products);
+    const publicList = attached.map((p) => this.publicProduct(p));
+
+    if (isFeatured) {
+      publicList.sort((a, b) => this.computeProductScore(b) - this.computeProductScore(a));
+    }
+
+    return publicList;
   }
 
   async findOne(id: string) {

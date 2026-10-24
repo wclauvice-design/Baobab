@@ -18,6 +18,7 @@ import {
   universes,
 } from "../lib/concierge";
 import { estimateFreight } from "../lib/freight";
+import { fallbackPhoto } from "../lib/photos";
 import "./marketplace.css";
 import "./marketplace-premium.css";
 import "./marketplace-motion.css";
@@ -107,6 +108,52 @@ export function Icon({ name, size = 22 }: { name: string; size?: number }) {
     </svg>
   );
 }
+
+export const DESTINATIONS = [
+  { id: "CI", flag: "🇨🇮", name: "Côte d'Ivoire (Abidjan)", airRate: 8500, seaRate: 180000, daysAir: "5–8 j", daysSea: "25–30 j" },
+  { id: "SN", flag: "🇸🇳", name: "Sénégal (Dakar)", airRate: 8500, seaRate: 180000, daysAir: "5–8 j", daysSea: "24–28 j" },
+  { id: "BF", flag: "🇧🇫", name: "Burkina Faso (Ouagadougou)", airRate: 9000, seaRate: 210000, daysAir: "6–9 j", daysSea: "30–35 j" },
+  { id: "TG", flag: "🇹🇬", name: "Togo (Lomé)", airRate: 8000, seaRate: 175000, daysAir: "5–8 j", daysSea: "22–28 j" },
+  { id: "BJ", flag: "🇧🇯", name: "Bénin (Cotonou)", airRate: 8200, seaRate: 175000, daysAir: "5–8 j", daysSea: "22–28 j" },
+  { id: "ML", flag: "🇲🇱", name: "Mali (Bamako)", airRate: 9200, seaRate: 220000, daysAir: "7–10 j", daysSea: "32–38 j" },
+  { id: "NE", flag: "🇳🇪", name: "Niger (Niamey)", airRate: 9500, seaRate: 230000, daysAir: "7–10 j", daysSea: "35–40 j" },
+  { id: "GN", flag: "🇬🇳", name: "Guinée (Conakry)", airRate: 8800, seaRate: 195000, daysAir: "6–9 j", daysSea: "25–30 j" },
+];
+
+const DEST_KEY = "baobab_selected_destination";
+const DEST_EVENT = "baobab:destination";
+
+export function useUserDestination() {
+  const [destId, setDestId] = useState<string>(() => saved<string>(DEST_KEY, "CI"));
+  useEffect(() => {
+    const sync = () => setDestId(saved<string>(DEST_KEY, "CI"));
+    window.addEventListener(DEST_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(DEST_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+  const select = (id: string) => {
+    save(DEST_KEY, id);
+    setDestId(id);
+    window.dispatchEvent(new Event(DEST_EVENT));
+  };
+  const current = DESTINATIONS.find((d) => d.id === destId) || DESTINATIONS[0];
+  return { current, select, all: DESTINATIONS };
+}
+
+export const STORY_CATEGORIES = [
+  { id: "all", label: "Tout voir", emoji: "✨", universe: "", subcategory: "" },
+  { id: "motors", label: "Véhicules GCC", emoji: "🚗", universe: "motors", subcategory: "" },
+  { id: "solar", label: "Solaire 5-10kW", emoji: "⚡", universe: "classifieds", subcategory: "Énergie Solaire & Batteries" },
+  { id: "ac", label: "Clim Tropicale", emoji: "❄️", universe: "classifieds", subcategory: "Électroménager" },
+  { id: "phones", label: "iPhones & Tech", emoji: "📱", universe: "classifieds", subcategory: "Téléphones & Tablettes" },
+  { id: "laptops", label: "PC & Laptops", emoji: "💻", universe: "classifieds", subcategory: "Informatique & PC" },
+  { id: "trade", label: "Groupes & Chantier", emoji: "🛠️", universe: "trade", subcategory: "" },
+  { id: "home", label: "Mobilier Bureau", emoji: "🛋️", universe: "home", subcategory: "" },
+];
+
 const FAVORITES_KEY = "baobab_favorites";
 const FAVORITES_EVENT = "baobab:favorites";
 
@@ -137,10 +184,15 @@ function useFavorites() {
 
 export function MarketShell({ children }: { children: React.ReactNode }) {
   const { ids: favoriteIds } = useFavorites();
+  const { current: userDest } = useUserDestination();
   return (
     <div className="market">
       <div className="top-note">
-        DE DUBAÏ À CHEZ VOUS <span>Un interlocuteur. Chaque étape.</span>
+        <span className="gold-badge-live">DUBAÏ ➔ AFRIQUE</span>
+        <span className="dest-quick-wrap">
+          Livraison & Dédouanement : <strong>{userDest.flag} {userDest.name}</strong>
+        </span>
+        <span className="transit-quick-info">Aérien {userDest.daysAir} · Maritime {userDest.daysSea}</span>
       </div>
       <header className="market-header">
         <Link to="/" className="brand">
@@ -233,20 +285,16 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
     >
       <div className="listing-picture">
         <Link to={`/products/${p.id}`}>
-          {p.images?.[0] ? (
-            <img src={p.images[0]} alt={p.name} loading="lazy" />
-          ) : (
-            <div className="photo-missing">
-              <Icon
-                name={
-                  universes.find((u) => u.id === p.category?.universe)?.icon ||
-                  "box"
-                }
-                size={56}
-              />
-              <span>Photos à venir</span>
-            </div>
-          )}
+          <img
+            src={
+              p.images?.[0] ||
+              fallbackPhoto(p.subcategory, p.category?.name, p.category?.universe, p.name)
+            }
+            alt={p.name}
+            loading="lazy"
+            decoding="async"
+            className={p.images?.[0] ? "" : "is-sample"}
+          />
         </Link>
         <button
           className={`favorite ${favorite ? "selected" : ""}`}
@@ -273,23 +321,22 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
         <strong>
           {money(p.price)} <small>/ {p.unit || "pièce"}</small>
         </strong>
-        <p className="listing-location">
-          <Icon name="pin" size={14} />
-          {p.location || "Dubaï"}
-          <span>
+        <p className="listing-meta">
+          <span className="meta-moq">
             {p.minimumOrder > 1
               ? `Min. ${p.minimumOrder} ${p.unit || "pièces"}`
               : "À l’unité"}
           </span>
+          <span className="meta-place">
+            <Icon name="pin" size={12} />
+            {p.location || "Dubaï"}
+          </span>
         </p>
-        <p className="shipping-note">
-          {p.shippingIncluded
-            ? `Livraison incluse · ${p.shippingDestination}`
-            : "Transport & importation sur devis"}
-        </p>
-        <Link className="listing-discover" to={`/products/${p.id}`}>
-          Découvrir l’annonce <Icon name="arrow" size={16} />
-        </Link>
+        {p.shippingIncluded && (
+          <p className="shipping-note">
+            Livraison incluse{p.shippingDestination ? ` · ${p.shippingDestination}` : ""}
+          </p>
+        )}
       </div>
     </article>
   );
@@ -301,6 +348,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
     [error, setError] = useState(""),
     [loading, setLoading] = useState(true);
   const { ids: favoriteIds } = useFavorites();
+  const { current: currentDest, select: selectDest, all: allDests } = useUserDestination();
   const universe = params.get("universe") || "",
     search = params.get("search") || "";
   useEffect(() => {
@@ -445,35 +493,64 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
           </div>
         </div>
       </section>
-      <ol className="purchase-steps" aria-label="Comment acheter avec Baobab">
-        <li><span>01</span><p><strong>Choisissez</strong><small>Une annonce, à l’unité ou en lot</small></p></li>
-        <li><span>02</span><p><strong>Recevez votre devis</strong><small>Fret et douane détaillés, avant de payer</small></p></li>
-        <li><span>03</span><p><strong>Suivez en direct</strong><small>De Dubaï jusqu’à votre porte</small></p></li>
-      </ol>
-      <div className="trust-strip" aria-label="Nos engagements">
-        <span><Icon name="check" size={15} /> Annonces vérifiées</span>
-        <span><Icon name="plane" size={15} /> Aérien 5–10 j · Maritime 22–40 j</span>
-        <span><Icon name="shield" size={15} /> Aucun paiement avant accord</span>
-        <span><Icon name="chat" size={15} /> Support WhatsApp</span>
-      </div>
-      <section className="universe-grid" aria-label="Grands univers">
-        {universes.map((u) => (
-          <button
-            className={`universe ${universe === u.id ? "active" : ""}`}
-            key={u.id}
-            aria-pressed={universe === u.id}
-            onClick={() => filter("universe", universe === u.id ? "" : u.id)}
+
+      {/* Barre de destination et de fret interactif */}
+      <div className="dest-destination-bar" role="region" aria-label="Destination et délais">
+        <div className="dest-selector-box">
+          <Icon name="pin" size={16} />
+          <span className="dest-lead">Destination :</span>
+          <select
+            value={currentDest.id}
+            onChange={(e) => selectDest(e.target.value)}
+            className="dest-select-native"
+            aria-label="Changer le pays de destination"
           >
-            <div className={`universe-icon ${u.id}`}>
-              <Icon name={u.icon} size={29} />
-            </div>
-            <div>
-              <h2>{u.name}</h2>
-              <p>{u.subtitle}</p>
-            </div>
-            <Icon name="arrow" size={18} />
-          </button>
-        ))}
+            {allDests.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.flag} {d.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="dest-modes-tags">
+          <span className="mode-pill air"><Icon name="plane" size={13} /> Aérien {currentDest.daysAir}</span>
+          <span className="mode-pill sea">🚢 Maritime {currentDest.daysSea}</span>
+          <span className="mode-pill customs"><Icon name="check" size={13} /> Dédouanement garanti</span>
+        </div>
+      </div>
+
+      {/* Story Circles tactiles : Catégories à forte désirabilité */}
+      <section className="story-circles-bar" aria-label="Catégories vedettes">
+        <div className="story-circles-track">
+          {STORY_CATEGORIES.map((cat) => {
+            const isSelected =
+              cat.universe === "" && cat.subcategory === ""
+                ? !universe && !params.get("subcategory")
+                : cat.subcategory
+                  ? params.get("subcategory") === cat.subcategory
+                  : universe === cat.universe;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                className={`story-circle-btn ${isSelected ? "active" : ""}`}
+                onClick={() => {
+                  const next = new URLSearchParams(params);
+                  if (cat.universe) next.set("universe", cat.universe);
+                  else next.delete("universe");
+                  if (cat.subcategory) next.set("subcategory", cat.subcategory);
+                  else next.delete("subcategory");
+                  setParams(next);
+                }}
+              >
+                <div className="story-circle-glow">
+                  <span className="story-emoji">{cat.emoji}</span>
+                </div>
+                <span className="story-label">{cat.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </section>
       <section className="listings">
         <div className="section-heading">
@@ -613,25 +690,17 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
     </>
   );
 }
-const DESTINATIONS = [
-  { id: "CI", name: "Côte d'Ivoire (Abidjan)", airRate: 8500, seaRate: 180000, daysAir: "5–8 j", daysSea: "25–30 j" },
-  { id: "BF", name: "Burkina Faso (Ouagadougou)", airRate: 9000, seaRate: 210000, daysAir: "6–9 j", daysSea: "30–35 j" },
-  { id: "TG", name: "Togo (Lomé)", airRate: 8000, seaRate: 175000, daysAir: "5–8 j", daysSea: "22–28 j" },
-  { id: "BJ", name: "Bénin (Cotonou)", airRate: 8200, seaRate: 175000, daysAir: "5–8 j", daysSea: "22–28 j" },
-  { id: "ML", name: "Mali (Bamako)", airRate: 9200, seaRate: 220000, daysAir: "7–10 j", daysSea: "32–38 j" },
-  { id: "NE", name: "Niger (Niamey)", airRate: 9500, seaRate: 230000, daysAir: "7–10 j", daysSea: "35–40 j" },
-];
 
 export function ListingDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { current: dest, select: selectDest } = useUserDestination();
   const [p, setP] = useState<any>(null),
     [config, setConfig] = useState<any>(null),
     [image, setImage] = useState(0),
     [qty, setQty] = useState(1),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
-    [dest, setDest] = useState(DESTINATIONS[0]),
     [shippingMode, setShippingMode] = useState<"AIR" | "SEA">("AIR");
   useEffect(() => {
     setP(null);
@@ -702,13 +771,17 @@ export function ListingDetail() {
       <div className="detail-grid">
         <section>
           <div className="detail-photo">
-            {p.images?.[image] ? (
-              <img src={p.images[image]} alt={p.name} />
-            ) : (
-              <div className="photo-missing">
-                <Icon name="box" size={80} />
-                <span>Photos à venir</span>
-              </div>
+            <img
+              src={
+                p.images?.[image] ||
+                fallbackPhoto(p.subcategory, p.category?.name, p.category?.universe, p.name)
+              }
+              alt={p.name}
+              decoding="async"
+              className={p.images?.[image] ? "" : "is-sample"}
+            />
+            {!p.images?.length && (
+              <span className="sample-note">Photo d’illustration</span>
             )}
           </div>
           <div className="thumbnails">
@@ -790,9 +863,7 @@ export function ListingDetail() {
               Destination d’arrivée
               <select
                 value={dest.id}
-                onChange={(e) =>
-                  setDest(DESTINATIONS.find((d) => d.id === e.target.value) || DESTINATIONS[0])
-                }
+                onChange={(e) => selectDest(e.target.value)}
               >
                 {DESTINATIONS.map((d) => (
                   <option key={d.id} value={d.id}>
