@@ -277,6 +277,8 @@ export function Empty({
 function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
   const { ids, toggle } = useFavorites();
   const favorite = ids.includes(p.id);
+  const isRealPhoto = Boolean(p.images?.[0]);
+
   return (
     <article
       className="listing-tile"
@@ -293,7 +295,7 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
             alt={p.name}
             loading="lazy"
             decoding="async"
-            className={p.images?.[0] ? "" : "is-sample"}
+            className={isRealPhoto ? "is-real" : "is-sample"}
           />
         </Link>
         <button
@@ -305,18 +307,28 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
         >
           <Icon name="heart" size={19} />
         </button>
-        <span className="picture-tag">
-          {p.condition === "NEW"
-            ? "Neuf"
-            : p.condition === "REFURBISHED"
-              ? "Reconditionné"
-              : "Occasion"}
-        </span>
+        <div className="picture-badges">
+          <span className="picture-tag">
+            {p.condition === "NEW"
+              ? "Neuf"
+              : p.condition === "REFURBISHED"
+                ? "Reconditionné"
+                : "Occasion"}
+          </span>
+          {isRealPhoto && (
+            <span className="picture-tag is-real">
+              <Icon name="check" size={10} /> Photo réelle
+            </span>
+          )}
+        </div>
       </div>
       <div className="listing-copy">
-        <p className="eyebrow">{p.subcategory && p.subcategory !== "Autres" ? p.subcategory : p.category?.name}</p>
+        <div className="listing-header-line">
+          <p className="eyebrow">{p.subcategory && p.subcategory !== "Autres" ? p.subcategory : p.category?.name}</p>
+          <span className="origin-tag">🇦🇪 Dubaï</span>
+        </div>
         <Link to={`/products/${p.id}`}>
-          <h3>{p.name}</h3>
+          <h3 title={p.name}>{p.name}</h3>
         </Link>
         <strong>
           {money(p.price)} <small>/ {p.unit || "pièce"}</small>
@@ -421,103 +433,70 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
     config?.universes?.find((u: any) => u.id === universe)?.categories || [];
   return (
     <>
-      <section className="discovery-hero">
-        <div className="hero-copy">
-          <p className="eyebrow"><span className="hero-dot" /> DUBAÏ → AFRIQUE · LE COMMERCE, ACCOMPAGNÉ</p>
-          <h1>
-            {favorites ? (
-              "Vos belles trouvailles."
-            ) : (
-              <>
-                Vos envies, ici.
-                <br />
-                <em>Le meilleur de Dubaï, à portée.</em>
-              </>
-            )}
-          </h1>
-          <p>
-            Pour vous, votre maison ou votre activité. Explorez les annonces,
-            échangez avec notre équipe et recevez un devis adapté à votre destination.
-          </p>
-          <form
-            className="market-search"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const value = new FormData(e.currentTarget).get("search");
-              filter("search", String(value || ""));
-            }}
-          >
-            <Icon name="search" />
+      {/* 1. Header de Recherche Luxury Mobile-First */}
+      <section className="luxury-hero-banner" role="banner">
+        <div className="luxury-lead-strip">
+          <div className="lead-tag-pulse">
+            <span className="live-dot" />
+            <span>EXPORT DUBAÏ ➔ AFRIQUE DE L'OUEST</span>
+          </div>
+          <div className="dest-quick-select">
+            <Icon name="pin" size={13} />
+            <select
+              value={currentDest.id}
+              onChange={(e) => selectDest(e.target.value)}
+              className="dest-select-head"
+              aria-label="Pays de livraison"
+            >
+              {allDests.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.flag} {d.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <h1 className="luxury-hero-title">
+          {favorites ? (
+            "Vos sélections & favoris Dubaï"
+          ) : (
+            <>
+              Le meilleur de Dubaï. <em>Directement chez vous.</em>
+            </>
+          )}
+        </h1>
+
+        <form
+          className="luxury-search-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const value = new FormData(e.currentTarget).get("search");
+            filter("search", String(value || ""));
+          }}
+        >
+          <div className="search-input-wrap">
+            <Icon name="search" size={19} />
             <input
               name="search"
               defaultValue={search}
-              placeholder="Quel sera votre prochain achat ?"
+              placeholder="Rechercher Toyota Hilux, Kit Solaire 10kW, Climatiseur T3, iPhone 15..."
               aria-label="Rechercher une annonce"
             />
-            <button type="submit">
-              Rechercher <Icon name="arrow" size={18} />
-            </button>
-          </form>
-          <div className="hero-promises">
-            <span>
-              <Icon name="shield" size={17} /> Annonces validées
-            </span>
-            <span>
-              <Icon name="chat" size={17} /> Équipe Baobab à vos côtés
-            </span>
           </div>
-        </div>
-        <div className="hero-art" aria-hidden="true">
-          <div className="art-sun" />
-          <svg viewBox="0 0 420 260">
-            <path
-              d="M0 240h420M25 240V150h45v90m20 0V95h50v145m25 0V130h45v110m25 0V70h22V35h7V8h4v27h7v35h22v170m20 0V120h60v120m15 0V180h35v60"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3"
-            />
-            <path
-              d="M100 110v110m15-110v110m210-80v80m20-80v80"
-              stroke="currentColor"
-              opacity=".35"
-            />
-          </svg>
-          <div className="art-caption">
-            SÉLECTION À DUBAÏ<span>Accompagnement Baobab</span>
-          </div>
-          <div className="hero-passport">
-            <span className="passport-label">VOTRE ACHAT, EN TOUTE CLARTÉ</span>
-            <div className="passport-route"><strong>Dubaï</strong><Icon name="arrow" size={24} /><strong>Chez vous</strong></div>
-            <div className="passport-divider" />
-            <div className="passport-service"><Icon name="shield" size={25} /><div><strong>Un devis avant de décider.</strong><span>Un interlocuteur à chaque étape.</span></div></div>
-          </div>
+          <button type="submit" className="search-submit-btn">
+            <span>Rechercher</span>
+            <Icon name="arrow" size={16} />
+          </button>
+        </form>
+
+        <div className="luxury-trust-row">
+          <span><Icon name="check" size={12} /> Prix Grossiste (+15%)</span>
+          <span><Icon name="plane" size={12} /> Aérien {currentDest.daysAir}</span>
+          <span>🚢 Maritime {currentDest.daysSea}</span>
+          <span><Icon name="shield" size={12} /> Dédouanement Garanti</span>
         </div>
       </section>
-
-      {/* Barre de destination et de fret interactif */}
-      <div className="dest-destination-bar" role="region" aria-label="Destination et délais">
-        <div className="dest-selector-box">
-          <Icon name="pin" size={16} />
-          <span className="dest-lead">Destination :</span>
-          <select
-            value={currentDest.id}
-            onChange={(e) => selectDest(e.target.value)}
-            className="dest-select-native"
-            aria-label="Changer le pays de destination"
-          >
-            {allDests.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.flag} {d.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="dest-modes-tags">
-          <span className="mode-pill air"><Icon name="plane" size={13} /> Aérien {currentDest.daysAir}</span>
-          <span className="mode-pill sea">🚢 Maritime {currentDest.daysSea}</span>
-          <span className="mode-pill customs"><Icon name="check" size={13} /> Dédouanement garanti</span>
-        </div>
-      </div>
 
       {/* Story Circles tactiles : Catégories à forte désirabilité */}
       <section className="story-circles-bar" aria-label="Catégories vedettes">
