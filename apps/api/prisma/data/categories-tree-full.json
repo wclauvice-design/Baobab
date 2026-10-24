@@ -1,0 +1,536 @@
+[
+  {
+    "name": "Téléphonie & Tablettes",
+    "slug": "telephonie-tablettes",
+    "parentSlug": null,
+    "sortOrder": 1
+  },
+  {
+    "name": "Coques & Protections",
+    "slug": "telephonie-tablettes-coques-protections",
+    "parentSlug": "telephonie-tablettes",
+    "sortOrder": 1
+  },
+  {
+    "name": "Verres trempés",
+    "slug": "telephonie-tablettes-verres-trempes",
+    "parentSlug": "telephonie-tablettes",
+    "sortOrder": 2
+  },
+  {
+    "name": "Supports & Stands",
+    "slug": "telephonie-tablettes-supports",
+    "parentSlug": "telephonie-tablettes",
+    "sortOrder": 3
+  },
+  {
+    "name": "Câbles & Chargeurs",
+    "slug": "telephonie-tablettes-cables-chargeurs",
+    "parentSlug": "telephonie-tablettes",
+    "sortOrder": 4
+  },
+  {
+    "name": "Powerbanks",
+    "slug": "telephonie-tablettes-powerbanks",
+    "parentSlug": "telephonie-tablettes",
+    "sortOrder": 5
+  },
+  {
+    "name": "Accessoires Écouteurs",
+    "slug": "telephonie-tablettes-accessoires-ecouteurs",
+    "parentSlug": "telephonie-tablettes",
+    "sortOrder": 6
+  },
+  {
+    "name": "Tablettes & Accessoires",
+    "slug": "telephonie-tablettes-tablettes-accessoires",
+    "parentSlug": "telephonie-tablettes",
+    "sortOrder": 7
+  },
+  {
+    "name": "Ordinateurs & Informatique",
+    "slug": "ordinateurs-informatique",
+    "parentSlug": null,
+    "sortOrder": 2
+  },
+  {
+    "name": "PC Portables",
+    "slug": "ordinateurs-informatique-pc-portables",
+    "parentSlug": "ordinateurs-informatique",
+    "sortOrder": 1
+  },
+  {
+    "name": "PC Fixes & Assemblés",
+    "slug": "ordinateurs-informatique-pc-fixes",
+    "parentSlug": "ordinateurs-informatique",
+    "sortOrder": 2
+  },
+  {
+    "name": "Écrans & Moniteurs",
+    "slug": "ordinateurs-informatique-ecrans-moniteurs",
+    "parentSlug": "ordinateurs-informatique",
+    "sortOrder": 3
+  },
+  {
+    "name": "Claviers, Souris & Tapis",
+    "slug": "ordinateurs-informatique-claviers-souris",
+    "parentSlug": "ordinateurs-informatique",
+    "sortOrder": 4
+  },
+  {
+    "name": "Stockage & Mémoire",
+    "slug": "ordinateurs-informatique-stockage-memoire",
+    "parentSlug": "ordinateurs-informatique",
+    "sortOrder": 5
+  },
+  {
+    "name": "Réseaux & Connectiques",
+    "slug": "ordinateurs-informatique-reseaux-connectiques",
+    "parentSlug": "ordinateurs-informatique",
+    "sortOrder": 6
+  },
+  {
+    "name": "Composants & Pièces",
+    "slug": "ordinateurs-informatique-composants-pieces",
+    "parentSlug": "ordinateurs-informatique",
+    "sortOrder": 7
+  },
+  {
+    "name": "Sacs & Housses PC",
+    "slug": "ordinateurs-informatique-sacs-housses",
+    "parentSlug": "ordinateurs-informatique",
+    "sortOrder": 8
+  },
+  {
+    "name": "Électronique",
+    "slug": "electronique",
+    "parentSlug": null,
+    "sortOrder": 3
+  },
+  {
+    "name": "Audio & Casques",
+    "slug": "electronique-audio-casques",
+    "parentSlug": "electronique",
+    "sortOrder": 1
+  },
+  {
+    "name": "Enceintes & Barres de son",
+    "slug": "electronique-enceintes-barres-son",
+    "parentSlug": "electronique",
+    "sortOrder": 2
+  },
+  {
+    "name": "Caméras & Accessoires",
+    "slug": "electronique-cameras-accessoires",
+    "parentSlug": "electronique",
+    "sortOrder": 3
+  },
+  {
+    "name": "Gadgets & Smart Gadgets",
+    "slug": "electronique-gadgets-smart-gadgets",
+    "parentSlug": "electronique",
+    "sortOrder": 4
+  },
+  {
+    "name": "Domotique & Sécurité",
+    "slug": "electronique-domotique-securite",
+    "parentSlug": "electronique",
+    "sortOrder": 5
+  },
+  {
+    "name": "Projecteurs & Accessoires",
+    "slug": "electronique-projecteurs-accessoires",
+    "parentSlug": "electronique",
+    "sortOrder": 6
+  },
+  {
+    "name": "Électroménager",
+    "slug": "electromenager",
+    "parentSlug": null,
+    "sortOrder": 4
+  },
+  {
+    "name": "Petit Électroménager",
+    "slug": "electromenager-petit-electromenager",
+    "parentSlug": "electromenager",
+    "sortOrder": 1
+  },
+  {
+    "name": "Cuisson",
+    "slug": "electromenager-cuisson",
+    "parentSlug": "electromenager",
+    "sortOrder": 2
+  },
+  {
+    "name": "Réfrigération & Conservation",
+    "slug": "electromenager-refrigeration-conservation",
+    "parentSlug": "electromenager",
+    "sortOrder": 3
+  },
+  {
+    "name": "Entretien & Nettoyage",
+    "slug": "electromenager-entretien-nettoyage",
+    "parentSlug": "electromenager",
+    "sortOrder": 4
+  },
+  {
+    "name": "Chauffage & Climatisation",
+    "slug": "electromenager-chauffage-climatisation",
+    "parentSlug": "electromenager",
+    "sortOrder": 5
+  },
+  {
+    "name": "Accessoires Électroménager",
+    "slug": "electromenager-accessoires",
+    "parentSlug": "electromenager",
+    "sortOrder": 6
+  },
+  {
+    "name": "Maison & Cuisine",
+    "slug": "maison-cuisine",
+    "parentSlug": null,
+    "sortOrder": 5
+  },
+  {
+    "name": "Ustensiles de Cuisine",
+    "slug": "maison-cuisine-ustensiles-cuisine",
+    "parentSlug": "maison-cuisine",
+    "sortOrder": 1
+  },
+  {
+    "name": "Arts de Table",
+    "slug": "maison-cuisine-arts-de-table",
+    "parentSlug": "maison-cuisine",
+    "sortOrder": 2
+  },
+  {
+    "name": "Rangement & Organisation",
+    "slug": "maison-cuisine-rangement-organisation",
+    "parentSlug": "maison-cuisine",
+    "sortOrder": 3
+  },
+  {
+    "name": "Décoration Intérieure",
+    "slug": "maison-cuisine-decoration-interieure",
+    "parentSlug": "maison-cuisine",
+    "sortOrder": 4
+  },
+  {
+    "name": "Éclairage & Lampes",
+    "slug": "maison-cuisine-eclairage-lampes",
+    "parentSlug": "maison-cuisine",
+    "sortOrder": 5
+  },
+  {
+    "name": "Literie & Draps",
+    "slug": "maison-cuisine-literie-draps",
+    "parentSlug": "maison-cuisine",
+    "sortOrder": 6
+  },
+  {
+    "name": "Rideaux & Textiles",
+    "slug": "maison-cuisine-rideaux-textiles",
+    "parentSlug": "maison-cuisine",
+    "sortOrder": 7
+  },
+  {
+    "name": "Nettoyage & Entretien",
+    "slug": "maison-cuisine-nettoyage-entretien",
+    "parentSlug": "maison-cuisine",
+    "sortOrder": 8
+  },
+  {
+    "name": "Meubles & Ameublement",
+    "slug": "meubles-ameublement",
+    "parentSlug": null,
+    "sortOrder": 6
+  },
+  {
+    "name": "Tables & Chaises",
+    "slug": "meubles-ameublement-tables-chaises",
+    "parentSlug": "meubles-ameublement",
+    "sortOrder": 1
+  },
+  {
+    "name": "Rangements & Commodes",
+    "slug": "meubles-ameublement-rangements-commodes",
+    "parentSlug": "meubles-ameublement",
+    "sortOrder": 2
+  },
+  {
+    "name": "Canapés & Fauteuils",
+    "slug": "meubles-ameublement-canapes-fauteuils",
+    "parentSlug": "meubles-ameublement",
+    "sortOrder": 3
+  },
+  {
+    "name": "Étagères & Bibliothèques",
+    "slug": "meubles-ameublement-etageres-bibliotheques",
+    "parentSlug": "meubles-ameublement",
+    "sortOrder": 4
+  },
+  {
+    "name": "Mobilier Chambre",
+    "slug": "meubles-ameublement-mobilier-chambre",
+    "parentSlug": "meubles-ameublement",
+    "sortOrder": 5
+  },
+  {
+    "name": "Mobilier Salle à manger",
+    "slug": "meubles-ameublement-mobilier-salle-manger",
+    "parentSlug": "meubles-ameublement",
+    "sortOrder": 6
+  },
+  {
+    "name": "Mobilier Bureau",
+    "slug": "meubles-ameublement-mobilier-bureau",
+    "parentSlug": "meubles-ameublement",
+    "sortOrder": 7
+  },
+  {
+    "name": "Mobilier Extérieur léger",
+    "slug": "meubles-ameublement-mobilier-exterieur-leger",
+    "parentSlug": "meubles-ameublement",
+    "sortOrder": 8
+  },
+  {
+    "name": "Auto & Moto",
+    "slug": "auto-moto",
+    "parentSlug": null,
+    "sortOrder": 7
+  },
+  {
+    "name": "Voitures",
+    "slug": "auto-moto-voitures",
+    "parentSlug": "auto-moto",
+    "sortOrder": 1
+  },
+  {
+    "name": "Pièces & Accessoires Auto",
+    "slug": "auto-moto-pieces-accessoires-auto",
+    "parentSlug": "auto-moto",
+    "sortOrder": 2
+  },
+  {
+    "name": "Entretien & Lubrifiants Auto",
+    "slug": "auto-moto-entretien-lubrifiants-auto",
+    "parentSlug": "auto-moto",
+    "sortOrder": 3
+  },
+  {
+    "name": "Pneus & Jantes",
+    "slug": "auto-moto-pneus-jantes",
+    "parentSlug": "auto-moto",
+    "sortOrder": 4
+  },
+  {
+    "name": "Éclairage Auto",
+    "slug": "auto-moto-eclairage-auto",
+    "parentSlug": "auto-moto",
+    "sortOrder": 5
+  },
+  {
+    "name": "Accessoires Moto",
+    "slug": "auto-moto-accessoires-moto",
+    "parentSlug": "auto-moto",
+    "sortOrder": 6
+  },
+  {
+    "name": "Pièces Moto",
+    "slug": "auto-moto-pieces-moto",
+    "parentSlug": "auto-moto",
+    "sortOrder": 7
+  },
+  {
+    "name": "Outils & Bricolage",
+    "slug": "outils-bricolage",
+    "parentSlug": null,
+    "sortOrder": 8
+  },
+  {
+    "name": "Outillage à main",
+    "slug": "outils-bricolage-outillage-main",
+    "parentSlug": "outils-bricolage",
+    "sortOrder": 1
+  },
+  {
+    "name": "Outillage électroportatif",
+    "slug": "outils-bricolage-outillage-electroportatif",
+    "parentSlug": "outils-bricolage",
+    "sortOrder": 2
+  },
+  {
+    "name": "Quincaillerie",
+    "slug": "outils-bricolage-quincaillerie",
+    "parentSlug": "outils-bricolage",
+    "sortOrder": 3
+  },
+  {
+    "name": "Électricité & Domotique",
+    "slug": "outils-bricolage-electricite-domotique",
+    "parentSlug": "outils-bricolage",
+    "sortOrder": 4
+  },
+  {
+    "name": "Plomberie & Tuyauterie",
+    "slug": "outils-bricolage-plomberie-tuyauterie",
+    "parentSlug": "outils-bricolage",
+    "sortOrder": 5
+  },
+  {
+    "name": "Peinture & Revêtements",
+    "slug": "outils-bricolage-peinture-revetements",
+    "parentSlug": "outils-bricolage",
+    "sortOrder": 6
+  },
+  {
+    "name": "Sécurité & Mesure",
+    "slug": "outils-bricolage-securite-mesure",
+    "parentSlug": "outils-bricolage",
+    "sortOrder": 7
+  },
+  {
+    "name": "Sports & Loisirs",
+    "slug": "sports-loisirs",
+    "parentSlug": null,
+    "sortOrder": 9
+  },
+  {
+    "name": "Fitness & Musculation",
+    "slug": "sports-loisirs-fitness-musculation",
+    "parentSlug": "sports-loisirs",
+    "sortOrder": 1
+  },
+  {
+    "name": "Running & Cardio",
+    "slug": "sports-loisirs-running-cardio",
+    "parentSlug": "sports-loisirs",
+    "sortOrder": 2
+  },
+  {
+    "name": "Camping & Randonnée",
+    "slug": "sports-loisirs-camping-randonnee",
+    "parentSlug": "sports-loisirs",
+    "sortOrder": 3
+  },
+  {
+    "name": "Vélo & Accessoires",
+    "slug": "sports-loisirs-velo-accessoires",
+    "parentSlug": "sports-loisirs",
+    "sortOrder": 4
+  },
+  {
+    "name": "Natation & Plage",
+    "slug": "sports-loisirs-natation-plage",
+    "parentSlug": "sports-loisirs",
+    "sortOrder": 5
+  },
+  {
+    "name": "Pêche & Chasse",
+    "slug": "sports-loisirs-peche-chasse",
+    "parentSlug": "sports-loisirs",
+    "sortOrder": 6
+  },
+  {
+    "name": "Animaux",
+    "slug": "animaux",
+    "parentSlug": null,
+    "sortOrder": 10
+  },
+  {
+    "name": "Nourriture Animale",
+    "slug": "animaux-nourriture-animale",
+    "parentSlug": "animaux",
+    "sortOrder": 1
+  },
+  {
+    "name": "Accessoires Animaux",
+    "slug": "animaux-accessoires-animaux",
+    "parentSlug": "animaux",
+    "sortOrder": 2
+  },
+  {
+    "name": "Hygiène & Soins Animaux",
+    "slug": "animaux-hygiene-soins-animaux",
+    "parentSlug": "animaux",
+    "sortOrder": 3
+  },
+  {
+    "name": "Cages, Lits & Transport",
+    "slug": "animaux-cages-lits-transport",
+    "parentSlug": "animaux",
+    "sortOrder": 4
+  },
+  {
+    "name": "Jardin & Extérieur",
+    "slug": "jardin-exterieur",
+    "parentSlug": null,
+    "sortOrder": 11
+  },
+  {
+    "name": "Outils de Jardin",
+    "slug": "jardin-exterieur-outils-jardin",
+    "parentSlug": "jardin-exterieur",
+    "sortOrder": 1
+  },
+  {
+    "name": "Plantes & Graines",
+    "slug": "jardin-exterieur-plantes-graines",
+    "parentSlug": "jardin-exterieur",
+    "sortOrder": 2
+  },
+  {
+    "name": "Arrosage & Irrigation",
+    "slug": "jardin-exterieur-arrosage-irrigation",
+    "parentSlug": "jardin-exterieur",
+    "sortOrder": 3
+  },
+  {
+    "name": "Éclairage Extérieur",
+    "slug": "jardin-exterieur-eclairage-exterieur",
+    "parentSlug": "jardin-exterieur",
+    "sortOrder": 4
+  },
+  {
+    "name": "Mobilier Jardin léger",
+    "slug": "jardin-exterieur-mobilier-jardin-leger",
+    "parentSlug": "jardin-exterieur",
+    "sortOrder": 5
+  },
+  {
+    "name": "Barbecues & Accessoires",
+    "slug": "jardin-exterieur-barbecues-accessoires",
+    "parentSlug": "jardin-exterieur",
+    "sortOrder": 6
+  },
+  {
+    "name": "Fournitures & Papeterie",
+    "slug": "fournitures-papeterie",
+    "parentSlug": null,
+    "sortOrder": 12
+  },
+  {
+    "name": "Bureau & Classement",
+    "slug": "fournitures-papeterie-bureau-classement",
+    "parentSlug": "fournitures-papeterie",
+    "sortOrder": 1
+  },
+  {
+    "name": "Scolaire",
+    "slug": "fournitures-papeterie-scolaire",
+    "parentSlug": "fournitures-papeterie",
+    "sortOrder": 2
+  },
+  {
+    "name": "Impression & Consommables",
+    "slug": "fournitures-papeterie-impression-consommables",
+    "parentSlug": "fournitures-papeterie",
+    "sortOrder": 3
+  },
+  {
+    "name": "Emballage & Expédition",
+    "slug": "fournitures-papeterie-emballage-expedition",
+    "parentSlug": "fournitures-papeterie",
+    "sortOrder": 4
+  }
+]

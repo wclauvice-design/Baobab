@@ -1,0 +1,189 @@
+[
+  {
+    "name": "Robe longue fleurie bohème",
+    "description": "Robe longue à imprimé floral, manches longues légères, coupe fluide, idéale pour l'été.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=robe%20longue%20fleurie",
+    "suggestedFilename": "robe-longue-fleurie-boheme.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 19.99,
+    "categorySlug": "mode-femme-robes",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Robe mi-longue satinée à bretelles",
+    "description": "Robe satinée mi-longue à fines bretelles, dos ouvert, look élégant.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=robe%20satin%20bretelles",
+    "suggestedFilename": "robe-mi-longue-satinee-bretelles.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 16.49,
+    "categorySlug": "mode-femme-robes",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Top crop côtelé manches courtes",
+    "description": "Top crop en maille côtelée, stretch confortable, parfait pour mix & match.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=top%20crop%20cotele",
+    "suggestedFilename": "top-crop-cotele-manches-courtes.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 5.99,
+    "categorySlug": "mode-femme-tops-tshirts",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "T-shirt oversize femme imprimé",
+    "description": "T-shirt oversize en coton doux, impression tendance, coupe décontractée.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=tshirt%20oversize%20femme",
+    "suggestedFilename": "t-shirt-oversize-femme-imprime.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 7.49,
+    "categorySlug": "mode-femme-tops-tshirts",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Pantalon large taille haute",
+    "description": "Pantalon large taille haute en tissu fluide, jambe évasée, ceinture élastiquée.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=pantalon%20large%20taille%20haute",
+    "suggestedFilename": "pantalon-large-taille-haute.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 12.99,
+    "categorySlug": "mode-femme-bas-pantalons",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "T-shirt homme oversize uni",
+    "description": "T-shirt homme oversize 100% coton, coupe décontractée, plusieurs couleurs.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=tshirt%20oversize%20homme%20uni",
+    "suggestedFilename": "t-shirt-homme-oversize-uni.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 6.49,
+    "categorySlug": "mode-homme-tshirts-polos",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Chemise homme manches longues slim",
+    "description": "Chemise homme manches longues, coupe slim fit, tissu léger et respirant.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=chemise%20homme%20slim%20manches%20longues",
+    "suggestedFilename": "chemise-homme-manches-longues-slim.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 13.49,
+    "categorySlug": "mode-homme-chemises",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Jean homme droit délavé",
+    "description": "Jean droit homme, effet délavé, coupe classique indémodable.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=jean%20homme%20droit%20delave",
+    "suggestedFilename": "jean-homme-droit-delave.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 19.99,
+    "categorySlug": "mode-homme-pantalons-jeans",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Sneakers femme plateforme",
+    "description": "Sneakers femme à semelle plateforme, mesh respirant, style urbain tendance.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=sneakers%20femme%20plateforme",
+    "suggestedFilename": "sneakers-femme-plateforme.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 24.49,
+    "categorySlug": "chaussures-sneakers",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Sandales plates femme à lanières",
+    "description": "Sandales plates minimalistes à lanières, cuir synthétique souple.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=sandales%20plates%20femme%20lanieres",
+    "suggestedFilename": "sandales-plates-femme-lanieres.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 9.49,
+    "categorySlug": "chaussures-sandales-tongs",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Set spatules silicone cuisine",
+    "description": "Set de 5 spatules en silicone résistant à la chaleur, manche en bois.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=spatules%20silicone%20cuisine",
+    "suggestedFilename": "set-spatules-silicone-cuisine.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 6.49,
+    "categorySlug": "maison-cuisine-ustensiles-cuisine",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Guirlande LED solaire",
+    "description": "Guirlande LED solaire pour décoration extérieure/intérieure, résiste aux intempéries.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=bougeoirs%20minimaux%20dore",
+    "suggestedFilename": "guirlande-led-solaire.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 9.49,
+    "categorySlug": "jardin-exterieur-eclairage-exterieur",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Support voiture magnétique",
+    "description": "Support magnétique pour téléphone dans voiture, rotation 360°.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=coque%20transparente%20iphone",
+    "suggestedFilename": "support-voiture-magnetique.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 7.99,
+    "categorySlug": "auto-moto-accessoires-auto",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Écouteurs sans fil TWS",
+    "description": "Écouteurs sans fil True Wireless, réduction de bruit, autonomie 24h avec boîtier.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=ecouteurs%20sans%20fil%20tws",
+    "suggestedFilename": "ecouteurs-sans-fil-tws.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 24.99,
+    "categorySlug": "electronique-audio-casques",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Support voiture magnétique",
+    "description": "Support magnétique pour téléphone dans voiture, rotation 360°.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=powerbank%2010000mah%20slim",
+    "suggestedFilename": "support-voiture-magnetique.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 7.99,
+    "categorySlug": "auto-moto-accessoires-auto",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Gourde isotherme inox 750ml",
+    "description": "Gourde isotherme en acier inoxydable, garde chaud/froid 12h, bouchon anti-fuite.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=gourde%20isotherme%20inox%20750ml",
+    "suggestedFilename": "gourde-isotherme-inox-750ml.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 11.49,
+    "categorySlug": "sports-loisirs-camping-randonnee",
+    "sellerMode": "platform"
+  },
+  {
+    "name": "Tapis de yoga antidérapant",
+    "description": "Tapis de yoga 6mm antidérapant, écologique, facile à nettoyer, avec sac de transport.",
+    "sourcePlatform": "Temu",
+    "sourceUrl": "https://www.temu.com/search_result.html?search_key=tapis%20yoga%20antiderapant",
+    "suggestedFilename": "tapis-de-yoga-antiderapant.jpg",
+    "sourceCurrency": "USD",
+    "sourcePrice": 12.99,
+    "categorySlug": "sports-loisirs-fitness-musculation",
+    "sellerMode": "platform"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "test-set_spatules_silicone_cuisine",
+    "name": "Set spatules silicone cuisine",
+    "categorySlug": "maison-cuisine-ustensiles-cuisine",
+    "source": {
+      "platform": "Temu",
+      "url": "https://www.temu.com/search_result.html?search_key=spatules%20silicone%20cuisine",
+      "currency": "USD",
+      "price": 6.49
+    },
+    "priceXof": 4500,
+    "compareAtPriceXof": 5050,
+    "suggestedImage": "set-spatules-silicone-cuisine.jpg",
+    "localImagePath": "apps/api/uploads/products/set-spatules-silicone-cuisine.jpg"
+  },
+  {
+    "id": "test-guirlande_led_solaire",
+    "name": "Guirlande LED solaire",
+    "categorySlug": "jardin-exterieur-eclairage-exterieur",
+    "source": {
+      "platform": "Temu",
+      "url": "https://www.temu.com/search_result.html?search_key=bougeoirs%20minimaux%20dore",
+      "currency": "USD",
+      "price": 9.49
+    },
+    "priceXof": 6550,
+    "compareAtPriceXof": 7350,
+    "suggestedImage": "guirlande-led-solaire.jpg",
+    "localImagePath": "apps/api/uploads/products/guirlande-led-solaire.jpg"
+  },
+  {
+    "id": "test-gourde_isotherme_inox_750ml",
+    "name": "Gourde isotherme inox 750ml",
+    "categorySlug": "sports-loisirs-camping-randonnee",
+    "source": {
+      "platform": "Temu",
+      "url": "https://www.temu.com/search_result.html?search_key=gourde%20isotherme%20inox%20750ml",
+      "currency": "USD",
+      "price": 11.49
+    },
+    "priceXof": 7950,
+    "compareAtPriceXof": 8900,
+    "suggestedImage": "gourde-isotherme-inox-750ml.jpg",
+    "localImagePath": "apps/api/uploads/products/gourde-isotherme-inox-750ml.jpg"
+  },
+  {
+    "id": "test-tapis_de_yoga_antiderapant",
+    "name": "Tapis de yoga antidérapant",
+    "categorySlug": "sports-loisirs-fitness-musculation",
+    "source": {
+      "platform": "Temu",
+      "url": "https://www.temu.com/search_result.html?search_key=tapis%20yoga%20antiderapant",
+      "currency": "USD",
+      "price": 12.99
+    },
+    "priceXof": 8950,
+    "compareAtPriceXof": 10000,
+    "suggestedImage": "tapis-de-yoga-antiderapant.jpg",
+    "localImagePath": "apps/api/uploads/products/tapis-de-yoga-antiderapant.jpg"
+  }
+]

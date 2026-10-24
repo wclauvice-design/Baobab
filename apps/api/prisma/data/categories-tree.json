@@ -1,0 +1,194 @@
+[
+  {
+    "name": "Électronique",
+    "slug": "electronique",
+    "parentSlug": null,
+    "sortOrder": 1
+  },
+  {
+    "name": "Home Audio & Turntables",
+    "slug": "electronique-home-audio-turntables",
+    "parentSlug": "electronique",
+    "sortOrder": 1
+  },
+  {
+    "name": "Televisions",
+    "slug": "electronique-televisions",
+    "parentSlug": "electronique",
+    "sortOrder": 2
+  },
+  {
+    "name": "DVD & Home Theater",
+    "slug": "electronique-dvd-home-theater",
+    "parentSlug": "electronique",
+    "sortOrder": 3
+  },
+  {
+    "name": "Electronic Accessories",
+    "slug": "electronique-electronic-accessories",
+    "parentSlug": "electronique",
+    "sortOrder": 4
+  },
+  {
+    "name": "Gadgets",
+    "slug": "electronique-gadgets",
+    "parentSlug": "electronique",
+    "sortOrder": 5
+  },
+  {
+    "name": "Car Electronics",
+    "slug": "electronique-car-electronics",
+    "parentSlug": "electronique",
+    "sortOrder": 6
+  },
+  {
+    "name": "Projectors",
+    "slug": "electronique-projectors",
+    "parentSlug": "electronique",
+    "sortOrder": 7
+  },
+  {
+    "name": "Mp3 Players and Portable Audio",
+    "slug": "electronique-mp3-players-portable-audio",
+    "parentSlug": "electronique",
+    "sortOrder": 8
+  },
+  {
+    "name": "Satellite & Cable TV",
+    "slug": "electronique-satellite-cable-tv",
+    "parentSlug": "electronique",
+    "sortOrder": 9
+  },
+  {
+    "name": "Health Electronics",
+    "slug": "electronique-health-electronics",
+    "parentSlug": "electronique",
+    "sortOrder": 10
+  },
+  {
+    "name": "Smart Home",
+    "slug": "electronique-smart-home",
+    "parentSlug": "electronique",
+    "sortOrder": 11
+  },
+  {
+    "name": "Wearable Technology",
+    "slug": "electronique-wearable-technology",
+    "parentSlug": "electronique",
+    "sortOrder": 12
+  },
+  {
+    "name": "Other",
+    "slug": "electronique-other",
+    "parentSlug": "electronique",
+    "sortOrder": 13
+  },
+  {
+    "name": "Informatique & Réseaux",
+    "slug": "informatique-reseaux",
+    "parentSlug": null,
+    "sortOrder": 2
+  },
+  {
+    "name": "Computers",
+    "slug": "informatique-reseaux-computers",
+    "parentSlug": "informatique-reseaux",
+    "sortOrder": 1
+  },
+  {
+    "name": "Computer Components",
+    "slug": "informatique-reseaux-computer-components",
+    "parentSlug": "informatique-reseaux",
+    "sortOrder": 2
+  },
+  {
+    "name": "Accessories",
+    "slug": "informatique-reseaux-accessories",
+    "parentSlug": "informatique-reseaux",
+    "sortOrder": 3
+  },
+  {
+    "name": "Networking & Communication",
+    "slug": "informatique-reseaux-networking-communication",
+    "parentSlug": "informatique-reseaux",
+    "sortOrder": 4
+  },
+  {
+    "name": "Software",
+    "slug": "informatique-reseaux-software",
+    "parentSlug": "informatique-reseaux",
+    "sortOrder": 5
+  },
+  {
+    "name": "Mining Rigs & Components (CryptoCurrency)",
+    "slug": "informatique-reseaux-mining-rigs-crypto",
+    "parentSlug": "informatique-reseaux",
+    "sortOrder": 6
+  },
+  {
+    "name": "POS machine & parts",
+    "slug": "informatique-reseaux-pos-machine-parts",
+    "parentSlug": "informatique-reseaux",
+    "sortOrder": 7
+  },
+  {
+    "name": "Monitors, Printers & Other Peripherals",
+    "slug": "informatique-reseaux-monitors-printers-peripherals",
+    "parentSlug": "informatique-reseaux",
+    "sortOrder": 8
+  },
+  {
+    "name": "Home Appliances",
+    "slug": "home-appliances",
+    "parentSlug": null,
+    "sortOrder": 3
+  },
+  {
+    "name": "Large Appliances / White Goods",
+    "slug": "home-appliances-large-appliances-white-goods",
+    "parentSlug": "home-appliances",
+    "sortOrder": 1
+  },
+  {
+    "name": "Small Kitchen Appliances",
+    "slug": "home-appliances-small-kitchen-appliances",
+    "parentSlug": "home-appliances",
+    "sortOrder": 2
+  },
+  {
+    "name": "Outdoor Appliances",
+    "slug": "home-appliances-outdoor-appliances",
+    "parentSlug": "home-appliances",
+    "sortOrder": 3
+  },
+  {
+    "name": "Small Bathroom Appliances",
+    "slug": "home-appliances-small-bathroom-appliances",
+    "parentSlug": "home-appliances",
+    "sortOrder": 4
+  },
+  {
+    "name": "Beauty, Spa & Sauna Appliances",
+    "slug": "home-appliances-beauty-spa-sauna-appliances",
+    "parentSlug": "home-appliances",
+    "sortOrder": 5
+  },
+  {
+    "name": "Irons & Sewing Machines",
+    "slug": "home-appliances-irons-sewing-machines",
+    "parentSlug": "home-appliances",
+    "sortOrder": 6
+  },
+  {
+    "name": "Vacuums & Floor Care",
+    "slug": "home-appliances-vacuums-floor-care",
+    "parentSlug": "home-appliances",
+    "sortOrder": 7
+  },
+  {
+    "name": "Other",
+    "slug": "home-appliances-other",
+    "parentSlug": "home-appliances",
+    "sortOrder": 8
+  }
+]

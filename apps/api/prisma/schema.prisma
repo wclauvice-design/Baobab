@@ -135,12 +135,21 @@ model Seller {
 }
 
 model Category {
-  id   String @id @default(cuid())
-  name String
-  slug String @unique
-  universe String @default("classifieds")
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  universe  String     @default("classifieds")
+  parentId  String?
+  parent    Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Category[] @relation("CategoryHierarchy")
+  image     String?
+  sortOrder Int        @default(0)
+  isActive  Boolean    @default(true)
 
   products Product[]
+
+  @@index([parentId])
+  @@index([slug])
 }
 
 model Product {
