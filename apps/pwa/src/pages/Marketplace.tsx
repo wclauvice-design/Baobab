@@ -17,7 +17,7 @@ import {
   stages,
   universes,
 } from "../lib/concierge";
-import { estimateFreight } from "../lib/freight";
+import { estimateFreight, ShippingMode } from "../lib/freight";
 import { fallbackPhoto } from "../lib/photos";
 import "./marketplace.css";
 import "./marketplace-premium.css";
@@ -110,14 +110,17 @@ export function Icon({ name, size = 22 }: { name: string; size?: number }) {
 }
 
 export const DESTINATIONS = [
-  { id: "CI", flag: "🇨🇮", name: "Côte d'Ivoire (Abidjan)", airRate: 8500, seaRate: 180000, daysAir: "5–8 j", daysSea: "25–30 j" },
-  { id: "SN", flag: "🇸🇳", name: "Sénégal (Dakar)", airRate: 8500, seaRate: 180000, daysAir: "5–8 j", daysSea: "24–28 j" },
-  { id: "BF", flag: "🇧🇫", name: "Burkina Faso (Ouagadougou)", airRate: 9000, seaRate: 210000, daysAir: "6–9 j", daysSea: "30–35 j" },
-  { id: "TG", flag: "🇹🇬", name: "Togo (Lomé)", airRate: 8000, seaRate: 175000, daysAir: "5–8 j", daysSea: "22–28 j" },
-  { id: "BJ", flag: "🇧🇯", name: "Bénin (Cotonou)", airRate: 8200, seaRate: 175000, daysAir: "5–8 j", daysSea: "22–28 j" },
-  { id: "ML", flag: "🇲🇱", name: "Mali (Bamako)", airRate: 9200, seaRate: 220000, daysAir: "7–10 j", daysSea: "32–38 j" },
-  { id: "NE", flag: "🇳🇪", name: "Niger (Niamey)", airRate: 9500, seaRate: 230000, daysAir: "7–10 j", daysSea: "35–40 j" },
-  { id: "GN", flag: "🇬🇳", name: "Guinée (Conakry)", airRate: 8800, seaRate: 195000, daysAir: "6–9 j", daysSea: "25–30 j" },
+  { id: "CI", flag: "🇨🇮", name: "Côte d'Ivoire (Abidjan)", cbmRate: 185000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
+  { id: "SN", flag: "🇸🇳", name: "Sénégal (Dakar)", cbmRate: 190000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
+  { id: "CM", flag: "🇨🇲", name: "Cameroun (Douala)", cbmRate: 195000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
+  { id: "CD", flag: "🇨🇩", name: "RD Congo (Kinshasa)", cbmRate: 275000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
+  { id: "TG", flag: "🇹🇬", name: "Togo (Lomé)", cbmRate: 175000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
+  { id: "BJ", flag: "🇧🇯", name: "Bénin (Cotonou)", cbmRate: 180000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
+  { id: "BF", flag: "🇧🇫", name: "Burkina Faso (Ouagadougou)", cbmRate: 230000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
+  { id: "ML", flag: "🇲🇱", name: "Mali (Bamako)", cbmRate: 240000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
+  { id: "NE", flag: "🇳🇪", name: "Niger (Niamey)", cbmRate: 245000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
+  { id: "GN", flag: "🇬🇳", name: "Guinée (Conakry)", cbmRate: 210000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
+  { id: "GA", flag: "🇬🇦", name: "Gabon (Libreville)", cbmRate: 220000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
 ];
 
 const DEST_KEY = "baobab_selected_destination";
@@ -190,9 +193,9 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
       <div className="top-note">
         <span className="gold-badge-live">DUBAÏ ➔ AFRIQUE</span>
         <span className="dest-quick-wrap">
-          Livraison & Dédouanement : <strong>{userDest.flag} {userDest.name}</strong>
+          Expédition vers : <strong>{userDest.flag} {userDest.name}</strong>
         </span>
-        <span className="transit-quick-info">Aérien {userDest.daysAir} · Maritime {userDest.daysSea}</span>
+        <span className="transit-quick-info">Express 3–6j · Cargo 14–16j · Maritime 45–50j</span>
       </div>
       <header className="market-header">
         <Link to="/" className="brand">
@@ -491,10 +494,10 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
         </form>
 
         <div className="luxury-trust-row">
-          <span><Icon name="check" size={12} /> Prix Grossiste (+15%)</span>
-          <span><Icon name="plane" size={12} /> Aérien {currentDest.daysAir}</span>
-          <span>🚢 Maritime {currentDest.daysSea}</span>
-          <span><Icon name="shield" size={12} /> Dédouanement Garanti</span>
+          <span><Icon name="check" size={12} /> Produits Authentiques Dubaï</span>
+          <span><Icon name="plane" size={12} /> Express (3–6j) & Cargo (14–16j)</span>
+          <span>🚢 Maritime Conteneur (45–50j)</span>
+          <span><Icon name="shield" size={12} /> Inspection & Suivi Garanti</span>
         </div>
       </section>
 
@@ -680,7 +683,7 @@ export function ListingDetail() {
     [qty, setQty] = useState(1),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
-    [shippingMode, setShippingMode] = useState<"AIR" | "SEA">("AIR");
+    [shippingMode, setShippingMode] = useState<ShippingMode>("EXPRESS");
   useEffect(() => {
     setP(null);
     call(`/products/${id}`)
@@ -701,18 +704,29 @@ export function ListingDetail() {
     unitWeightKg: p?.weightKg,
     dimensions: p?.dimensions,
   });
-  const totalWeight = freight.chargeableWeightKg;
+  const totalWeight = freight.realWeightKg;
   const estimatedFreight = freight.cost;
   const productSubtotal = p ? Math.round(Number(p.price) * qty) : 0;
   const estimatedGrandTotal = p?.shippingIncluded ? productSubtotal : productSubtotal + estimatedFreight;
 
+  // Synchronisation automatique si le mode actuel n'est pas autorisé pour ce poids
+  useEffect(() => {
+    if (freight.availableModes.length > 0 && !freight.availableModes.includes(shippingMode)) {
+      setShippingMode(freight.availableModes[0]);
+    }
+  }, [freight.availableModes, shippingMode]);
+
   async function discuss() {
     setBusy(true);
     try {
-      const modeLabel = shippingMode === "AIR" ? `Fret Aérien Express (${dest.daysAir})` : `Fret Maritime (${dest.daysSea})`;
+      const modeDescription = freight.mode === "EXPRESS"
+        ? "Fret Aérien Express (3 à 6 jours, 12 500 F/kg)"
+        : freight.mode === "CARGO"
+          ? "Fret Aérien Cargo (14 à 16 jours, 8 600 F/kg)"
+          : `Fret Maritime / Conteneur (45 à 50 jours, ${money(dest.cbmRate)}/m³)`;
       const c = await call("/concierge/conversations", {
         productId: id,
-        body: `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} : ${p.name}. Destination : ${dest.name} en ${modeLabel}. Total estimé : ${money(estimatedGrandTotal)}.`,
+        body: `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} : ${p.name}. Destination : ${dest.name} en ${modeDescription}. Poids estimé : ${totalWeight} kg. Total estimé : ${money(estimatedGrandTotal)}.`,
         requestKey: requestKey(),
       });
       save("baobab_conversations", [
@@ -735,7 +749,7 @@ export function ListingDetail() {
         />
       </>
     );
-  const message = `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} de "${p.name}" vers ${dest.name} en ${shippingMode === "AIR" ? "Fret Aérien Express" : "Fret Maritime"}. Référence ${p.id}. ${window.location.href}`;
+  const message = `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} de "${p.name}" vers ${dest.name} en ${freight.modeLabel}. Référence ${p.id}. ${window.location.href}`;
   return (
     <>
       <div className="breadcrumb">
@@ -852,21 +866,43 @@ export function ListingDetail() {
               </select>
             </label>
             <div className="shipping-mode-selector">
-              <button
-                type="button"
-                className={`mode-btn ${shippingMode === "AIR" ? "active" : ""}`}
-                onClick={() => setShippingMode("AIR")}
-              >
-                ✈️ Aérien ({dest.daysAir})
-              </button>
-              <button
-                type="button"
-                className={`mode-btn ${shippingMode === "SEA" ? "active" : ""}`}
-                onClick={() => setShippingMode("SEA")}
-              >
-                🚢 Maritime ({dest.daysSea})
-              </button>
+              {freight.availableModes.includes("EXPRESS") && (
+                <button
+                  type="button"
+                  className={`mode-btn ${freight.mode === "EXPRESS" ? "active" : ""}`}
+                  onClick={() => setShippingMode("EXPRESS")}
+                >
+                  <span className="mode-btn-title">✈️ Express (3–6 j)</span>
+                  <small>12 500 F/kg</small>
+                </button>
+              )}
+              {freight.availableModes.includes("CARGO") && (
+                <button
+                  type="button"
+                  className={`mode-btn ${freight.mode === "CARGO" ? "active" : ""}`}
+                  onClick={() => setShippingMode("CARGO")}
+                >
+                  <span className="mode-btn-title">✈️ Cargo (14–16 j)</span>
+                  <small>8 600 F/kg</small>
+                </button>
+              )}
+              {freight.availableModes.includes("SEA") && (
+                <button
+                  type="button"
+                  className={`mode-btn ${freight.mode === "SEA" ? "active" : ""}`}
+                  onClick={() => setShippingMode("SEA")}
+                >
+                  <span className="mode-btn-title">🚢 Maritime (45–50 j)</span>
+                  <small>{money(dest.cbmRate)}/m³</small>
+                </button>
+              )}
             </div>
+            {freight.restrictionNote && (
+              <div className="shipping-restriction-badge">
+                <Icon name="shield" size={13} />
+                <span>{freight.restrictionNote}</span>
+              </div>
+            )}
             <div className="freight-breakdown">
               <div>
                 <span>Marchandise ({qty} {p.unit || "pcs"})</span>
@@ -874,12 +910,13 @@ export function ListingDetail() {
               </div>
               <div>
                 <span>
-                  Fret & dédouanement estimé (~{totalWeight.toFixed(1)} kg{" "}
-                  {freight.basis === "volumetric" ? "volumétriques" : "réels"}
-                  {shippingMode === "SEA" && freight.volumeCbm > 0
-                    ? ` · ${freight.volumeCbm.toFixed(2)} m³`
-                    : ""}
-                  )
+                  {freight.modeLabel}
+                  <br />
+                  <small style={{ color: "#94a3b8" }}>
+                    Poids total : ~{totalWeight.toFixed(1)} kg
+                    {freight.mode === "SEA" ? ` · Volume : ${freight.volumeCbm.toFixed(2)} m³` : ""}
+                    {freight.basis === "volumetric" ? " (poids volumétrique)" : ""}
+                  </small>
                 </span>
                 <b>{p.shippingIncluded ? "Inclus" : money(estimatedFreight)}</b>
               </div>
@@ -1514,7 +1551,7 @@ export function MarketAccount() {
                 ? "client"
                 : user.role === "SELLER"
                   ? "commerçant"
-                  : "administrateur"}
+                  : "partenaire Baobab"}
             </p>
             <button className="market-button secondary" onClick={logout}>
               Se déconnecter
