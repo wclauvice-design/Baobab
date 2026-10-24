@@ -436,74 +436,68 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
     config?.universes?.find((u: any) => u.id === universe)?.categories || [];
   return (
     <>
-      {/* 1. Header de Recherche Luxury Mobile-First */}
-      <section className="luxury-hero-banner" role="banner">
-        <div className="luxury-lead-strip">
-          <div className="lead-tag-pulse">
-            <span className="live-dot" />
-            <span>EXPORT DUBAÏ ➔ AFRIQUE DE L'OUEST</span>
-          </div>
-          <div className="dest-quick-select">
-            <Icon name="pin" size={13} />
-            <select
-              value={currentDest.id}
-              onChange={(e) => selectDest(e.target.value)}
-              className="dest-select-head"
-              aria-label="Pays de livraison"
-            >
-              {allDests.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.flag} {d.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+      {/* 1. Header Compact & Sticky : Recherche, Destination & Catégories (Style Temu / Farfetch Premium) */}
+      <section className="app-sticky-header" role="banner">
+        <div className="app-top-nav-row">
+          <Link
+            to="/"
+            className="app-brand-badge"
+            onClick={() => setParams(new URLSearchParams())}
+            title="Accueil Baobab"
+          >
+            <span className="app-brand-icon">🌳</span>
+            <span className="app-brand-text">baobab</span>
+          </Link>
 
-        <h1 className="luxury-hero-title">
-          {favorites ? (
-            "Vos sélections & favoris Dubaï"
-          ) : (
-            <>
-              Le meilleur de Dubaï. <em>Directement chez vous.</em>
-            </>
-          )}
-        </h1>
-
-        <form
-          className="luxury-search-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const value = new FormData(e.currentTarget).get("search");
-            filter("search", String(value || ""));
-          }}
-        >
-          <div className="search-input-wrap">
-            <Icon name="search" size={19} />
+          <form
+            className="app-search-pill"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const value = new FormData(e.currentTarget).get("search");
+              filter("search", String(value || ""));
+            }}
+          >
+            <Icon name="search" size={16} />
             <input
               name="search"
               defaultValue={search}
-              placeholder="Rechercher Toyota Hilux, Kit Solaire 10kW, Climatiseur T3, iPhone 15..."
+              placeholder="Land Cruiser, Kit Solaire, iPhone..."
               aria-label="Rechercher une annonce"
             />
+            {search ? (
+              <button
+                type="button"
+                className="search-clear-btn"
+                onClick={() => filter("search", "")}
+                title="Effacer"
+              >
+                ✕
+              </button>
+            ) : (
+              <span className="search-hint-tag">Dubaï</span>
+            )}
+          </form>
+
+          <div className="app-dest-pill" title="Destination de livraison">
+            <span className="dest-flag">{currentDest.flag}</span>
+            <select
+              value={currentDest.id}
+              onChange={(e) => selectDest(e.target.value)}
+              className="app-dest-select"
+              aria-label="Pays de destination"
+            >
+              {allDests.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.flag} {d.name.split(" ")[0]}
+                </option>
+              ))}
+            </select>
+            <span className="dest-chevron">▾</span>
           </div>
-          <button type="submit" className="search-submit-btn">
-            <span>Rechercher</span>
-            <Icon name="arrow" size={16} />
-          </button>
-        </form>
-
-        <div className="luxury-trust-row">
-          <span><Icon name="check" size={12} /> Produits Authentiques Dubaï</span>
-          <span><Icon name="plane" size={12} /> Express (3–6j) & Cargo (14–16j)</span>
-          <span>🚢 Maritime Conteneur (45–50j)</span>
-          <span><Icon name="shield" size={12} /> Inspection & Suivi Garanti</span>
         </div>
-      </section>
 
-      {/* Story Circles tactiles : Catégories à forte désirabilité */}
-      <section className="story-circles-bar" aria-label="Catégories vedettes">
-        <div className="story-circles-track">
+        {/* Barre de Catégories Défilante avec Glissement Or (Tabs) */}
+        <nav className="app-category-strip" aria-label="Catégories">
           {STORY_CATEGORIES.map((cat) => {
             const isSelected =
               cat.universe === "" && cat.subcategory === ""
@@ -515,7 +509,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
               <button
                 key={cat.id}
                 type="button"
-                className={`story-circle-btn ${isSelected ? "active" : ""}`}
+                className={`app-cat-tab ${isSelected ? "active" : ""}`}
                 onClick={() => {
                   const next = new URLSearchParams(params);
                   if (cat.universe) next.set("universe", cat.universe);
@@ -525,31 +519,104 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
                   setParams(next);
                 }}
               >
-                <div className="story-circle-glow">
-                  <span className="story-emoji">{cat.emoji}</span>
-                </div>
-                <span className="story-label">{cat.label}</span>
+                <span className="tab-emoji">{cat.emoji}</span>
+                <span className="tab-label">{cat.label}</span>
+                {isSelected && <span className="tab-gold-indicator" />}
               </button>
             );
           })}
-        </div>
+        </nav>
       </section>
-      <section className="listings">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">À EXPLORER</p>
-            <h2>
-              {favorites
-                ? "Mes favoris"
-                : universe
-                  ? universes.find((u) => u.id === universe)?.name
-                  : "Les dernières annonces"}
-            </h2>
+
+      {/* 2. Hero Card Compacte & Dynamique (Sourcing Dubaï) */}
+      {!search && (
+        <section className="app-hero-strip">
+          <div className="hero-strip-badge">
+            <span className="live-sparkle">✨</span>
+            <span>DUBAÏ DIRECT · SOURCING CERTIFIÉ</span>
           </div>
-          <span>
-            {loading
-              ? "Chargement…"
-              : `${shown.length} annonce${shown.length > 1 ? "s" : ""} à découvrir`}
+          <div className="hero-strip-main">
+            <h2>Équipements & Véhicules au tarif direct Jebel Ali</h2>
+            <p>Export direct vers {currentDest.name} · Tarifs fret groupés</p>
+          </div>
+          <div className="hero-strip-pills">
+            <span className="pill-item">✈️ Express 3–6j (12 500 F/kg)</span>
+            <span className="pill-item">🚢 Conteneur 45–50j (CBM)</span>
+            <span className="pill-item highlight">🛡️ 100% Vérifié</span>
+          </div>
+        </section>
+      )}
+
+      {/* 3. Vitrine Flash 2 Colonnes (comme Temu Clearance & Lightning Deals) */}
+      {!search && !universe && (
+        <section className="app-flash-showcase">
+          <div
+            className="flash-card card-motors"
+            onClick={() => {
+              const next = new URLSearchParams(params);
+              next.set("universe", "motors");
+              setParams(next);
+            }}
+          >
+            <div className="flash-card-head">
+              <span className="flash-label">🚗 Arrivages Dubaï ›</span>
+              <h3>Véhicules & 4x4 GCC</h3>
+              <p>Hilux, Prado, Jetour neufs / occasions</p>
+            </div>
+            <div className="flash-card-foot">
+              <span className="flash-badge">Conteneur maritime dédié</span>
+            </div>
+          </div>
+
+          <div
+            className="flash-card card-solar"
+            onClick={() => {
+              const next = new URLSearchParams(params);
+              next.set("universe", "classifieds");
+              next.set("subcategory", "Énergie Solaire & Batteries");
+              setParams(next);
+            }}
+          >
+            <div className="flash-card-head">
+              <span className="flash-label">⚡ Climat & Énergie ›</span>
+              <h3>Solaire & Clim Tropicale</h3>
+              <p>Onduleurs 5–10kW & splits tropicaux T3</p>
+            </div>
+            <div className="flash-card-foot">
+              <span className="flash-badge">Prix sortie d'usine</span>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 4. Barre de Filtres Rapides & Décompte */}
+      <section className="listings">
+        <div className="app-feed-header">
+          <div className="app-feed-chips">
+            <button
+              type="button"
+              className={`feed-chip ${!params.get("sort") ? "active" : ""}`}
+              onClick={() => filter("sort", "")}
+            >
+              🔥 Recommandés
+            </button>
+            <button
+              type="button"
+              className={`feed-chip ${params.get("sort") === "price-asc" ? "active" : ""}`}
+              onClick={() => filter("sort", "price-asc")}
+            >
+              💰 Prix croissants
+            </button>
+            <button
+              type="button"
+              className={`feed-chip ${params.get("sort") === "price-desc" ? "active" : ""}`}
+              onClick={() => filter("sort", "price-desc")}
+            >
+              💎 Prestige
+            </button>
+          </div>
+          <span className="feed-counter">
+            {loading ? "..." : `${shown.length} offres`}
           </span>
         </div>
         <div className="filter-bar">
