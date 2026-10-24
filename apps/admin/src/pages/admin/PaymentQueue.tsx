@@ -48,7 +48,7 @@ export function PaymentQueue() {
       ) : items.length === 0 ? (
         <p className="text-sm text-slate-500">Aucun paiement en attente.</p>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-900">
           <table className="w-full text-sm">
             <thead className="bg-slate-100 text-left text-xs uppercase text-slate-500">
               <tr>

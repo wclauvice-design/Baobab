@@ -13,6 +13,7 @@ import { Layout } from "./components/Layout";
 import { Login } from "./pages/Login";
 import { PaymentQueue } from "./pages/admin/PaymentQueue";
 import { Sellers } from "./pages/admin/Sellers";
+import { SellerDetail } from "./pages/admin/SellerDetail";
 import { Catalog } from "./pages/admin/Catalog";
 import { Orders as AdminOrders } from "./pages/admin/Orders";
 import { Dashboard } from "./pages/seller/Dashboard";
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/legacy-payments" element={<PaymentQueue />} />
           <Route path="/legacy-orders" element={<AdminOrders />} />
           <Route path="/sellers" element={<Sellers />} />
+          <Route path="/sellers/:id" element={<SellerDetail />} />
           <Route path="/catalog" element={<ListingEditor />} />
           <Route path="/orders" element={<TradeOrders />} />
           <Route path="*" element={<Navigate to="/" replace />} />

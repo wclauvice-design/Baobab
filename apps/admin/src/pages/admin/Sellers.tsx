@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../../lib/api';
 
 interface SellerRow {
@@ -50,7 +51,7 @@ export function Sellers() {
           <tbody>
             {sellers.map((s) => (
               <tr key={s.id} className="border-t border-slate-100">
-                <td className="px-4 py-3 font-medium text-slate-900">{s.shopName}</td>
+                <td className="px-4 py-3 font-bold text-slate-900"><Link to={`/sellers/${s.id}`} className="text-emerald-800 hover:underline">{s.shopName}</Link></td>
                 <td className="px-4 py-3 text-slate-700">{s.city}</td>
                 <td className="px-4 py-3 text-slate-700">{s.user.country || "-"}</td>
                 <td className="px-4 py-3 text-slate-700">{s.user.phone}</td>
@@ -62,7 +63,13 @@ export function Sellers() {
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to={`/sellers/${s.id}`}
+                      className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-900 shadow-sm"
+                    >
+                      Détails & ventes →
+                    </Link>
                     {s.status !== 'APPROVED' && (
                       <button
                         onClick={() => setStatus(s.id, 'APPROVED')}
