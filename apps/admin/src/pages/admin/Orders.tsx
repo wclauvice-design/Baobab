@@ -21,7 +21,7 @@ export function Orders() {
   return (
     <div>
       <h1 className="mb-6 text-2xl font-bold">Vue d'ensemble des commandes</h1>
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-900">
         <table className="w-full text-sm">
           <thead className="bg-slate-100 text-left text-xs uppercase text-slate-500">
             <tr>

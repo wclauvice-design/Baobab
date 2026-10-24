@@ -391,6 +391,12 @@ export function OperationsInbox() {
   const [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false),
     [text, setText] = useState("");
+  const [showQuickOrderModal, setShowQuickOrderModal] = useState(false);
+  const [guestFirstName, setGuestFirstName] = useState("Client");
+  const [guestLastName, setGuestLastName] = useState("Baobab");
+  const [guestPhone, setGuestPhone] = useState("");
+  const [guestCity, setGuestCity] = useState("Ouagadougou");
+  const [guestCountry, setGuestCountry] = useState("Burkina Faso");
   const [notifState, setNotifState] = useState<NotificationPermission>(getNotificationPermission);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevUrgentCountRef = useRef<number | null>(null);
@@ -440,6 +446,49 @@ export function OperationsInbox() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function handlePrepareOrder() {
+    if (detail.data.customerId) {
+      act(async () => {
+        const o = await api.post<any>(`${base}/orders`, {
+          customerId: detail.data.customerId,
+          conversationId: id,
+        });
+        sessionStorage.setItem(`tracking_${o.id}`, o.trackingUrl);
+        navigate(`/orders/${o.id}`);
+      });
+    } else {
+      setShowQuickOrderModal(true);
+    }
+  }
+
+  async function handleCreateCustomerAndOrder(e: FormEvent) {
+    e.preventDefault();
+    act(async () => {
+      const cust = await api.post<any>(`${base}/customers`, {
+        firstName: guestFirstName.trim() || "Client",
+        lastName: guestLastName.trim() || "Baobab",
+        phone: guestPhone.trim(),
+        country: guestCountry.trim(),
+        city: guestCity.trim(),
+        address: guestCity.trim(),
+        messagingOptIn: true,
+      });
+
+      await api.patch(`${base}/conversations/${id}/customer`, {
+        customerId: cust.id,
+      });
+
+      const o = await api.post<any>(`${base}/orders`, {
+        customerId: cust.id,
+        conversationId: id,
+      });
+
+      sessionStorage.setItem(`tracking_${o.id}`, o.trackingUrl);
+      setShowQuickOrderModal(false);
+      navigate(`/orders/${o.id}`);
+    });
   }
   return (
     <div className="ops">
@@ -500,43 +549,86 @@ export function OperationsInbox() {
           {id && detail.data ? (
             <>
               <h2>{detail.data.subject}</h2>
-              <div className="op-row">
-                <select
-                  aria-label="Rattacher un client"
-                  value={detail.data.customerId || ""}
-                  onChange={(e) =>
-                    e.target.value &&
-                    act(() =>
-                      api.patch(`${base}/conversations/${id}/customer`, {
-                        customerId: e.target.value,
-                      }),
-                    )
-                  }
-                >
-                  <option value="">Choisir la fiche client…</option>
-                  {customers.data?.map((c: any) => (
-                    <option key={c.id} value={c.id}>
-                      {c.firstName} {c.lastName} · {c.phone}
-                    </option>
-                  ))}
-                </select>
+              <div className="op-row" style={{ flexWrap: "wrap", gap: 10 }}>
+                {detail.data.customer ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span className="op-pill" style={{ background: "#e0f2fe", color: "#0369a1", fontWeight: 700 }}>
+                      👤 {detail.data.customer.firstName} {detail.data.customer.lastName} ({detail.data.customer.phone})
+                    </span>
+                  </div>
+                ) : (
+                  <select
+                    aria-label="Rattacher un client"
+                    value={detail.data.customerId || ""}
+                    onChange={(e) =>
+                      e.target.value &&
+                      act(() =>
+                        api.patch(`${base}/conversations/${id}/customer`, {
+                          customerId: e.target.value,
+                        }),
+                      )
+                    }
+                  >
+                    <option value="">Rattacher à une fiche client existante…</option>
+                    {customers.data?.map((c: any) => (
+                      <option key={c.id} value={c.id}>
+                        {c.firstName} {c.lastName} · {c.phone}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
                 <button
-                  disabled={busy || !detail.data.customerId}
+                  disabled={busy}
+                  type="button"
                   className="op-button"
-                  onClick={() =>
-                    act(async () => {
-                      const o = await api.post<any>(`${base}/orders`, {
-                        customerId: detail.data.customerId,
-                        conversationId: id,
-                      });
-                      sessionStorage.setItem(`tracking_${o.id}`, o.trackingUrl);
-                      navigate(`/orders/${o.id}`);
-                    })
-                  }
+                  style={{ background: "#064e3b", color: "#fff", fontWeight: 700 }}
+                  onClick={handlePrepareOrder}
                 >
-                  Préparer une commande
+                  📋 Préparer une commande {detail.data.customer ? "" : "(avec fiche client)"}
                 </button>
               </div>
+
+              {showQuickOrderModal && (
+                <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: 12, padding: 16, margin: "10px 0" }}>
+                  <h3 style={{ margin: "0 0 10px", fontSize: 15, fontWeight: 800, color: "#0f172a" }}>
+                    📋 Fiche client pour préparer le devis / la commande
+                  </h3>
+                  <p style={{ margin: "0 0 12px", fontSize: 12, color: "#475569" }}>
+                    Renseignez les coordonnées pour créer la fiche client et générer le devis officiel de ce renseignement.
+                  </p>
+                  <form onSubmit={handleCreateCustomerAndOrder} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: 11, fontWeight: 700, marginBottom: 3 }}>Prénom</label>
+                      <input required value={guestFirstName} onChange={(e) => setGuestFirstName(e.target.value)} placeholder="Prénom" style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #cbd5e1" }} />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: 11, fontWeight: 700, marginBottom: 3 }}>Nom</label>
+                      <input required value={guestLastName} onChange={(e) => setGuestLastName(e.target.value)} placeholder="Nom" style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #cbd5e1" }} />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: 11, fontWeight: 700, marginBottom: 3 }}>Téléphone WhatsApp</label>
+                      <input required value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} placeholder="+226..." style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #cbd5e1" }} />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: 11, fontWeight: 700, marginBottom: 3 }}>Ville</label>
+                      <input required value={guestCity} onChange={(e) => setGuestCity(e.target.value)} placeholder="Ouagadougou, Abidjan..." style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #cbd5e1" }} />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: 11, fontWeight: 700, marginBottom: 3 }}>Pays</label>
+                      <input required value={guestCountry} onChange={(e) => setGuestCountry(e.target.value)} placeholder="Burkina Faso, Côte d'Ivoire..." style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #cbd5e1" }} />
+                    </div>
+                    <div style={{ gridColumn: "1 / -1", display: "flex", gap: 8, marginTop: 8 }}>
+                      <button type="submit" disabled={busy} className="op-button" style={{ background: "#064e3b", color: "#fff", fontWeight: 700 }}>
+                        {busy ? "Création en cours…" : "✓ Créer la fiche & ouvrir la commande →"}
+                      </button>
+                      <button type="button" onClick={() => setShowQuickOrderModal(false)} className="op-button secondary">
+                        Annuler
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
               <div className="op-chat">
                 {detail.data.messages.map((m: any) => (
                   <div

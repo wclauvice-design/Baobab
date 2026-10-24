@@ -443,10 +443,16 @@ export class CommerceService {
         const c = await tx.conversation.findUnique({
           where: { id: dto.conversationId },
         });
-        if (!c || c.customerId !== customer.id)
+        if (c && !c.customerId) {
+          await tx.conversation.update({
+            where: { id: c.id },
+            data: { customerId: customer.id },
+          });
+        } else if (!c || c.customerId !== customer.id) {
           throw new BadRequestException(
             "Rattachez d’abord la conversation à ce client",
           );
+        }
       }
       const o = await tx.tradeOrder.create({
         data: {

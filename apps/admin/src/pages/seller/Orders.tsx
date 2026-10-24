@@ -43,7 +43,7 @@ export function Orders() {
         {orders.map((o) => {
           const next = NEXT_STATUS[o.status];
           return (
-            <div key={o.id} className="rounded-xl border border-slate-200 bg-white p-4">
+            <div key={o.id} className="rounded-xl border border-slate-200 bg-white text-slate-900 p-4">
               <div className="mb-2 flex items-center justify-between">
                 <span className="font-mono text-sm">{o.id.slice(-8).toUpperCase()}</span>
                 <span className="text-xs text-slate-500">{o.buyer.phone}</span>

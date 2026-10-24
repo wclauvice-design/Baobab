@@ -85,7 +85,7 @@ export function Catalog() {
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
       <div className="mb-8 grid grid-cols-2 gap-6">
-        <form onSubmit={createCategory} className="rounded-xl border border-slate-200 bg-white p-4">
+        <form onSubmit={createCategory} className="rounded-xl border border-slate-200 bg-white text-slate-900 p-4">
           <h2 className="mb-3 text-sm font-semibold">Nouvelle catégorie</h2>
           <input
             name="name"
@@ -98,7 +98,7 @@ export function Catalog() {
           </button>
         </form>
 
-        <form onSubmit={createProduct} className="rounded-xl border border-slate-200 bg-white p-4">
+        <form onSubmit={createProduct} className="rounded-xl border border-slate-200 bg-white text-slate-900 p-4">
           <h2 className="mb-3 text-sm font-semibold">Nouveau produit (vente directe)</h2>
           <input
             name="name"
@@ -151,7 +151,7 @@ export function Catalog() {
         </form>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-900">
         <table className="w-full text-sm">
           <thead className="bg-slate-100 text-left text-xs uppercase text-slate-500">
             <tr>

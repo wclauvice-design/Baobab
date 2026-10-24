@@ -28,6 +28,151 @@ export class SellersService {
     });
   }
 
+  async getAdminDetail(sellerId: string) {
+    const seller = await this.prisma.seller.findUnique({
+      where: { id: sellerId },
+      include: {
+        user: { select: { id: true, phone: true, country: true, language: true, createdAt: true } },
+      },
+    });
+    if (!seller) throw new NotFoundException("Commerçant introuvable");
+
+    // 1. Annonces (Adds)
+    const products = await this.prisma.product.findMany({
+      where: { sellerId },
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
+    });
+    const productIds = products.map((p) => p.id);
+
+    // 2. Renseignements (Demandes d'informations / Leads clients)
+    const inquiries = await this.prisma.conversation.findMany({
+      where: {
+        productId: { in: productIds },
+      },
+      include: {
+        customer: true,
+        messages: { orderBy: { createdAt: "desc" }, take: 1 },
+        tradeOrders: { select: { id: true, reference: true, status: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    // 3. Commandes & Ventes liées aux produits de ce vendeur
+    const allTradeOrders = await this.prisma.tradeOrder.findMany({
+      include: {
+        customer: true,
+        quotes: { orderBy: { revision: "desc" } },
+        entries: true,
+        conversation: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const relatedOrders = allTradeOrders.filter((o) => {
+      if (o.conversation?.productId && productIds.includes(o.conversation.productId)) {
+        return true;
+      }
+      const hasLine = o.quotes.some((q) => {
+        const lines = (q.lines as any[]) || [];
+        return lines.some(
+          (l) => productIds.includes(l.productId) || l.supplierId === seller.id,
+        );
+      });
+      if (hasLine) return true;
+      return o.entries.some((e) => e.supplierId === seller.id);
+    });
+
+    // Pipeline split:
+    // Commandes: Devis en préparation (DRAFT, QUOTED)
+    const commandList = relatedOrders.filter(
+      (o) =>
+        o.status === "DRAFT" ||
+        o.status === "QUOTED" ||
+        (!o.acceptedRevision && o.status !== "CANCELLED"),
+    );
+
+    // Ventes: Commandes confirmées
+    const salesList = relatedOrders.filter(
+      (o) =>
+        o.acceptedRevision !== null ||
+        [
+          "CONFIRMED",
+          "PREPARING",
+          "HANDED_TO_CARRIER",
+          "IN_TRANSIT",
+          "ARRIVED",
+          "CUSTOMS",
+          "LOCAL_DELIVERY",
+          "DELIVERED",
+        ].includes(o.status),
+    );
+
+    // Calculs financiers intelligents
+    let totalSalesVolume = 0;
+    let totalSupplierRevenue = 0;
+    let totalPaidToSeller = 0;
+
+    for (const o of salesList) {
+      const q =
+        o.quotes.find((q) => q.revision === o.acceptedRevision) || o.quotes[0];
+      if (q) {
+        const lines = ((q.lines as any[]) || []).filter(
+          (l) => productIds.includes(l.productId) || l.supplierId === seller.id,
+        );
+        for (const l of lines) {
+          totalSalesVolume += minor(l.unitPrice) * l.quantity;
+          totalSupplierRevenue += minor(l.supplierUnitPrice || l.unitPrice) * l.quantity;
+        }
+      }
+      const payments = o.entries.filter(
+        (e) =>
+          e.supplierId === seller.id &&
+          e.kind === "SUPPLIER_PAYMENT" &&
+          e.state === "CONFIRMED",
+      );
+      for (const p of payments) {
+        totalPaidToSeller += minor(p.amount);
+      }
+    }
+
+    const dueToSeller = Math.max(0, totalSupplierRevenue - totalPaidToSeller);
+    const totalBaobabCommission = Math.max(0, totalSalesVolume - totalSupplierRevenue);
+
+    // Taux de conversion intelligents
+    const totalInquiries = inquiries.length;
+    const totalCommands = commandList.length + salesList.length;
+    const totalSales = salesList.length;
+
+    const conversionInquiryToCommand =
+      totalInquiries > 0 ? Math.round((totalCommands / totalInquiries) * 100) : 0;
+    const conversionCommandToSale =
+      totalCommands > 0 ? Math.round((totalSales / totalCommands) * 100) : 0;
+
+    return {
+      seller,
+      metrics: {
+        totalProducts: products.length,
+        publishedProducts: products.filter((p) => p.moderation === "PUBLISHED").length,
+        pendingProducts: products.filter((p) => p.moderation === "PENDING").length,
+        totalInquiries,
+        totalCommands,
+        totalSales,
+        conversionInquiryToCommand,
+        conversionCommandToSale,
+        totalSalesVolume: amount(totalSalesVolume),
+        totalSupplierRevenue: amount(totalSupplierRevenue),
+        totalBaobabCommission: amount(totalBaobabCommission),
+        totalPaidToSeller: amount(totalPaidToSeller),
+        dueToSeller: amount(dueToSeller),
+      },
+      products,
+      inquiries,
+      commandes: commandList,
+      ventes: salesList,
+    };
+  }
+
   listAll(status?: SellerStatus) {
     return this.prisma.seller.findMany({
       where: status ? { status } : undefined,

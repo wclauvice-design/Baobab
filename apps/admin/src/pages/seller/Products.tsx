@@ -73,7 +73,7 @@ export function Products() {
       <h1 className="mb-6 text-2xl font-bold">Mes produits</h1>
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-      <form onSubmit={createProduct} className="mb-8 max-w-md rounded-xl border border-slate-200 bg-white p-4">
+      <form onSubmit={createProduct} className="mb-8 max-w-md rounded-xl border border-slate-200 bg-white text-slate-900 p-4">
         <h2 className="mb-3 text-sm font-semibold">Nouveau produit</h2>
         <input
           name="name"
@@ -125,7 +125,7 @@ export function Products() {
         </button>
       </form>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-900">
         <table className="w-full text-sm">
           <thead className="bg-slate-100 text-left text-xs uppercase text-slate-500">
             <tr>
