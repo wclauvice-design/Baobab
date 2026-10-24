@@ -86,6 +86,27 @@ export function Icon({ name, size = 22 }: { name: string; size?: number }) {
         <path d="M7 14a4 4 0 0 1-2-7 5 5 0 0 1 10-3 5 5 0 0 1 3 10Z" />
       </>
     ),
+    plane: (
+      <path d="M2 16l20-8-6 14-4-6-6-2Zm10 0 10-8" />
+    ),
+    image: (
+      <>
+        <rect x="3" y="4" width="18" height="16" rx="3" />
+        <circle cx="9" cy="10" r="1.6" />
+        <path d="m21 16-5-5-9 9" />
+      </>
+    ),
+    close: <path d="M6 6l12 12M18 6 6 18" />,
+    sliders: (
+      <path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6" />
+    ),
+    calc: (
+      <>
+        <rect x="5" y="2" width="14" height="20" rx="3" />
+        <path d="M8 6h8M8 11h2m4 0h2M8 15h2m4 0h2M8 19h2m4 0h2" />
+      </>
+    ),
+    check: <path d="m5 12 5 5 9-10" />,
   };
   return (
     <svg
@@ -103,7 +124,36 @@ export function Icon({ name, size = 22 }: { name: string; size?: number }) {
     </svg>
   );
 }
+const FAVORITES_KEY = "baobab_favorites";
+const FAVORITES_EVENT = "baobab:favorites";
+
+/** Favoris partagés (accueil, fiches, navigation) et synchronisés entre onglets. */
+function useFavorites() {
+  const [ids, setIds] = useState<string[]>(() =>
+    saved<string[]>(FAVORITES_KEY, []),
+  );
+  useEffect(() => {
+    const sync = () => setIds(saved<string[]>(FAVORITES_KEY, []));
+    window.addEventListener(FAVORITES_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(FAVORITES_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+  const toggle = (id: string) => {
+    const current = saved<string[]>(FAVORITES_KEY, []);
+    save(
+      FAVORITES_KEY,
+      current.includes(id) ? current.filter((x) => x !== id) : [...current, id],
+    );
+    window.dispatchEvent(new Event(FAVORITES_EVENT));
+  };
+  return { ids, toggle };
+}
+
 export function MarketShell({ children }: { children: React.ReactNode }) {
+  const { ids: favoriteIds } = useFavorites();
   return (
     <div className="market">
       <div className="top-note">
@@ -116,7 +166,12 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
         </Link>
         <nav>
           <NavLink to="/" end>Explorer</NavLink>
-          <NavLink to="/favorites">Favoris</NavLink>
+          <NavLink to="/favorites">
+            Favoris
+            {favoriteIds.length > 0 && (
+              <em className="nav-count">{favoriteIds.length}</em>
+            )}
+          </NavLink>
           <NavLink to="/messages">Messages</NavLink>
           <NavLink to="/orders">Mes commandes</NavLink>
         </nav>
@@ -145,8 +200,13 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
           ["/account", "user", "Compte"],
         ].map(([to, icon, label]) => (
           <NavLink key={to} to={to} end={to === "/"}>
-            <Icon name={icon} />
-            <span>{label}</span>
+            <span className="mobile-nav-icon">
+              <Icon name={icon} size={21} />
+              {to === "/favorites" && favoriteIds.length > 0 && (
+                <b className="mobile-nav-badge">{favoriteIds.length}</b>
+              )}
+            </span>
+            <span className="mobile-nav-label">{label}</span>
           </NavLink>
         ))}
       </nav>
