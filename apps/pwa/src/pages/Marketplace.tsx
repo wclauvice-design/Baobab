@@ -21,6 +21,7 @@ import {
 } from "../lib/concierge";
 import { estimateFreight, ShippingMode } from "../lib/freight";
 import { fallbackPhoto } from "../lib/photos";
+import { BaobabPromises, DiscoverySearch, LiveActivityTicker } from "./DiscoveryMotion";
 import "./marketplace.css";
 import "./marketplace-premium.css";
 import "./marketplace-motion.css";
@@ -362,6 +363,7 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
   );
 }
 export function Marketplace({ favorites = false }: { favorites?: boolean }) {
+  const [motionPaused, setMotionPaused] = useState(false);
   const [params, setParams] = useSearchParams();
   const [products, setProducts] = useState<any[]>([]),
     [config, setConfig] = useState<any>(null),
@@ -454,36 +456,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
             <span className="app-brand-text">baobab</span>
           </Link>
 
-          <form
-            className="app-search-pill"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const value = new FormData(e.currentTarget).get("search");
-              filter("search", String(value || ""));
-            }}
-          >
-            <Icon name="search" size={16} />
-            <input
-              key={search}
-              name="search"
-              defaultValue={search}
-              placeholder="Land Cruiser, Kit Solaire, iPhone..."
-              aria-label="Rechercher une annonce"
-            />
-            {search ? (
-              <button
-                type="button"
-                className="search-clear-btn"
-                onClick={() => filter("search", "")}
-                title="Effacer"
-              >
-                ✕
-              </button>
-            ) : (
-              <span className="search-hint-tag">Dubaï</span>
-            )}
-            <button type="submit" className="search-submit" aria-label="Lancer la recherche"><Icon name="search" size={18} /></button>
-          </form>
+          <DiscoverySearch search={search} onSearch={(value) => filter("search", value)} paused={motionPaused} />
 
           <div className="app-dest-pill" title="Destination de livraison">
             <span className="dest-flag">{currentDest.flag}</span>
@@ -553,6 +526,9 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
           </div>
         </section>
       )}
+
+      <BaobabPromises paused={motionPaused} onPause={() => setMotionPaused((value) => !value)} />
+      <LiveActivityTicker paused={motionPaused} />
 
       {/* 3. Vitrine Flash 2 Colonnes (comme Temu Clearance & Lightning Deals) */}
       {!search && !universe && (

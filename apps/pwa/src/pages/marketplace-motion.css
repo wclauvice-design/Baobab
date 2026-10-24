@@ -478,6 +478,40 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 }
 
 /* Product-first storefront. Warm surfaces keep imagery and prices in focus. */
+@keyframes discovery-roll {
+  0% { opacity: 0; transform: translateY(90%); }
+  12%, 86% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-90%); }
+}
+.discovery-roll { animation: discovery-roll 2.6s cubic-bezier(.22,.61,.36,1) both; }
+.discovery-search-field { position: relative; flex: 1; min-width: 0; }
+.discovery-search-field input { display: block; width: 100%; position: relative; z-index: 1; }
+.search-ideas { position: absolute; inset: 0; display: flex; align-items: center; overflow: hidden; pointer-events: none; color: #73776d; font-size: 13px; }
+.search-ideas > span { display: block; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.baobab-promises { margin: 0 0 10px; }
+.promise-bar { display: flex; align-items: center; gap: 12px; padding: 4px 8px 4px 10px; min-height: 42px; border-radius: 10px; background: #173e32; color: #fff8e6; }
+.promise-toggle { display: flex; align-items: center; gap: 8px; border: 0; background: none; color: inherit; padding: 0; min-height: 36px; cursor: pointer; text-align: left; font: inherit; font-size: 12px; }
+.promise-seal { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50% 50% 50% 8%; background: #f2c35e; color: #173e32; transform: rotate(-8deg); font-weight: 800; }
+.promise-chevron { color: #f2c35e; font-size: 18px; }
+.promise-ticker { flex: 1; min-width: 0; height: 20px; overflow: hidden; text-align: right; font-size: 12px; color: #e0e9d9; }
+.promise-ticker > span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.motion-toggle { border: 1px solid #ffffff35; border-radius: 50%; background: transparent; color: #fff8e6; width: 36px; height: 36px; flex-shrink: 0; cursor: pointer; }
+.promise-conditions { font-size: 10px; color: #65725f; margin: 4px 3px 0; }
+.promise-details { background: #fffdf6; padding: 16px; border: 1px solid #d4decf; border-radius: 0 0 12px 12px; }
+.promise-details:not([hidden]) { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.promise-details strong { font-size: 13px; color: #173e32; }
+.promise-details p { font-size: 12px; color: #52624e; margin: 6px 0 0; line-height: 1.6; }
+.promise-details a { grid-column: 1 / -1; color: #235f45; font-size: 12px; font-weight: 700; }
+.baobab-promises :focus-visible { outline: 3px solid #dcae45; outline-offset: 3px; }
+@media (max-width: 480px) {
+  .promise-bar { display: grid; grid-template-columns: minmax(0,1fr) 36px; gap: 0 6px; padding: 4px 8px; }
+  .promise-toggle { min-height: 28px; }
+  .promise-ticker { grid-row: 2; text-align: left; padding-left: 30px; font-size: 11px; }
+  .motion-toggle { grid-column: 2; grid-row: 1 / 3; }
+  .promise-details:not([hidden]) { grid-template-columns: 1fr; }
+  .search-ideas { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .discovery-roll { animation: none !important; } }
 .market:has(.app-sticky-header) { background: #f6f4ee; color: #20372f; }
 .market:has(.app-sticky-header) .market-main { max-width: 1440px; }
 .app-sticky-header { background: #f2c35e; border-color: #dfb254; backdrop-filter: none; box-shadow: none; }
@@ -580,3 +614,302 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   .market:has(.app-sticky-header) .mobile-nav a.active .mobile-nav-icon { background: #f2d17c; color: #173e32; box-shadow: none; transform: none; }
 }
 
+
+
+/* ==========================================================================
+   ENHANCED DISCOVERY & REASSURANCE PILLARS
+   ========================================================================== */
+
+.search-trending-fire {
+  margin-right: 5px;
+  font-size: 13px;
+  display: inline-block;
+  animation: pop 1.2s ease-in-out infinite alternate;
+}
+
+.live-activity-stream {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  margin: 0 0 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8de;
+  border-radius: 20px;
+  font-size: 11.5px;
+  color: #385448;
+  box-shadow: 0 2px 8px rgba(23, 62, 50, 0.04);
+  overflow: hidden;
+}
+
+.stream-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #10b981;
+  background: #e6f9f0;
+  padding: 2px 7px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.stream-badge .pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: live-pulse 2s infinite;
+}
+
+.stream-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+  animation: discovery-roll 3.6s cubic-bezier(.22,.61,.36,1) both;
+}
+
+.stream-icon { font-size: 13px; }
+.stream-city { color: #173e32; font-weight: 700; }
+.stream-sep { color: #94a3b8; }
+.stream-text { color: #475569; overflow: hidden; text-overflow: ellipsis; }
+.stream-time { color: #94a3b8; font-size: 10.5px; flex-shrink: 0; }
+
+/* Enhanced Baobab Promises & Reassurance Cards */
+.baobab-promises {
+  margin: 0 0 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(23, 62, 50, 0.06);
+}
+
+.promise-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  min-height: 46px;
+  background: linear-gradient(95deg, #173e32, #1f4f40);
+  color: #fff8e6;
+  border-radius: 12px;
+}
+
+.promise-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: none;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.promise-seal {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fce094, #f2c35e);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.promise-title-block strong {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.promise-title-block .promise-subtitle {
+  font-size: 10px;
+  color: #fce094;
+  opacity: 0.9;
+}
+
+.promise-ticker {
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.promise-ticker .ticker-badge {
+  background: #f2c35e25;
+  border: 1px solid #f2c35e60;
+  color: #fde68a;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-right: 6px;
+}
+
+.promise-ticker .ticker-label {
+  font-size: 11.5px;
+  color: #f1f5f9;
+  font-weight: 500;
+}
+
+.promise-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.expand-guarantees-btn {
+  background: #ffffff18;
+  border: 1px solid #ffffff30;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.expand-guarantees-btn:hover {
+  background: #f2c35e;
+  color: #173e32;
+  border-color: #f2c35e;
+}
+
+.promise-details {
+  background: #ffffff;
+  padding: 16px;
+  border: 1px solid #e2e8de;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  animation: rise-in 0.3s ease both;
+}
+
+.promise-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.promise-card {
+  background: #fbfdf9;
+  border: 1px solid #e7eee4;
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.promise-card:hover {
+  border-color: #f2c35e;
+  transform: translateY(-2px);
+}
+
+.promise-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.promise-card-head .card-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.promise-card-head .card-badge {
+  display: inline-block;
+  background: #173e3215;
+  color: #173e32;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+}
+
+.promise-card-head strong {
+  display: block;
+  font-size: 13px;
+  color: #173e32;
+  line-height: 1.25;
+}
+
+.card-summary {
+  font-size: 11.5px;
+  color: #2b4438;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.card-detail {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.promise-footer {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #e2e8de;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.promise-conditions {
+  font-size: 10.5px;
+  color: #64748b;
+  margin: 0;
+  max-width: 70%;
+}
+
+.promise-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #173e32;
+  color: #fff8e6 !important;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 20px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.promise-cta-btn:hover {
+  background: #235f45;
+}
+
+@media (max-width: 700px) {
+  .promise-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .promise-conditions {
+    max-width: 100%;
+  }
+  .promise-ticker {
+    display: none;
+  }
+  .promise-bar {
+    justify-content: space-between;
+  }
+}
