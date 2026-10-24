@@ -29,6 +29,7 @@ export class CreateProductDto {
   @IsArray()
   @IsUrl({ protocols: ['https'], require_protocol: true }, { each: true })
   images?: string[];
+  @IsOptional() @IsString() sellerId?: string;
   @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) supplierPrice?: number;
   @IsOptional() @IsString() @MaxLength(100) subcategory?: string;
   @IsOptional() @IsIn(['NEW', 'USED', 'REFURBISHED']) condition?: string;
