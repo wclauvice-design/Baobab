@@ -18,6 +18,7 @@ import {
   universes,
 } from "../lib/concierge";
 import "./marketplace.css";
+import "./marketplace-premium.css";
 
 export function Icon({ name, size = 22 }: { name: string; size?: number }) {
   const paths: Record<string, React.ReactNode> = {
@@ -113,7 +114,7 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
           baobab<span>Le bon achat, bien accompagné.</span>
         </Link>
         <nav>
-          <NavLink to="/">Explorer</NavLink>
+          <NavLink to="/" end>Explorer</NavLink>
           <NavLink to="/favorites">Favoris</NavLink>
           <NavLink to="/messages">Messages</NavLink>
           <NavLink to="/orders">Mes commandes</NavLink>
@@ -208,6 +209,7 @@ function ProductTile({ p, onFavorite }: { p: any; onFavorite?: () => void }) {
         <button
           className={`favorite ${favorite ? "selected" : ""}`}
           aria-label={favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+          aria-pressed={favorite}
           onClick={toggle}
         >
           <Icon name="heart" size={19} />
@@ -221,7 +223,7 @@ function ProductTile({ p, onFavorite }: { p: any; onFavorite?: () => void }) {
         </span>
       </div>
       <div className="listing-copy">
-        <p className="eyebrow">{p.subcategory || p.category?.name}</p>
+        <p className="eyebrow">{p.subcategory && p.subcategory !== "Autres" ? p.subcategory : p.category?.name}</p>
         <Link to={`/products/${p.id}`}>
           <h3>{p.name}</h3>
         </Link>
@@ -242,6 +244,9 @@ function ProductTile({ p, onFavorite }: { p: any; onFavorite?: () => void }) {
             ? `Livraison incluse · ${p.shippingDestination}`
             : "Transport & importation sur devis"}
         </p>
+        <Link className="listing-discover" to={`/products/${p.id}`}>
+          Découvrir l’annonce <Icon name="arrow" size={16} />
+        </Link>
       </div>
     </article>
   );
@@ -293,21 +298,21 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
     <>
       <section className="discovery-hero">
         <div className="hero-copy">
-          <p className="eyebrow">DUBAÏ → AFRIQUE</p>
+          <p className="eyebrow"><span className="hero-dot" /> DUBAÏ → AFRIQUE · LE COMMERCE, ACCOMPAGNÉ</p>
           <h1>
             {favorites ? (
               "Vos belles trouvailles."
             ) : (
               <>
-                De belles découvertes.
+                Vos envies, ici.
                 <br />
-                <em>De grandes possibilités.</em>
+                <em>Le meilleur de Dubaï, à portée.</em>
               </>
             )}
           </h1>
           <p>
-            Véhicules, équipements, maison et projets. Trouvez ce qu’il vous
-            faut, Baobab s’occupe de la suite.
+            Pour vous, votre maison ou votre activité. Explorez les annonces,
+            échangez avec notre équipe et recevez un devis adapté à votre destination.
           </p>
           <form
             className="market-search"
@@ -321,7 +326,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
             <input
               name="search"
               defaultValue={search}
-              placeholder="Un téléphone, un canapé, une machine de gym…"
+              placeholder="Quel sera votre prochain achat ?"
               aria-label="Rechercher une annonce"
             />
             <button type="submit">
@@ -355,13 +360,25 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
           <div className="art-caption">
             SÉLECTION À DUBAÏ<span>Accompagnement Baobab</span>
           </div>
+          <div className="hero-passport">
+            <span className="passport-label">VOTRE ACHAT, EN TOUTE CLARTÉ</span>
+            <div className="passport-route"><strong>Dubaï</strong><Icon name="arrow" size={24} /><strong>Chez vous</strong></div>
+            <div className="passport-divider" />
+            <div className="passport-service"><Icon name="shield" size={25} /><div><strong>Un devis avant de décider.</strong><span>Un interlocuteur à chaque étape.</span></div></div>
+          </div>
         </div>
       </section>
+      <div className="purchase-steps" aria-label="Comment acheter avec Baobab">
+        <div><span>01</span><p><strong>Trouvez votre prochain achat</strong><small>À l’unité ou pour votre activité</small></p></div>
+        <div><span>02</span><p><strong>Validez votre devis</strong><small>Prix et conditions avant de commander</small></p></div>
+        <div><span>03</span><p><strong>Suivez chaque étape</strong><small>De la préparation à la livraison</small></p></div>
+      </div>
       <section className="universe-grid" aria-label="Grands univers">
         {universes.map((u) => (
           <button
             className={`universe ${universe === u.id ? "active" : ""}`}
             key={u.id}
+            aria-pressed={universe === u.id}
             onClick={() => filter("universe", universe === u.id ? "" : u.id)}
           >
             <div className={`universe-icon ${u.id}`}>
@@ -390,7 +407,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
           <span>
             {loading
               ? "Chargement…"
-              : `${shown.length} annonce${shown.length > 1 ? "s" : ""}`}
+              : `${shown.length} annonce${shown.length > 1 ? "s" : ""} à découvrir`}
           </span>
         </div>
         <div className="filter-bar">

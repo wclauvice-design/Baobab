@@ -1,0 +1,184 @@
+/* Baobab commerce identity: shared across discovery, product and client screens. */
+.market {
+  --ink: #163c32;
+  --accent: #ad4e2c;
+  --muted: #62736c;
+  --line: #dfe7e1;
+  background: #f7f8f4;
+  font-family: "Sora", system-ui, sans-serif;
+  line-height: 1.65;
+}
+.market h1, .market h2, .market h3, .market .brand {
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+.market a, .market button, .market input, .market select, .market textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+.market button, .market a { transition: color .2s, background .2s, border-color .2s, transform .2s, box-shadow .2s; }
+.market input, .market textarea, .market select { border-radius: 12px; }
+.market :is(a,button,input,select,textarea):focus-visible { outline: 3px solid #b96b38; outline-offset: 4px; }
+.top-note { background: #143c32; padding: 10px 18px; font-size: 10px; letter-spacing: .14em; }
+.top-note span { color: #d7e4dd; }
+.market-header { padding: 24px 40px; min-height: 100px; border-bottom: 0; }
+.brand { font-size: 34px; letter-spacing: -1.8px; }
+.brand > span { top: 40px; font-size: 8px; letter-spacing: .04em; }
+.market-header nav { padding: 5px; gap: 3px; background: #eaf0e9; border: 1px solid #e2e8e0; border-radius: 50px; }
+.market-header nav a { padding: 10px 18px; border-radius: 40px; font-size: 11px; font-weight: 500; }
+.market-header nav a.active { background: #fff; color: var(--ink); box-shadow: 0 2px 7px #143c3210; }
+.market-header nav a:hover { background: #ffffffb0; }
+.account-link { border: 1px solid #d6dfd7; border-radius: 30px; padding: 12px 17px; background: #fff; }
+.market-main { padding-top: 18px; }
+.discovery-hero { min-height: 430px; padding: 48px; border-radius: 28px; background: #173e34; color: #fff; isolation: isolate; }
+.discovery-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse at 95% 10%, #58857666, transparent 55%), linear-gradient(115deg, transparent 55%, #062a2040); }
+.hero-copy { width: 58%; max-width: 650px; }
+.hero-copy .eyebrow { display: flex; align-items: center; gap: 9px; font-size: 9px; letter-spacing: .14em; color: #dce8df; }
+.hero-dot { width: 6px; height: 6px; background: #e8bc82; border-radius: 50%; flex-shrink: 0; }
+.market .hero-copy h1 { font-size: clamp(36px, 4.2vw, 57px); line-height: 1.06; font-weight: 600; letter-spacing: -.055em; margin: 23px 0; }
+.hero-copy h1 em { color: #edc796; }
+.hero-copy > p:not(.eyebrow) { max-width: 500px; color: #d5e2da; font-size: 12px; line-height: 1.85; }
+.market-search { border: 1px solid #ffffffb0; border-radius: 16px; box-shadow: 0 10px 30px #061f2426; margin-top: 25px; color: var(--ink); gap: 10px; }
+.market-search input { font-size: 12px; padding: 13px 0; }
+.market-search button { background: #eac18d; color: #183b30; font-size: 11px; font-weight: 600; border-radius: 11px; padding: 15px; min-height: 46px; }
+.market-search button:hover { background: #f5d8af; }
+.hero-promises { color: #d6e4dc; font-size: 10px; gap: 19px; margin-top: 20px; }
+.hero-art { width: 35%; right: 4%; top: 0; bottom: 0; opacity: 1; color: #84a995; display: flex; align-items: center; }
+.hero-art > svg { position: absolute; width: 115%; left: -8%; bottom: -8%; opacity: .32; }
+.art-sun { width: 220px; height: 220px; right: -20px; top: 35px; background: #dab77b; opacity: .14; }
+.art-caption { display: none; }
+.hero-passport { position: relative; width: 100%; border: 1px solid #ffffff45; border-radius: 22px; background: #f7f5ed; color: #183c32; padding: 28px; transform: rotate(3deg); box-shadow: 0 24px 60px #061d2440; animation: passport-arrive .7s ease-out both; }
+.passport-label { display: block; font-size: 8px; letter-spacing: .16em; color: #6a796d; }
+.passport-route { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 26px 0; font-family: "Space Grotesk", sans-serif; font-size: 25px; letter-spacing: -.04em; }
+.passport-route svg { color: #ad4e2c; }
+.passport-divider { border-top: 1px dashed #c7d3c7; margin: 0 -28px 25px; }
+.passport-service { display: flex; gap: 12px; align-items: center; }
+.passport-service strong, .passport-service span { display: block; font-size: 10px; }
+.passport-service span { color: #68776e; font-size: 9px; margin-top: 5px; }
+.purchase-steps { display: grid; grid-template-columns: repeat(3,1fr); margin: 26px 0 32px; border-bottom: 1px solid var(--line); padding: 0 8px 24px; gap: 25px; }
+.purchase-steps > div { display: flex; gap: 14px; align-items: center; }
+.purchase-steps > div > span { font-family: "Space Grotesk",sans-serif; font-size: 25px; font-weight: 500; color: #acbcb1; }
+.purchase-steps p { margin: 0; }
+.purchase-steps strong, .purchase-steps small { display: block; }
+.purchase-steps strong { font-size: 11px; font-weight: 500; }
+.purchase-steps small { font-size: 9px; margin-top: 3px; }
+.universe-grid { gap: 14px; margin: 0 0 42px; }
+.universe-grid > button { border-radius: 17px; padding: 20px 16px; gap: 11px; transition: transform .2s, box-shadow .2s, border-color .2s; }
+.universe-grid > button:hover { transform: translateY(-3px); box-shadow: 0 10px 25px #143c320a; border-color: #9caf9e; }
+.universe-grid > button.active { border-color: #376c55; box-shadow: inset 0 0 0 1px #376c55; background: #edf3eb; }
+.universe-grid h2 { font-size: 14px; }
+.universe-grid p { font-size: 9px; color: #62736c; }
+.universe-grid .universe-icon { width: 45px; height: 48px; border-radius: 13px; background: #eaf0e8; }
+.universe-grid .classifieds { background: #e9edf6; }
+.universe-grid .classifieds svg { color: #4e638a; }
+.universe-grid .home { background: #f6ede0; }
+.universe-grid .home svg { color: #9b7344; }
+.universe-grid .trade { background: #f6e9e3; }
+.universe-grid .trade svg { color: #ab6549; }
+.market .section-heading h2 { font-size: 30px; letter-spacing: -.04em; }
+.eyebrow { color: #8a593c; font-size: 9px; }
+.section-heading > span { background: #eaf0e8; color: #4e6757; border-radius: 20px; padding: 7px 13px; }
+.filter-bar { padding: 14px; background: #edf1eb; border: 1px solid #e3e9e0; border-radius: 17px; gap: 9px; }
+.filter-bar select, .filter-bar input { min-height: 44px; font-size: 11px; border-color: transparent; }
+.filter-bar select:last-of-type { margin-left: auto; }
+.listing-grid { gap: 22px; }
+.listing-tile { border-radius: 19px; border-color: #e3e9e2; box-shadow: 0 2px 4px #173e3403; }
+.listing-tile:hover { transform: translateY(-5px); border-color: #bdcdbf; box-shadow: 0 16px 32px #173e3412; }
+.listing-picture { height: 220px; background: #eef2ed; overflow: hidden; }
+.listing-picture img { transition: transform .5s; }
+.listing-tile:hover .listing-picture img { transform: scale(1.045); }
+.photo-missing { color: #728c7c; background: radial-gradient(ellipse at 50% 45%, #fff, #e7eee7); }
+.photo-missing > svg { padding: 16px; box-sizing: content-box; border: 1px solid #dce6dc; border-radius: 23px; background: #ffffff80; }
+.favorite { width: 40px; height: 40px; box-shadow: 0 3px 12px #153a3210; }
+.favorite:hover { transform: scale(1.08); }
+.picture-tag { border-radius: 7px; padding: 4px 10px; font-size: 10px; }
+.listing-copy { padding: 19px; }
+.listing-copy .eyebrow { font-size: 8px; color: #697e6c; letter-spacing: .1em; }
+.listing-copy h3 { font-size: 17px; min-height: 48px; }
+.listing-copy > strong { font-family: "Space Grotesk",sans-serif; font-size: 23px; color: #173e34; }
+.listing-copy strong small { font-family: "Sora",sans-serif; font-size: 10px; }
+.listing-location { font-size: 10px; margin: 13px 0 !important; }
+.shipping-note { font-size: 9px; color: #647468; border-color: #e6ece4; }
+.listing-discover { display: flex; align-items: center; justify-content: space-between; font-size: 10px; font-weight: 500; margin-top: 14px; color: #1c5944; }
+.listing-discover:hover { color: var(--accent); }
+.market-button { border-radius: 12px; min-height: 46px; background: #184c39; border-color: #184c39; }
+.market-button:hover { background: #256347; box-shadow: 0 5px 15px #143c3215; }
+.concierge-banner { padding: 36px; border: 1px solid #dbe4d4; border-radius: 23px; background: #eaf0e2; margin-top: 48px; }
+.market-footer { padding-top: 40px; padding-bottom: 40px; }
+.detail-panel, .tracking-card, .market-empty { border-radius: 20px; }
+.loading-card { border-radius: 19px; background: linear-gradient(100deg,#e9eee7 25%,#f7faf5 45%,#e9eee7 65%); background-size: 200% 100%; animation: commerce-loading 1.6s linear infinite; }
+@keyframes commerce-loading { to { background-position: -200% 0; } }
+@keyframes passport-arrive { from { opacity: 0; transform: translateY(16px) rotate(0); } to { opacity: 1; transform: translateY(0) rotate(3deg); } }
+@media (max-width: 1100px) {
+  .market-header nav a { padding: 10px 11px; }
+  .market-header { gap: 18px; }
+  .discovery-hero { padding: 34px; }
+  .hero-copy { width: 61%; }
+  .hero-art { width: 31%; right: 4%; }
+  .hero-passport { padding: 20px; }
+  .passport-route { font-size: 20px; }
+  .passport-divider { margin-left: -20px; margin-right: -20px; }
+  .universe-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .listing-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+@media (max-width: 700px) {
+  .top-note { font-size: 8px; padding: 8px 12px; letter-spacing: .08em; }
+  .top-note span { display: none; }
+  .market-header { padding: 19px 20px 24px; min-height: 89px; }
+  .market-header nav { display: none; }
+  .brand { font-size: 30px; }
+  .brand > span { top: 35px; }
+  .account-link { padding: 10px; border-radius: 50%; }
+  .market-main { padding: 8px 16px 100px; }
+  .discovery-hero { min-height: 0; border-radius: 22px; padding: 28px 23px; display: block; }
+  .hero-copy { width: 100%; max-width: none; }
+  .hero-copy .eyebrow { font-size: 7px; letter-spacing: .08em; }
+  .market .hero-copy h1 { font-size: 38px; line-height: 1.08; margin: 21px 0 16px; }
+  .hero-copy > p:not(.eyebrow) { font-size: 11px; }
+  .hero-art { display: none; }
+  .market-search { gap: 7px; margin-top: 21px; padding: 5px 5px 5px 10px; border-radius: 13px; }
+  .market-search > svg { width: 17px; flex-shrink: 0; }
+  .market-search input { font-size: 12px; width: 0; }
+  .market-search button { font-size: 10px; padding: 10px; min-height: 43px; }
+  .market-search button svg { display: none; }
+  .hero-promises { flex-wrap: wrap; gap: 10px; font-size: 8px; }
+  .purchase-steps { grid-template-columns: 1fr; gap: 12px; margin: 22px 4px; padding-bottom: 22px; }
+  .purchase-steps > div { gap: 13px; }
+  .purchase-steps > div > span { font-size: 20px; }
+  .purchase-steps strong { font-size: 10px; }
+  .purchase-steps small { font-size: 9px; }
+  .universe-grid { gap: 9px; margin-bottom: 30px; }
+  .universe-grid > button { padding: 14px 10px; gap: 8px; border-radius: 14px; }
+  .universe-grid h2 { font-size: 12px; }
+  .universe-grid p { font-size: 8px; }
+  .universe-grid .universe-icon { width: 32px; height: 39px; border-radius: 10px; }
+  .universe-icon svg { width: 23px; }
+  .market .section-heading h2 { font-size: 25px; }
+  .section-heading { align-items: flex-start; }
+  .section-heading > span { font-size: 9px; padding: 5px 9px; white-space: nowrap; margin-top: 10px; }
+  .filter-bar { gap: 7px; padding: 10px; }
+  .filter-bar select, .filter-bar input { font-size: 11px; flex: 1 1 40%; width: 40%; min-width: 0; }
+  .listing-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+  .listing-tile { border-radius: 15px; }
+  .listing-picture { height: 157px; }
+  .photo-missing { min-height: 0; font-size: 9px; gap: 7px; }
+  .photo-missing > svg { width: 36px; height: 36px; padding: 11px; border-radius: 16px; }
+  .listing-copy { padding: 12px; }
+  .listing-copy h3 { font-size: 14px; min-height: 40px; }
+  .listing-copy > strong { font-size: 18px; }
+  .listing-copy strong small { display: block; font-size: 9px; }
+  .listing-copy .eyebrow { font-size: 7px; min-height: 22px; }
+  .listing-location { flex-wrap: wrap; font-size: 8px; gap: 3px; }
+  .listing-location span { width: 100%; margin-left: 0; }
+  .shipping-note { font-size: 8px; min-height: 35px; }
+  .listing-discover { font-size: 9px; gap: 3px; }
+  .listing-discover svg { width: 13px; flex-shrink: 0; }
+  .favorite { width: 38px; height: 38px; top: 8px; right: 8px; }
+  .picture-tag { font-size: 8px; padding: 3px 7px; left: 8px; bottom: 8px; }
+  .concierge-banner { padding: 25px; margin-top: 30px; border-radius: 19px; }
+  .mobile-nav { background: #fffffff5; backdrop-filter: blur(18px); border-top: 1px solid #dce5dc; box-shadow: 0 -5px 25px #163c3209; padding-bottom: max(8px,env(safe-area-inset-bottom)); }
+  .mobile-nav a { min-height: 48px; justify-content: center; border-radius: 13px; }
+  .mobile-nav a.active { background: #edf3e9; color: #184c39; }
+  .market-footer { padding: 28px 20px 100px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .market *, .market *::before, .market *::after { animation: none !important; transition: none !important; }
+}
