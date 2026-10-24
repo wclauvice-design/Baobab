@@ -17,6 +17,7 @@ import {
   stages,
   universes,
 } from "../lib/concierge";
+import { estimateFreight } from "../lib/freight";
 import "./marketplace.css";
 import "./marketplace-premium.css";
 
@@ -547,11 +548,15 @@ export function ListingDetail() {
       .catch(() => {});
   }, [id]);
 
-  const unitWeight = Number(p?.weightKg) || 0.45;
-  const totalWeight = Math.max(0.5, unitWeight * qty);
-  const estimatedFreight = shippingMode === "AIR"
-    ? Math.round(totalWeight * dest.airRate)
-    : Math.max(45000, Math.round((totalWeight / 200) * dest.seaRate));
+  const freight = estimateFreight({
+    mode: shippingMode,
+    destination: dest,
+    quantity: qty,
+    unitWeightKg: p?.weightKg,
+    dimensions: p?.dimensions,
+  });
+  const totalWeight = freight.chargeableWeightKg;
+  const estimatedFreight = freight.cost;
   const productSubtotal = p ? Math.round(Number(p.price) * qty) : 0;
   const estimatedGrandTotal = p?.shippingIncluded ? productSubtotal : productSubtotal + estimatedFreight;
 
@@ -720,7 +725,14 @@ export function ListingDetail() {
                 <b>{money(productSubtotal)}</b>
               </div>
               <div>
-                <span>Fret & dédouanement estimé (~{totalWeight.toFixed(1)} kg)</span>
+                <span>
+                  Fret & dédouanement estimé (~{totalWeight.toFixed(1)} kg{" "}
+                  {freight.basis === "volumetric" ? "volumétriques" : "réels"}
+                  {shippingMode === "SEA" && freight.volumeCbm > 0
+                    ? ` · ${freight.volumeCbm.toFixed(2)} m³`
+                    : ""}
+                  )
+                </span>
                 <b>{p.shippingIncluded ? "Inclus" : money(estimatedFreight)}</b>
               </div>
               <div className="freight-total">
@@ -1046,6 +1058,9 @@ export function Tracking({ account = false }: { account?: boolean }) {
             {q ? (
               <>
                 <p className="muted">
+                  <span className="print-only">
+                    BAOBAB · FACTURE PROFORMA · Réf. {order.reference || id}
+                  </span>
                   Version {q.revision} ·{" "}
                   {order.acceptedRevision === q.revision
                     ? `Acceptée le ${date(order.acceptedAt)}`

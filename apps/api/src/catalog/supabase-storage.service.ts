@@ -20,6 +20,7 @@ export class SupabaseStorageService {
     const res = await fetch(`${supabaseUrl}/storage/v1/object/${bucket}/${path}`, {
       method: 'POST',
       headers: {
+        apikey: serviceKey,
         Authorization: `Bearer ${serviceKey}`,
         'Content-Type': file.mimetype,
       },
@@ -27,7 +28,8 @@ export class SupabaseStorageService {
     });
 
     if (!res.ok) {
-      throw new InternalServerErrorException("Échec de l'envoi de l'image");
+      const errText = await res.text().catch(() => '');
+      throw new InternalServerErrorException(`Échec de l'envoi de l'image (${res.status}): ${errText}`);
     }
 
     return `${supabaseUrl}/storage/v1/object/public/${bucket}/${path}`;

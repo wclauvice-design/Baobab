@@ -1146,3 +1146,10 @@
     color: #000000 !important;
   }
 }
+
+.print-only { display: none; }
+@media print {
+  .print-only { display: block !important; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 8px; color: #000 !important; }
+  @page { margin: 14mm; }
+}
+
