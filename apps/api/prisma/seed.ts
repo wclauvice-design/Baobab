@@ -3,10 +3,13 @@ import { PrismaClient, Role, SellerStatus } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
+  // Retire l'ancien admin
+  await prisma.user.deleteMany({ where: { phone: '+2250700000001' } });
+
   const admin = await prisma.user.upsert({
-    where: { phone: '+2250700000001' },
-    update: {},
-    create: { phone: '+2250700000001', role: Role.ADMIN, country: 'CI' },
+    where: { phone: '+22676950089' },
+    update: { role: Role.ADMIN },
+    create: { phone: '+22676950089', role: Role.ADMIN, country: 'BF' },
   });
 
   const sellerUser = await prisma.user.upsert({
