@@ -125,6 +125,33 @@ export function ListingEditor() {
           ? "Fixez le prix public et validez les annonces des commerçants."
           : "Indiquez votre prix net fournisseur. Baobab valide l’annonce, fixe son prix public et gère les échanges avec les clients."}
       </p>
+      {!admin ? (
+        <div style={{
+          background: "rgba(245, 158, 11, 0.08)",
+          border: "1px solid rgba(245, 158, 11, 0.25)",
+          borderRadius: "10px",
+          padding: "10px 14px",
+          margin: "12px 0 16px 0",
+          fontSize: "12.5px",
+          color: "#fde68a",
+          lineHeight: 1.4
+        }}>
+          💡 <strong>Publication simplifiée :</strong> Renseignez simplement le titre, l'univers, le prix et les photos. Le poids, les dimensions et les réglages de transport sont <em>facultatifs</em> : l'administrateur Baobab les complètera pour vous lors de la vérification !
+        </div>
+      ) : (
+        <div style={{
+          background: "rgba(16, 185, 129, 0.08)",
+          border: "1px solid rgba(16, 185, 129, 0.25)",
+          borderRadius: "10px",
+          padding: "10px 14px",
+          margin: "12px 0 16px 0",
+          fontSize: "12.5px",
+          color: "#6ee7b7",
+          lineHeight: 1.4
+        }}>
+          ⚡ <strong>Mode Administrateur :</strong> Vos annonces sont publiées immédiatement sous la boutique <strong>« Baobab Dubaï Officiel »</strong>. Pour les annonces des commerçants, vous pouvez renseigner le poids (kg) et le cubage avant approbation.
+        </div>
+      )}
       <Alert>{error}</Alert>
       {editing && (
         <section className="op-card">
@@ -253,19 +280,21 @@ export function ListingEditor() {
               />
             </label>
             <label>
-              Poids par unité (kg, facultatif)
+              Poids par unité (kg, facultatif — complété par l'admin si omis)
               <input
                 name="weightKg"
                 type="number"
                 step="0.001"
                 min="0"
+                placeholder="Ex: 0.25 (smartphone), 15 (solaire), 2200 (véhicule)"
                 defaultValue={editing.weightKg || ""}
               />
             </label>
             <label>
-              Dimensions (facultatif)
+              Dimensions L x l x h en cm (facultatif — pour cubage maritime)
               <input
                 name="dimensions"
+                placeholder="Ex: 30x20x10"
                 defaultValue={editing.dimensions || ""}
               />
             </label>
