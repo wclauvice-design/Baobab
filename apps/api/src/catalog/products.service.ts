@@ -129,7 +129,7 @@ export class ProductsService {
   }
 
   async create(userId: string, role: Role, dto: CreateProductDto) {
-    const sellerId = await this.resolveSellerId(userId, role);
+    const sellerId = (role === Role.ADMIN && dto.sellerId) ? dto.sellerId : await this.resolveSellerId(userId, role);
     this.validateListing(dto);
     return this.prisma.product.create({
       data: {

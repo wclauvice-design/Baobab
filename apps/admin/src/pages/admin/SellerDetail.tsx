@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../../lib/api";
+import { useAuth } from "../../lib/auth";
 
 const STATUS_STYLES: Record<string, string> = {
   PENDING: "bg-amber-100 text-amber-700 border-amber-300",
@@ -11,24 +12,58 @@ const STATUS_STYLES: Record<string, string> = {
 export function SellerDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { impersonate } = useAuth();
   const [data, setData] = useState<any>(null);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<"adds" | "inquiries" | "commandes" | "ventes">("adds");
 
+  // Per-row quick image upload state
+  const [uploadingProductId, setUploadingProductId] = useState<string | null>(null);
+
   // Quick moderation & product completion modal
   const [modifyingProduct, setModifyingProduct] = useState<any>(null);
+  const [modalName, setModalName] = useState("");
+  const [modalDescription, setModalDescription] = useState("");
+  const [modalCategoryId, setModalCategoryId] = useState("");
+  const [modalSubcategory, setModalSubcategory] = useState("");
   const [modalWeight, setModalWeight] = useState("");
   const [modalPrice, setModalPrice] = useState("");
   const [modalPublicPrice, setModalPublicPrice] = useState("");
+  const [modalStock, setModalStock] = useState("");
+  const [modalCondition, setModalCondition] = useState("NEW");
+  const [modalLocation, setModalLocation] = useState("Dubaï");
+  const [modalDimensions, setModalDimensions] = useState("");
   const [modalNote, setModalNote] = useState("");
+  const [modalImages, setModalImages] = useState<string[]>([]);
   const [modifyingBusy, setModifyingBusy] = useState(false);
+  const [modalUploadingPhotos, setModalUploadingPhotos] = useState(false);
+
+  // New product modal
+  const [creatingProduct, setCreatingProduct] = useState(false);
+  const [newProdName, setNewProdName] = useState("");
+  const [newProdCategoryId, setNewProdCategoryId] = useState("");
+  const [newProdPrice, setNewProdPrice] = useState("");
+  const [newProdSupplierPrice, setNewProdSupplierPrice] = useState("");
+  const [newProdWeight, setNewProdWeight] = useState("");
+  const [newProdStock, setNewProdStock] = useState("10");
+  const [newProdCondition, setNewProdCondition] = useState("NEW");
+  const [newProdLocation, setNewProdLocation] = useState("Dubaï");
+  const [newProdDesc, setNewProdDesc] = useState("");
+  const [newProdFiles, setNewProdFiles] = useState<File[]>([]);
+  const [creatingBusy, setCreatingBusy] = useState(false);
 
   async function load() {
     if (!id) return;
     setLoading(true);
     setError("");
+
+    // Load categories if not loaded
+    if (categories.length === 0) {
+      api.get<any[]>("/categories").then(setCategories).catch(() => {});
+    }
 
     // 1. First attempt: Dedicated admin seller endpoint
     try {
@@ -170,26 +205,114 @@ export function SellerDetail() {
     }
   }
 
-  function openModifier(product: any) {
-    setModifyingProduct(product);
-    setModalWeight(product.weightKg ? String(product.weightKg) : "");
-    setModalPrice(product.sellerPrice ? String(product.sellerPrice) : "");
-    setModalPublicPrice(product.price ? String(product.price) : "");
-    setModalNote("");
+  async function handleLoginAsMerchant() {
+    if (!data?.seller?.user?.phone) return;
+    if (
+      !confirm(
+        `Voulez-vous basculer dans la boutique de "${data.seller.shopName}" (${data.seller.user.phone}) ?\n\nVous pourrez créer/éditer des annonces pour son compte et revenir à tout moment à votre session Admin via le bandeau supérieur.`
+      )
+    ) {
+      return;
+    }
+    try {
+      await impersonate(data.seller.user.phone, data.seller.shopName);
+      navigate("/");
+    } catch (e: any) {
+      alert("Erreur de connexion commerçant : " + (e?.message || e));
+    }
   }
 
-  async function handleSaveAndPublish(moderation: "PUBLISHED" | "REJECTED") {
+  // Quick single image upload on product row
+  async function handleRowUpload(productId: string, file: File) {
+    if (!file) return;
+    setUploadingProductId(productId);
+    try {
+      await api.upload(`/products/${productId}/images`, file);
+      await load();
+    } catch (e: any) {
+      alert("Erreur lors de l'envoi de la photo : " + (e?.message || e));
+    } finally {
+      setUploadingProductId(null);
+    }
+  }
+
+  // Quick single image delete
+  async function handleDeleteImage(productId: string, url: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!confirm("Voulez-vous supprimer cette photo ?")) return;
+    try {
+      await api.delete(`/products/${productId}/images`, { url });
+      if (modifyingProduct && modifyingProduct.id === productId) {
+        setModalImages((prev) => prev.filter((u) => u !== url));
+      }
+      await load();
+    } catch (err: any) {
+      alert("Erreur suppression photo : " + (err?.message || err));
+    }
+  }
+
+  function openModifier(product: any) {
+    setModifyingProduct(product);
+    setModalName(product.name || "");
+    setModalDescription(product.description || "");
+    setModalCategoryId(product.categoryId || "");
+    setModalSubcategory(product.subcategory || "");
+    setModalWeight(product.weightKg ? String(product.weightKg) : "");
+    setModalPrice(
+      product.sellerPrice
+        ? String(product.sellerPrice)
+        : product.supplierPrice
+        ? String(product.supplierPrice)
+        : ""
+    );
+    setModalPublicPrice(product.price ? String(product.price) : "");
+    setModalStock(product.stock !== undefined ? String(product.stock) : "1");
+    setModalCondition(product.condition || "NEW");
+    setModalLocation(product.location || "Dubaï");
+    setModalDimensions(product.dimensions || "");
+    setModalNote(product.moderationNote || "");
+    setModalImages(product.images || []);
+  }
+
+  async function handleModalUploadPhotos(files: FileList | null) {
+    if (!files || files.length === 0 || !modifyingProduct) return;
+    setModalUploadingPhotos(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const updated = await api.upload<any>(`/products/${modifyingProduct.id}/images`, file);
+        if (updated?.images) {
+          setModalImages(updated.images);
+        }
+      }
+      await load();
+    } catch (e: any) {
+      alert("Erreur téléversement photos : " + (e?.message || e));
+    } finally {
+      setModalUploadingPhotos(false);
+    }
+  }
+
+  async function handleSaveAndPublish(moderation: "PUBLISHED" | "PENDING" | "REJECTED") {
     if (!modifyingProduct) return;
     setModifyingBusy(true);
     try {
-      // 1. Update weight and optional price details
-      const updatePayload: any = {};
+      // 1. Update full product details
+      const updatePayload: any = {
+        name: modalName,
+        description: modalDescription,
+        categoryId: modalCategoryId || undefined,
+        subcategory: modalSubcategory || undefined,
+        condition: modalCondition,
+        location: modalLocation,
+        stock: modalStock ? Number(modalStock) : undefined,
+        dimensions: modalDimensions || undefined,
+      };
       if (modalWeight) updatePayload.weightKg = Number(modalWeight);
       if (modalPublicPrice) updatePayload.price = Number(modalPublicPrice);
+      if (modalPrice) updatePayload.supplierPrice = Number(modalPrice);
 
-      if (Object.keys(updatePayload).length > 0) {
-        await api.patch(`/products/${modifyingProduct.id}`, updatePayload).catch(() => {});
-      }
+      await api.patch(`/products/${modifyingProduct.id}`, updatePayload).catch(() => {});
 
       // 2. Apply moderation status
       await api.patch(`/products/${modifyingProduct.id}/moderation`, {
@@ -204,6 +327,52 @@ export function SellerDetail() {
       alert("Erreur lors de la mise à jour : " + (e?.message || e));
     } finally {
       setModifyingBusy(false);
+    }
+  }
+
+  async function handleCreateProduct(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newProdName || !newProdCategoryId || !newProdPrice) {
+      alert("Veuillez renseigner au minimum le nom, la catégorie et le prix public.");
+      return;
+    }
+    setCreatingBusy(true);
+    try {
+      const pubPrice = Number(newProdPrice);
+      const supPrice = newProdSupplierPrice ? Number(newProdSupplierPrice) : pubPrice;
+
+      const created = await api.post<any>("/products", {
+        name: newProdName,
+        description: newProdDesc || newProdName,
+        price: pubPrice,
+        supplierPrice: supPrice,
+        categoryId: newProdCategoryId,
+        stock: newProdStock ? Number(newProdStock) : 1,
+        weightKg: newProdWeight ? Number(newProdWeight) : undefined,
+        condition: newProdCondition,
+        location: newProdLocation,
+        sellerId: id,
+      });
+
+      // Upload selected photos for the newly created product
+      if (created?.id && newProdFiles.length > 0) {
+        for (const file of newProdFiles) {
+          await api.upload(`/products/${created.id}/images`, file).catch(() => {});
+        }
+      }
+
+      setCreatingProduct(false);
+      setNewProdName("");
+      setNewProdPrice("");
+      setNewProdSupplierPrice("");
+      setNewProdWeight("");
+      setNewProdDesc("");
+      setNewProdFiles([]);
+      await load();
+    } catch (err: any) {
+      alert("Erreur création article : " + (err?.message || err));
+    } finally {
+      setCreatingBusy(false);
     }
   }
 
@@ -274,21 +443,41 @@ export function SellerDetail() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* BOUTON PRO : Se connecter à la boutique du commerçant (Impersonation) */}
+          <button
+            onClick={handleLoginAsMerchant}
+            className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-600 to-amber-700 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:from-amber-700 hover:to-amber-800 transition-all active:scale-95"
+            title="Prendre la main sur la boutique pour créer/modifier des articles et voir ses commandes comme le vendeur"
+          >
+            <span>👤</span>
+            <span>Se connecter à sa boutique</span>
+          </button>
+
+          {/* Bouton Ajouter un article direct */}
+          <button
+            onClick={() => setCreatingProduct(true)}
+            className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-black transition-all active:scale-95"
+          >
+            <span>+</span>
+            <span>Ajouter une annonce</span>
+          </button>
+
           {seller.status !== "APPROVED" && (
             <button
               disabled={busy}
               onClick={() => updateStatus("APPROVED")}
-              className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50"
+              className="rounded-lg bg-emerald-700 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50"
             >
-              ✓ Approuver la boutique
+              ✓ Approuver boutique
             </button>
           )}
           {seller.status !== "SUSPENDED" && (
             <button
               disabled={busy}
               onClick={() => updateStatus("SUSPENDED")}
-              className="rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 hover:bg-red-100 disabled:opacity-50"
+              className="rounded-lg border border-red-300 bg-red-50 px-3.5 py-2 text-xs font-bold text-red-700 hover:bg-red-100 disabled:opacity-50"
             >
               ✕ Suspendre
             </button>
@@ -425,11 +614,12 @@ export function SellerDetail() {
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
               <tr>
-                <th className="px-4 py-3">Article</th>
+                <th className="px-4 py-3">Photos</th>
+                <th className="px-4 py-3">Article & Référence</th>
                 <th className="px-4 py-3">Catégorie</th>
-                <th className="px-4 py-3">Prix Vente</th>
+                <th className="px-4 py-3">Prix Public</th>
                 <th className="px-4 py-3">Prix Commerçant</th>
-                <th className="px-4 py-3">Poids</th>
+                <th className="px-4 py-3">Poids (kg)</th>
                 <th className="px-4 py-3">Statut</th>
                 <th className="px-4 py-3">Action Admin</th>
               </tr>
@@ -437,53 +627,99 @@ export function SellerDetail() {
             <tbody className="divide-y divide-slate-100">
               {products.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
-                    Aucune annonce enregistrée pour ce commerçant.
+                  <td colSpan={8} className="px-4 py-12 text-center text-slate-500">
+                    <p className="text-base font-semibold">Aucune annonce enregistrée pour ce commerçant.</p>
+                    <button
+                      onClick={() => setCreatingProduct(true)}
+                      className="mt-3 rounded-lg bg-emerald-700 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-800"
+                    >
+                      + Ajouter la première annonce
+                    </button>
                   </td>
                 </tr>
               ) : (
                 products.map((p: any) => (
-                  <tr key={p.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium text-slate-900">
-                      <div className="flex items-center gap-3">
-                        {p.images?.[0] ? (
-                          <img
-                            src={p.images[0]}
-                            alt={p.name}
-                            className="h-10 w-10 rounded-lg object-cover"
-                          />
+                  <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                    {/* Photos Column with Instant Upload & Thumbnail Gallery */}
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1.5">
+                        {p.images && p.images.length > 0 ? (
+                          p.images.slice(0, 3).map((imgUrl: string, idx: number) => (
+                            <div key={idx} className="group relative h-10 w-10 shrink-0">
+                              <img
+                                src={imgUrl}
+                                alt={`Photo ${idx + 1}`}
+                                className="h-10 w-10 rounded-md object-cover border border-slate-200 shadow-xs"
+                              />
+                              <button
+                                onClick={(e) => handleDeleteImage(p.id, imgUrl, e)}
+                                title="Supprimer cette photo"
+                                className="absolute -top-1.5 -right-1.5 hidden h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow group-hover:flex"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))
                         ) : (
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-xs text-slate-400">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 text-[10px] font-semibold text-slate-400">
                             Sans photo
                           </div>
                         )}
-                        <div>
-                          <div>{p.name}</div>
-                          <div className="text-xs text-slate-400">Réf : {p.id.slice(0, 10)}</div>
-                        </div>
+
+                        {/* Quick Add Photo Button */}
+                        <label
+                          className={`flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-dashed border-emerald-400 bg-emerald-50 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition-colors ${
+                            uploadingProductId === p.id ? "animate-pulse" : ""
+                          }`}
+                          title="Téléverser une photo pour cet article"
+                        >
+                          {uploadingProductId === p.id ? "…" : "+"}
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            disabled={uploadingProductId === p.id}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleRowUpload(p.id, file);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
                       </div>
                     </td>
+
+                    {/* Article & Details */}
+                    <td className="px-4 py-3 font-medium text-slate-900 max-w-sm">
+                      <div className="font-semibold line-clamp-2">{p.name}</div>
+                      <div className="text-xs text-slate-400 font-mono mt-0.5">Réf : {p.id}</div>
+                    </td>
+
                     <td className="px-4 py-3 text-slate-600">{p.category?.name || "—"}</td>
-                    <td className="px-4 py-3 font-bold text-slate-900">
+
+                    <td className="px-4 py-3 font-bold text-slate-900 whitespace-nowrap">
                       {Number(p.price || 0).toLocaleString("fr-FR")} FCFA
                     </td>
-                    <td className="px-4 py-3 text-slate-600">
+
+                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                       {p.sellerPrice
                         ? `${Number(p.sellerPrice).toLocaleString("fr-FR")} FCFA`
                         : p.supplierPrice
                         ? `${Number(p.supplierPrice).toLocaleString("fr-FR")} FCFA`
                         : "—"}
                     </td>
-                    <td className="px-4 py-3 text-slate-600">
+
+                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                       {p.weightKg ? (
-                        `${p.weightKg} kg`
+                        <span className="font-bold text-slate-800">{p.weightKg} kg</span>
                       ) : (
                         <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
                           Non renseigné
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3">
+
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                           p.moderation === "PUBLISHED"
@@ -500,10 +736,11 @@ export function SellerDetail() {
                           : "Rejeté"}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <button
                         onClick={() => openModifier(p)}
-                        className="rounded-lg bg-slate-800 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-slate-900"
+                        className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-black transition-all"
                       >
                         Compléter & modérer →
                       </button>
@@ -566,14 +803,12 @@ export function SellerDetail() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <Link
-                          to={`/messages/${inq.id}`}
-                          className="font-bold text-emerald-700 hover:text-emerald-900 hover:underline"
-                        >
-                          Discuter →
-                        </Link>
-                      </div>
+                      <Link
+                        to={`/messages/${inq.id}`}
+                        className="font-bold text-emerald-700 hover:text-emerald-900 hover:underline"
+                      >
+                        Discuter →
+                      </Link>
                     </td>
                   </tr>
                 ))
@@ -718,68 +953,231 @@ export function SellerDetail() {
         </div>
       )}
 
-      {/* MODAL ADMIN : Compléter le poids, prix et modérer l'annonce */}
+      {/* MODAL ADMIN 1 : Compléter le poids, photos, prix et modérer l'annonce */}
       {modifyingProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs overflow-y-auto">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl text-slate-900">
             <div className="flex items-center justify-between border-b pb-3">
               <div>
-                <h3 className="text-lg font-black text-slate-900">Compléter & Modérer l'Annonce</h3>
-                <p className="text-xs text-slate-500">{modifyingProduct.name}</p>
+                <h3 className="text-lg font-black text-slate-900">Compléter, Enrichir & Modérer</h3>
+                <p className="text-xs text-slate-500 font-mono">ID : {modifyingProduct.id}</p>
               </div>
               <button
                 onClick={() => setModifyingProduct(null)}
-                className="text-slate-400 hover:text-slate-600 font-bold"
+                className="text-slate-400 hover:text-slate-600 font-bold text-lg"
               >
                 ✕
               </button>
             </div>
 
             <div className="mt-4 space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Poids du colis (en kg) <span className="text-emerald-700 font-semibold">*Important pour le calcul de fret</span>
+              {/* SECTION PHOTOS DU PRODUIT */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">
+                  Photos réelles du produit ({modalImages.length} photo{modalImages.length > 1 ? "s" : ""})
                 </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={modalWeight}
-                  onChange={(e) => setModalWeight(e.target.value)}
-                  placeholder="Ex : 2.5"
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
-                />
-                <p className="mt-1 text-xs text-slate-500">
-                  Permet à l'algorithme logistique de calculer les frais de transport aérien / maritime.
-                </p>
+
+                {/* Existing Photos Grid */}
+                <div className="flex flex-wrap gap-2.5 mb-3">
+                  {modalImages.map((imgUrl, idx) => (
+                    <div key={idx} className="group relative h-16 w-16">
+                      <img
+                        src={imgUrl}
+                        alt={`Photo ${idx + 1}`}
+                        className="h-16 w-16 rounded-lg object-cover border border-slate-300 shadow-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteImage(modifyingProduct.id, imgUrl, e)}
+                        className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow hover:bg-red-700"
+                        title="Supprimer cette photo"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+
+                  {/* Multi-upload dropzone / trigger */}
+                  <label
+                    className={`flex h-16 w-28 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-emerald-500 bg-emerald-50 text-center text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors ${
+                      modalUploadingPhotos ? "animate-pulse" : ""
+                    }`}
+                  >
+                    <span>{modalUploadingPhotos ? "Envoi…" : "+ Ajouter"}</span>
+                    <span className="text-[10px] font-normal text-emerald-600">JPG/PNG/WebP</span>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      disabled={modalUploadingPhotos}
+                      onChange={(e) => handleModalUploadPhotos(e.target.files)}
+                    />
+                  </label>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Prix public affiché sur la marketplace (FCFA)
-                </label>
-                <input
-                  type="number"
-                  value={modalPublicPrice}
-                  onChange={(e) => setModalPublicPrice(e.target.value)}
-                  placeholder="Ex : 25000"
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
-                />
+              {/* Title & Category */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Titre de l'article
+                  </label>
+                  <input
+                    type="text"
+                    value={modalName}
+                    onChange={(e) => setModalName(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Catégorie
+                  </label>
+                  <select
+                    value={modalCategoryId}
+                    onChange={(e) => setModalCategoryId(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                  >
+                    <option value="">Sélectionner une catégorie...</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Sous-catégorie
+                  </label>
+                  <input
+                    type="text"
+                    value={modalSubcategory}
+                    onChange={(e) => setModalSubcategory(e.target.value)}
+                    placeholder="Ex : Smartphones, SUV..."
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
               </div>
 
+              {/* Poids et Prix */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Poids (en kg) <span className="text-emerald-700 font-bold">*Fret</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={modalWeight}
+                    onChange={(e) => setModalWeight(e.target.value)}
+                    placeholder="Ex : 2.5"
+                    className="mt-1 w-full rounded-lg border border-emerald-400 bg-emerald-50/30 px-3 py-2 text-sm font-bold text-slate-900 focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Prix Vente Public (FCFA)
+                  </label>
+                  <input
+                    type="number"
+                    value={modalPublicPrice}
+                    onChange={(e) => setModalPublicPrice(e.target.value)}
+                    placeholder="Ex : 25000"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-bold text-slate-900 focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Prix Commerçant (FCFA)
+                  </label>
+                  <input
+                    type="number"
+                    value={modalPrice}
+                    onChange={(e) => setModalPrice(e.target.value)}
+                    placeholder="Ex : 20000"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* État, Stock, Lieu */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Condition
+                  </label>
+                  <select
+                    value={modalCondition}
+                    onChange={(e) => setModalCondition(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                  >
+                    <option value="NEW">Neuf Scellé</option>
+                    <option value="REFURBISHED">Reconditionné A+</option>
+                    <option value="USED">Occasion Bon État</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Stock
+                  </label>
+                  <input
+                    type="number"
+                    value={modalStock}
+                    onChange={(e) => setModalStock(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Lieu de provenance
+                  </label>
+                  <input
+                    type="text"
+                    value={modalLocation}
+                    onChange={(e) => setModalLocation(e.target.value)}
+                    placeholder="Dubaï, Ouagadougou..."
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Note interne / Remarque pour le commerçant
+                  Description de l'article
                 </label>
                 <textarea
-                  rows={2}
-                  value={modalNote}
-                  onChange={(e) => setModalNote(e.target.value)}
-                  placeholder="Remarque éventuelle sur la fiche produit..."
+                  rows={3}
+                  value={modalDescription}
+                  onChange={(e) => setModalDescription(e.target.value)}
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t">
+              {/* Note interne */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Remarque / Note pour le commerçant
+                </label>
+                <input
+                  type="text"
+                  value={modalNote}
+                  onChange={(e) => setModalNote(e.target.value)}
+                  placeholder="Remarque éventuelle sur la fiche..."
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap justify-between gap-2 pt-3 border-t">
                 <button
                   type="button"
                   disabled={modifyingBusy}
@@ -788,16 +1186,220 @@ export function SellerDetail() {
                 >
                   ✕ Rejeter l'annonce
                 </button>
-                <button
-                  type="button"
-                  disabled={modifyingBusy}
-                  onClick={() => handleSaveAndPublish("PUBLISHED")}
-                  className="rounded-lg bg-emerald-700 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50"
-                >
-                  {modifyingBusy ? "Enregistrement…" : "✓ Valider & Publier"}
-                </button>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={modifyingBusy}
+                    onClick={() => handleSaveAndPublish("PENDING")}
+                    className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-800 hover:bg-amber-100 disabled:opacity-50"
+                  >
+                    ⏳ Garder en attente
+                  </button>
+                  <button
+                    type="button"
+                    disabled={modifyingBusy}
+                    onClick={() => handleSaveAndPublish("PUBLISHED")}
+                    className="rounded-lg bg-emerald-700 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50"
+                  >
+                    {modifyingBusy ? "Enregistrement…" : "✓ Valider & Publier sur Marketplace"}
+                  </button>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL ADMIN 2 : Créer un nouvel article directement pour ce commerçant */}
+      {creatingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs overflow-y-auto">
+          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl text-slate-900">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div>
+                <h3 className="text-lg font-black text-slate-900">+ Nouvel Article pour ce Commerçant</h3>
+                <p className="text-xs text-slate-500">Boutique affiliée : <strong>{seller.shopName}</strong></p>
+              </div>
+              <button
+                onClick={() => setCreatingProduct(false)}
+                className="text-slate-400 hover:text-slate-600 font-bold text-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateProduct} className="mt-4 space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Nom de l'article *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newProdName}
+                  onChange={(e) => setNewProdName(e.target.value)}
+                  placeholder="Ex : iPhone 15 Pro Max 256GB Titane"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Catégorie *
+                  </label>
+                  <select
+                    required
+                    value={newProdCategoryId}
+                    onChange={(e) => setNewProdCategoryId(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                  >
+                    <option value="">Sélectionner une catégorie...</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Poids (kg) <span className="text-emerald-700 font-semibold">*Fret</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={newProdWeight}
+                    onChange={(e) => setNewProdWeight(e.target.value)}
+                    placeholder="Ex : 0.45"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Prix Vente Public (FCFA) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={newProdPrice}
+                    onChange={(e) => setNewProdPrice(e.target.value)}
+                    placeholder="Ex : 450000"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-bold text-slate-900 focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Prix Commerçant Fournisseur (FCFA)
+                  </label>
+                  <input
+                    type="number"
+                    value={newProdSupplierPrice}
+                    onChange={(e) => setNewProdSupplierPrice(e.target.value)}
+                    placeholder="Ex : 400000"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Condition
+                  </label>
+                  <select
+                    value={newProdCondition}
+                    onChange={(e) => setNewProdCondition(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                  >
+                    <option value="NEW">Neuf Scellé</option>
+                    <option value="REFURBISHED">Reconditionné A+</option>
+                    <option value="USED">Occasion Bon État</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Stock
+                  </label>
+                  <input
+                    type="number"
+                    value={newProdStock}
+                    onChange={(e) => setNewProdStock(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Lieu
+                  </label>
+                  <input
+                    type="text"
+                    value={newProdLocation}
+                    onChange={(e) => setNewProdLocation(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Photos réelles (Sélectionner 1 ou plusieurs images)
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      setNewProdFiles(Array.from(e.target.files));
+                    }
+                  }}
+                  className="mt-1 w-full rounded-lg border border-slate-300 p-2 text-xs focus:border-emerald-600 focus:outline-none"
+                />
+                {newProdFiles.length > 0 && (
+                  <p className="mt-1 text-xs text-emerald-700 font-semibold">
+                    ✓ {newProdFiles.length} photo{newProdFiles.length > 1 ? "s" : ""} sélectionnée{newProdFiles.length > 1 ? "s" : ""}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={newProdDesc}
+                  onChange={(e) => setNewProdDesc(e.target.value)}
+                  placeholder="Détails, spécifications techniques, garantie..."
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t">
+                <button
+                  type="button"
+                  onClick={() => setCreatingProduct(false)}
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={creatingBusy}
+                  className="rounded-lg bg-emerald-700 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50"
+                >
+                  {creatingBusy ? "Création en cours…" : "✓ Créer & Publier l'article"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
