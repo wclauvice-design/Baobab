@@ -312,7 +312,7 @@ export function ListingEditor() {
               />
             </label>
             <label>
-              Ajouter des photos (5 Mo maximum par image)
+              Ajouter des photos (2 à 20 photos par produit, 5 Mo max par image)
               <input
                 type="file"
                 name="photos"

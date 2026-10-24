@@ -137,7 +137,10 @@ export class ProductsService {
     productId: string,
     file: Express.Multer.File,
   ) {
-    await this.assertOwnership(userId, role, productId);
+    const product = await this.assertOwnership(userId, role, productId);
+    if ((product.images?.length || 0) >= 20) {
+      throw new BadRequestException("Nombre maximal de 20 photos atteint pour ce produit");
+    }
     const url = await this.storage.uploadProductImage(file, productId);
     return this.prisma.product.update({
       where: { id: productId },
@@ -193,6 +196,10 @@ export class ProductsService {
     if ((dto.minimumOrder ?? 1) !== 1 && (dto.minimumOrder ?? 1) % (dto.packSize ?? 1) !== 0)
       throw new BadRequestException(
         "Le minimum doit être un multiple du conditionnement",
+      );
+    if (dto.images && dto.images.length > 20)
+      throw new BadRequestException(
+        "Un produit peut contenir au maximum 20 photos",
       );
     if (
       dto.attributes &&
