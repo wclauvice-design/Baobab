@@ -13,6 +13,7 @@
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:seed": "ts-node prisma/seed.ts",
     "catalog:import": "ts-node scripts/import-catalog.ts",
+    "catalog:import:rest": "ts-node scripts/import-via-rest.ts",
     "test": "jest"
   },
   "dependencies": {
