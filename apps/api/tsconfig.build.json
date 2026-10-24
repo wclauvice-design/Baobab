@@ -4,6 +4,7 @@
     "node_modules",
     "dist",
     "prisma",
+    "scripts",
     "**/*.spec.ts"
   ]
 }
