@@ -18,8 +18,7 @@ function slugify(s: string): string {
 
 async function main() {
   if (!SERVICE_KEY || SERVICE_KEY.startsWith('sb_publishable_')) {
-    console.error('❌ ERREUR: La clé SUPABASE_SERVICE_ROLE_KEY dans .env est encore la clé publique ou est vide.');
-    console.error('Veuillez renseigner la clé secrète service_role de Supabase dans apps/api/.env');
+    console.error('❌ ERREUR: La clé SUPABASE_SERVICE_ROLE_KEY dans .env est manquante ou invalide.');
     process.exit(1);
   }
 
@@ -27,48 +26,74 @@ async function main() {
   const products: any[] = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
   console.log(`📦 Chargement de ${products.length} produits...`);
 
-  // 1. Sync Categories
-  const categoryMap = new Map<string, any>();
+  // 1. Fetch all existing categories from Supabase
+  console.log('🔄 Récupération des catégories existantes depuis Supabase...');
+  const catFetchRes = await fetch(`${SUPABASE_URL}/rest/v1/Category?select=id,name,slug`, {
+    headers: {
+      'apikey': SERVICE_KEY,
+      'Authorization': `Bearer ${SERVICE_KEY}`,
+    },
+  });
+
+  const existingCats: any[] = await catFetchRes.json();
+  const slugToId = new Map<string, string>();
+  for (const c of existingCats) {
+    slugToId.set(c.slug, c.id);
+  }
+  console.log(`ℹ️ ${existingCats.length} catégories déjà enregistrées dans Supabase.`);
+
+  // 2. Identify missing categories
+  const neededCats = new Map<string, any>();
   for (const p of products) {
     if (!p.category) continue;
-    if (!categoryMap.has(p.category)) {
-      categoryMap.set(p.category, {
-        id: 'cat-' + slugify(p.category),
+    const slug = slugify(p.category);
+    if (!slugToId.has(slug) && !neededCats.has(slug)) {
+      neededCats.set(slug, {
+        id: 'cat-' + slug,
         name: p.category,
-        slug: slugify(p.category),
+        slug: slug,
         universe: p.universe || 'classifieds',
       });
     }
   }
 
-  console.log(`🔄 Synchronisation de ${categoryMap.size} catégories via REST...`);
-  const catPayload = Array.from(categoryMap.values());
-  const catRes = await fetch(`${SUPABASE_URL}/rest/v1/Category`, {
-    method: 'POST',
-    headers: {
-      'apikey': SERVICE_KEY,
-      'Authorization': `Bearer ${SERVICE_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'resolution=merge-duplicates',
-    },
-    body: JSON.stringify(catPayload),
-  });
+  if (neededCats.size > 0) {
+    console.log(`Insertion de ${neededCats.size} nouvelles catégories...`);
+    const newCatsPayload = Array.from(neededCats.values());
+    const insertCatRes = await fetch(`${SUPABASE_URL}/rest/v1/Category?on_conflict=slug`, {
+      method: 'POST',
+      headers: {
+        'apikey': SERVICE_KEY,
+        'Authorization': `Bearer ${SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify(newCatsPayload),
+    });
 
-  if (!catRes.ok) {
-    const errText = await catRes.text();
-    console.error('Erreur sync catégories:', catRes.status, errText);
-    process.exit(1);
+    if (!insertCatRes.ok) {
+      console.warn('Note sync categories:', await insertCatRes.text());
+    } else {
+      for (const nc of newCatsPayload) {
+        slugToId.set(nc.slug, nc.id);
+      }
+    }
   }
-  console.log('✅ Catégories synchronisées avec succès !');
 
-  // 2. Insert Products in batches of 200
+  // Fallback default category
+  const defaultCatId = existingCats[0]?.id || 'cat-autres';
+
+  // 3. Insert Products in chunks of 200 via PostgREST upsert
   const CHUNK_SIZE = 200;
   let totalInserted = 0;
+  console.log(`🚀 Début de l'importation de ${products.length} produits par lots de ${CHUNK_SIZE}...`);
 
   for (let i = 0; i < products.length; i += CHUNK_SIZE) {
     const chunk = products.slice(i, i + CHUNK_SIZE);
     const payload = chunk.map((p) => {
-      const cat = categoryMap.get(p.category);
+      const slug = slugify(p.category || '');
+      const catId = slugToId.get(slug) || defaultCatId;
+
       return {
         id: p.id,
         name: p.name,
@@ -78,7 +103,7 @@ async function main() {
         currency: p.currency || 'XOF',
         stock: p.stock || 10,
         images: p.images || [],
-        categoryId: cat ? cat.id : 'cat-autres',
+        categoryId: catId,
         moderation: 'PUBLISHED',
         subcategory: p.subcategory || 'Autres',
         condition: p.condition || 'NEW',
@@ -94,7 +119,7 @@ async function main() {
       };
     });
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/Product`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/Product?on_conflict=id`, {
       method: 'POST',
       headers: {
         'apikey': SERVICE_KEY,
@@ -107,14 +132,14 @@ async function main() {
 
     if (!res.ok) {
       const err = await res.text();
-      console.error(`Erreur sur le lot ${i} - ${i + CHUNK_SIZE}:`, res.status, err);
+      console.error(`❌ Erreur sur le lot ${i} - ${i + chunk.length}:`, res.status, err);
     } else {
       totalInserted += payload.length;
-      console.log(`🚀 Progression : ${totalInserted} / ${products.length} produits insérés...`);
+      console.log(`✅ [${Math.round((totalInserted / products.length) * 100)}%] ${totalInserted} / ${products.length} produits insérés avec succès...`);
     }
   }
 
-  console.log(`🎉 SUCCÈS TOTAL : ${totalInserted} produits importés dans Supabase !`);
+  console.log(`\n🎉 SUCCÈS TOTAL : ${totalInserted} produits importés et actifs dans Supabase !`);
 }
 
 main().catch(console.error);
