@@ -2275,3 +2275,50 @@ html, body, #root, .market {
     box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
   }
 }
+
+
+/* ==========================================================================
+   NOTIFICATION SYSTEM & UNREAD BADGES
+   ========================================================================== */
+.chat-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 3px;
+}
+
+.notif-optin-chip {
+  background: #f2c35e25;
+  border: 1px solid #f2c35e;
+  color: #855d14;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.notif-optin-chip:hover {
+  background: #f2c35e;
+  color: #173e32;
+}
+
+.notif-active-chip {
+  font-size: 11px;
+  color: #10b981;
+  font-weight: 600;
+}
+
+.mobile-nav-dot {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid #ffffff;
+  animation: live-pulse 2s infinite;
+}

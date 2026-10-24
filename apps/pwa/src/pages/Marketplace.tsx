@@ -22,6 +22,12 @@ import {
 import { estimateFreight, ShippingMode } from "../lib/freight";
 import { fallbackPhoto } from "../lib/photos";
 import { BaobabPromises, DiscoverySearch, LiveActivityTicker } from "./DiscoveryMotion";
+import {
+  getNotificationPermission,
+  hasNotificationSupport,
+  notifyNewMessage,
+  requestNotificationPermission,
+} from "../lib/notifications";
 import "./marketplace.css";
 import "./marketplace-premium.css";
 import "./marketplace-motion.css";
@@ -249,6 +255,9 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
                 <b className="mobile-nav-badge" data-testid="mobile-favorites-count">
                   {favoriteIds.length}
                 </b>
+              )}
+              {to === "/messages" && Boolean(getDeviceActiveConversation()) && (
+                <span className="mobile-nav-dot" title="Conversation active" />
               )}
             </span>
             <span className="mobile-nav-label">{label}</span>
@@ -1063,9 +1072,24 @@ export function Inbox() {
     [error, setError] = useState(""),
     [text, setText] = useState(""),
     [busy, setBusy] = useState(false);
+  const [notifState, setNotifState] = useState<NotificationPermission>(getNotificationPermission);
   const contacts = saved<any[]>("baobab_conversations", []),
     selected = contacts.find((c) => c.id === id);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const prevMsgCountRef = useRef<number>(0);
+
+  // Monitor incoming messages and trigger sound / browser notifications
+  useEffect(() => {
+    const msgs = conversation?.messages || [];
+    if (prevMsgCountRef.current > 0 && msgs.length > prevMsgCountRef.current) {
+      const added = msgs.slice(prevMsgCountRef.current);
+      const incoming = added.find((m: any) => m.role === "BAOBAB");
+      if (incoming) {
+        notifyNewMessage("Équipe Baobab", incoming.body);
+      }
+    }
+    prevMsgCountRef.current = msgs.length;
+  }, [conversation?.messages]);
 
   // Auto-route device to its active conversation if /messages opened directly
   useEffect(() => {
@@ -1217,9 +1241,26 @@ export function Inbox() {
               <strong>
                 {conversation?.subject || "Bienvenue chez Baobab"}
               </strong>
-              <small className="chat-live-badge">
-                <span className="live-dot" /> En direct · Réponse instantanée
-              </small>
+              <div className="chat-status-row">
+                <small className="chat-live-badge">
+                  <span className="live-dot" /> En direct · Réponse instantanée
+                </small>
+                {hasNotificationSupport() && notifState !== "granted" && (
+                  <button
+                    type="button"
+                    className="notif-optin-chip"
+                    onClick={async () => {
+                      const p = await requestNotificationPermission();
+                      setNotifState(p);
+                    }}
+                  >
+                    🔔 Activer alertes
+                  </button>
+                )}
+                {notifState === "granted" && (
+                  <span className="notif-active-chip">🔔 Alertes actives</span>
+                )}
+              </div>
             </div>
           </div>
           <div className="chat-messages" aria-live="polite">
