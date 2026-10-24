@@ -145,13 +145,13 @@ export function useUserDestination() {
 
 export const STORY_CATEGORIES = [
   { id: "all", label: "Tout voir", emoji: "✨", universe: "", subcategory: "" },
-  { id: "motors", label: "Véhicules GCC", emoji: "🚗", universe: "motors", subcategory: "" },
-  { id: "solar", label: "Solaire 5-10kW", emoji: "⚡", universe: "classifieds", subcategory: "Énergie Solaire & Batteries" },
-  { id: "ac", label: "Clim Tropicale", emoji: "❄️", universe: "classifieds", subcategory: "Électroménager" },
-  { id: "phones", label: "iPhones & Tech", emoji: "📱", universe: "classifieds", subcategory: "Téléphones & Tablettes" },
-  { id: "laptops", label: "PC & Laptops", emoji: "💻", universe: "classifieds", subcategory: "Informatique & PC" },
-  { id: "trade", label: "Groupes & Chantier", emoji: "🛠️", universe: "trade", subcategory: "" },
-  { id: "home", label: "Mobilier Bureau", emoji: "🛋️", universe: "home", subcategory: "" },
+  { id: "motors", label: "Véhicules", emoji: "🚗", universe: "motors", subcategory: "" },
+  { id: "solar", label: "Solaire", emoji: "⚡", universe: "classifieds", subcategory: "Énergie Solaire & Batteries" },
+  { id: "ac", label: "Climatiseurs", emoji: "❄️", universe: "classifieds", subcategory: "Électroménager" },
+  { id: "phones", label: "Smartphones", emoji: "📱", universe: "classifieds", subcategory: "Téléphones & Tablettes" },
+  { id: "laptops", label: "Ordinateurs", emoji: "💻", universe: "classifieds", subcategory: "Informatique & PC" },
+  { id: "trade", label: "Outillage", emoji: "🛠️", universe: "trade", subcategory: "" },
+  { id: "home", label: "Mobilier", emoji: "🛋️", universe: "home", subcategory: "" },
 ];
 
 const FAVORITES_KEY = "baobab_favorites";

@@ -1264,17 +1264,20 @@
 
 /* 2. Story Circles Luxury Native Bar */
 .story-circles-bar {
-  margin: 10px 0 24px 0;
+  margin: 12px 0 22px 0;
   position: relative;
+  width: 100%;
 }
 .story-circles-track {
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  padding: 8px 4px 14px 4px;
+  overflow-y: hidden;
+  padding: 8px 6px 14px 6px;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  align-items: flex-start;
 }
 .story-circles-track::-webkit-scrollbar {
   display: none;
@@ -1286,28 +1289,34 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  min-width: 74px;
+  gap: 7px;
+  flex: 0 0 72px;
+  width: 72px;
+  min-width: 72px;
+  max-width: 72px;
+  flex-shrink: 0;
   padding: 0;
   scroll-snap-align: start;
   outline: none;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 .story-circle-btn:active {
-  transform: scale(0.92);
+  transform: scale(0.93);
 }
 .story-circle-glow {
-  width: 58px;
-  height: 58px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: radial-gradient(circle at 35% 35%, #1f293d, #0b111e);
-  border: 2px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(135% 135% at 30% 25%, #182236 0%, #0d1424 70%, #070a12 100%);
+  border: 1.5px solid rgba(229, 184, 105, 0.22);
   position: relative;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.08);
 }
 .story-circle-glow::after {
   content: "";
@@ -1315,34 +1324,47 @@
   inset: -4px;
   border-radius: 50%;
   border: 1.5px solid transparent;
-  transition: border-color 0.3s ease;
+  transition: all 0.25s ease;
 }
-.story-circle-btn:hover .story-circle-glow,
+.story-circle-btn:hover .story-circle-glow {
+  border-color: rgba(229, 184, 105, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), 0 0 12px rgba(229, 184, 105, 0.25);
+}
 .story-circle-btn.active .story-circle-glow {
-  border-color: #f59e0b;
-  box-shadow: 0 0 18px rgba(245, 158, 11, 0.45), inset 0 0 12px rgba(245, 158, 11, 0.2);
+  background: radial-gradient(135% 135% at 30% 25%, #22304c 0%, #111a2f 70%, #080d18 100%);
+  border-color: #f3c77c;
+  box-shadow: 0 0 16px rgba(229, 184, 105, 0.45), 0 4px 14px rgba(0, 0, 0, 0.6);
   transform: translateY(-2px);
 }
 .story-circle-btn.active .story-circle-glow::after {
-  border-color: rgba(245, 158, 11, 0.5);
-  animation: pulse-ring 2s ease-out infinite;
+  border-color: rgba(229, 184, 105, 0.55);
 }
 .story-emoji {
-  font-size: 26px;
+  font-size: 25px;
   line-height: 1;
+  display: block;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 .story-label {
+  display: block;
+  width: 100%;
+  max-width: 72px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   color: #94a3b8;
   text-align: center;
   white-space: nowrap;
-  letter-spacing: 0.02em;
-  transition: color 0.25s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  padding: 0 2px;
+  box-sizing: border-box;
+  transition: color 0.2s ease, font-weight 0.2s ease;
 }
 .story-circle-btn.active .story-label {
-  color: #fbbf24;
+  color: #f3c77c;
   font-weight: 700;
 }
 
@@ -1358,19 +1380,26 @@
   }
   .story-circles-track {
     gap: 12px;
+    padding: 6px 8px 12px 8px;
   }
   .story-circle-btn {
-    min-width: 66px;
+    flex: 0 0 68px;
+    width: 68px;
+    min-width: 68px;
+    max-width: 68px;
+    flex-shrink: 0;
+    gap: 6px;
   }
   .story-circle-glow {
     width: 52px;
     height: 52px;
   }
   .story-emoji {
-    font-size: 23px;
+    font-size: 22px;
   }
   .story-label {
-    font-size: 10px;
+    font-size: 10.5px;
+    max-width: 68px;
   }
 
   /* Grid 2 colonnes ultra-optimisée */
