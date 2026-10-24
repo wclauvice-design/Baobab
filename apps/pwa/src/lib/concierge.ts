@@ -57,6 +57,33 @@ export function saved<T>(key: string, fallback: T): T {
 }
 export const save = (key: string, value: unknown) =>
   localStorage.setItem(key, JSON.stringify(value));
+
+export interface ActiveConversation {
+  id: string;
+  token: string;
+  subject?: string;
+}
+
+export function getDeviceActiveConversation(): ActiveConversation | null {
+  const active = saved<ActiveConversation | null>("baobab_active_conversation", null);
+  if (active && active.id && active.token) return active;
+  const list = saved<any[]>("baobab_conversations", []);
+  if (list && list.length > 0) {
+    const last = list[list.length - 1];
+    if (last && last.id && last.token) {
+      save("baobab_active_conversation", last);
+      return last;
+    }
+  }
+  return null;
+}
+
+export function setDeviceActiveConversation(c: ActiveConversation) {
+  save("baobab_active_conversation", c);
+  const list = saved<any[]>("baobab_conversations", []);
+  const filtered = list.filter((item) => item.id !== c.id);
+  save("baobab_conversations", [c, ...filtered].slice(0, 10));
+}
 export const universes = [
   { id: "motors", name: "Véhicules", subtitle: "Motors", icon: "car" },
   {

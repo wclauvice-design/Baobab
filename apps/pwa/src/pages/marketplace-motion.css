@@ -477,3 +477,106 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   .mobile-nav { left: 8px; right: 8px; }
 }
 
+/* Product-first storefront. Warm surfaces keep imagery and prices in focus. */
+.market:has(.app-sticky-header) { background: #f6f4ee; color: #20372f; }
+.market:has(.app-sticky-header) .market-main { max-width: 1440px; }
+.app-sticky-header { background: #f2c35e; border-color: #dfb254; backdrop-filter: none; box-shadow: none; }
+.app-brand-text { background: none; -webkit-text-fill-color: #173e32; color: #173e32; }
+.app-top-nav-row { height: 54px; }
+.app-search-pill, .app-search-pill:focus-within { background: #fffefb; border-color: #e0c78d; height: 44px; min-width: 0; box-shadow: none; padding-right: 4px; }
+.app-search-pill input { color: #20372f; font-size: 16px; }
+.app-search-pill input::placeholder { color: #73776d; font-size: 13px; }
+.app-search-pill > svg, .search-hint-tag { display: none; }
+.search-submit { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 36px; border: 0; border-radius: 24px; background: #173e32; cursor: pointer; }
+.search-submit svg { color: #fff; }
+.search-clear-btn { min-width: 36px; min-height: 36px; color: #385448; }
+.app-dest-pill { background: #f9d98f; border-color: #d2aa55; height: 40px; }
+.app-dest-select { color: #20372f; }
+.app-dest-select option { color: #20372f; background: #fff; }
+.app-category-strip { gap: 8px; padding-top: 0; }
+.app-cat-tab { min-height: 44px; color: #5b4d2d; font-size: 13px; }
+.app-cat-tab.active, .app-cat-tab:hover { color: #173e32; }
+.tab-gold-indicator { background: #173e32; box-shadow: none; animation: rise-in .25s ease both; }
+.app-hero-strip { background: linear-gradient(110deg, #f6d27d, #f9e9b9); border: 0; box-shadow: none; padding: 18px 22px; margin: 12px 0; border-radius: 16px; position: relative; overflow: hidden; }
+.app-hero-strip::after { content: ''; position: absolute; width: 220px; height: 220px; border: 36px solid #ffffff30; border-radius: 50%; right: -80px; top: -120px; pointer-events: none; }
+.hero-strip-badge { color: #725320; font-size: 10px; letter-spacing: .13em; }
+.hero-strip-main h1 { color: #173e32; font-size: clamp(21px, 3vw, 32px); line-height: 1.15; letter-spacing: -.04em; margin: 5px 0 7px; font-weight: 800; }
+.hero-strip-main p { color: #61573c; font-size: 12px; margin: 0; }
+.hero-strip-pills { margin-top: 10px; }
+.hero-strip-pills .pill-item { color: #314b3d; background: #fff8e6; border: 0; font-size: 11px; text-decoration: none; }
+.hero-strip-pills .highlight { background: #173e32; color: #fff; }
+.live-sparkle { display: inline-block; animation: pop .8s ease 2; }
+.app-flash-showcase { gap: 12px; margin: 0 0 12px; }
+.flash-card { text-align: left; font-family: inherit; min-height: 116px; padding: 16px; border: 0; position: relative; overflow: hidden; }
+.flash-card.card-motors { background: #e7ece6; border: 1px solid #d5ded4; }
+.flash-card.card-solar { background: #f2e5d2; border: 1px solid #e6d5bb; }
+.flash-card-head .flash-label { color: #5b6c57; font-size: 10px; letter-spacing: .1em; }
+.flash-card-head h3 { color: #173e32; font-size: 18px; max-width: 26ch; line-height: 1.2; margin: 6px 0; }
+.flash-card-head p { color: #677063; font-size: 12px; }
+.flash-card .flash-badge { color: #173e32; background: none; padding: 0; font-size: 11px; }
+.flash-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px #173e3210; }
+.app-feed-header { margin: 14px 0 8px; }
+.feed-chip { min-height: 40px; font-size: 12px; color: #536156; border-color: #dedfd4; background: #fffefb; }
+.feed-chip.active, .feed-chip:hover { background: #173e32; color: #fff; border-color: #173e32; }
+.feed-counter { color: #637064; font-size: 12px; }
+.feed-filters { margin: 0 0 12px; border-bottom: 1px solid #dedfd4; }
+.feed-filters summary { cursor: pointer; min-height: 42px; padding: 10px 0; font-size: 12px; font-weight: 700; color: #304d3f; }
+.feed-filters summary span { float: right; font-weight: 400; color: #687365; }
+.feed-filters .filter-bar { position: static; margin: 0 0 12px; background: #fffefb; border-color: #dedfd4; box-shadow: none; }
+.feed-filters .filter-bar :is(input, select) { color: #20372f; background: #f6f4ee; border-color: #d4dbcf; }
+.feed-filters .text-button { color: #245c47; }
+.market:has(.app-sticky-header) .filter-chip { background: #e5eee5; color: #245c47; border-color: #c6d6c9; }
+.market:has(.app-sticky-header) .listing-tile { background: #fffefb; border: 1px solid #e3e5dc; box-shadow: none; border-radius: 12px; overflow: hidden; }
+.market:has(.app-sticky-header) .listing-tile:hover { border-color: #b1bfae; box-shadow: 0 8px 22px #173e3210; transform: translateY(-3px); }
+.market:has(.app-sticky-header) .listing-copy { padding: 12px; gap: 5px; }
+.market:has(.app-sticky-header) .listing-copy h3 { color: #263b30; font-size: 14px; }
+.market:has(.app-sticky-header) .listing-copy :is(.eyebrow, .origin-tag, .listing-meta) { color: #6b7567; }
+.market:has(.app-sticky-header) .listing-copy > strong { color: #174d37; font-size: 21px; letter-spacing: -.035em; }
+.market:has(.app-sticky-header) .listing-copy > strong small { color: #697568; font-size: 11px; letter-spacing: 0; }
+.market:has(.app-sticky-header) .meta-moq { color: #45614b; }
+.market:has(.app-sticky-header) .listing-picture { aspect-ratio: 1.15; background: #e9ece4; }
+.market:has(.app-sticky-header) .listing-picture::after { display: none; }
+.market:has(.app-sticky-header) .favorite { background: #fffefbe8; color: #375843; border-color: #e0e4da; box-shadow: none; }
+.market:has(.app-sticky-header) .favorite.selected { color: #b84b35; }
+.market:has(.app-sticky-header) .favorite.selected svg { fill: #b84b35; }
+.market:has(.app-sticky-header) .listing-grid { gap: 14px; }
+.app-sticky-header :focus-visible, .listings :focus-visible, .flash-card:focus-visible { outline: 3px solid #49795c; outline-offset: 3px; }
+@media (min-width: 701px) {
+  .app-sticky-header { top: 0; margin: 0 0 12px; padding: 10px 18px 0; border-radius: 16px; }
+  .market:has(.app-sticky-header) .listing-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .app-top-nav-row { height: 48px; gap: 6px; }
+  .app-brand-text { display: none; }
+  .app-brand-badge { min-width: 26px; }
+  .app-dest-pill { max-width: 88px; }
+  .app-dest-select { min-width: 0; width: 100%; font-size: 12px; }
+  .dest-flag { display: none; }
+  .app-search-pill input { font-size: 16px; }
+  .app-hero-strip { padding: 12px 14px; margin: 8px 0; }
+  .hero-strip-main h1 { font-size: 22px; }
+  .hero-strip-pills { display: none; }
+  .app-flash-showcase { gap: 8px; margin-bottom: 8px; }
+  .flash-card { min-height: 64px; padding: 10px 11px; }
+  .flash-card-foot { display: none; }
+  .flash-card-head h3 { font-size: 14px; }
+  .flash-card-head p { display: none; }
+  .flash-card-head .flash-label { font-size: 9px; }
+  .flash-card .flash-badge { font-size: 10px; }
+  .app-feed-header { flex-wrap: nowrap; margin-top: 8px; }
+  .app-feed-chips { min-width: 0; gap: 5px; }
+  .feed-chip { padding: 6px 10px; }
+  .feed-counter { font-size: 11px; }
+  .market:has(.app-sticky-header) .listing-copy { padding: 10px; }
+  .market:has(.app-sticky-header) .listing-copy > strong { font-size: 18px; }
+  .market:has(.app-sticky-header) .listing-copy > strong { color: #174d37 !important; }
+  .market:has(.app-sticky-header) .meta-moq { color: #45614b !important; background: #eef3e9 !important; }
+  .market:has(.app-sticky-header) .listing-picture { height: auto !important; }
+  .market:has(.app-sticky-header) .app-dest-select { background: transparent; color: #20372f; padding: 0 10px 0 0; border: 0; }
+  .market:has(.app-sticky-header) .listing-header-line { display: none; }
+  .market:has(.app-sticky-header) .mobile-nav { left: 0; right: 0; bottom: 0; padding: 5px 6px max(5px, env(safe-area-inset-bottom)); border-radius: 0; background: #fffefbf5; border-color: #e0e4da; box-shadow: 0 -3px 18px #173e3210; }
+  .market:has(.app-sticky-header) .mobile-nav a { color: #687568; min-height: 48px; }
+  .market:has(.app-sticky-header) .mobile-nav a.active { color: #174d37; }
+  .market:has(.app-sticky-header) .mobile-nav a.active .mobile-nav-icon { background: #f2d17c; color: #173e32; box-shadow: none; transform: none; }
+}
+

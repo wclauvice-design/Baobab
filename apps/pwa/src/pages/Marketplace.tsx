@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   Link,
   NavLink,
@@ -10,10 +10,12 @@ import { useAuth } from "../lib/auth";
 import {
   call,
   date,
+  getDeviceActiveConversation,
   money,
   requestKey,
   saved,
   save,
+  setDeviceActiveConversation,
   stages,
   universes,
 } from "../lib/concierge";
@@ -278,6 +280,7 @@ export function Empty({
   );
 }
 function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
+  const [imageFailed, setImageFailed] = useState(false);
   const { ids, toggle } = useFavorites();
   const favorite = ids.includes(p.id);
   const isRealPhoto = Boolean(p.images?.[0]);
@@ -292,10 +295,11 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
         <Link to={`/products/${p.id}`}>
           <img
             src={
-              p.images?.[0] ||
+              imageFailed ? "/photos/placeholder.svg" : p.images?.[0] ||
               fallbackPhoto(p.subcategory, p.category?.name, p.category?.universe, p.name)
             }
             alt={p.name}
+            onError={() => setImageFailed(true)}
             loading="lazy"
             decoding="async"
             className={isRealPhoto ? "is-real" : "is-sample"}
@@ -318,11 +322,12 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
                 ? "Reconditionné"
                 : "Occasion"}
           </span>
-          {isRealPhoto && (
+          {isRealPhoto && !imageFailed && (
             <span className="picture-tag is-real">
               <Icon name="check" size={10} /> Photo réelle
             </span>
           )}
+          {!isRealPhoto && !imageFailed && <span className="picture-tag is-sample-label">Illustration</span>}
         </div>
       </div>
       <div className="listing-copy">
@@ -459,6 +464,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
           >
             <Icon name="search" size={16} />
             <input
+              key={search}
               name="search"
               defaultValue={search}
               placeholder="Land Cruiser, Kit Solaire, iPhone..."
@@ -476,6 +482,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
             ) : (
               <span className="search-hint-tag">Dubaï</span>
             )}
+            <button type="submit" className="search-submit" aria-label="Lancer la recherche"><Icon name="search" size={18} /></button>
           </form>
 
           <div className="app-dest-pill" title="Destination de livraison">
@@ -510,6 +517,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
                 key={cat.id}
                 type="button"
                 className={`app-cat-tab ${isSelected ? "active" : ""}`}
+                aria-pressed={isSelected}
                 onClick={() => {
                   const next = new URLSearchParams(params);
                   if (cat.universe) next.set("universe", cat.universe);
@@ -533,16 +541,15 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
         <section className="app-hero-strip">
           <div className="hero-strip-badge">
             <span className="live-sparkle">✨</span>
-            <span>DUBAÏ DIRECT · SOURCING CERTIFIÉ</span>
+            <span>LA SÉLECTION BAOBAB · DUBAÏ</span>
           </div>
           <div className="hero-strip-main">
-            <h2>Équipements & Véhicules au tarif direct Jebel Ali</h2>
-            <p>Export direct vers {currentDest.name} · Tarifs fret groupés</p>
+            <h1>Vos envies. De Dubaï à chez vous.</h1>
+            <p>À l’unité ou en gros · Destination : {currentDest.name}</p>
           </div>
           <div className="hero-strip-pills">
-            <span className="pill-item">✈️ Express 3–6j (12 500 F/kg)</span>
-            <span className="pill-item">🚢 Conteneur 45–50j (CBM)</span>
-            <span className="pill-item highlight">🛡️ 100% Vérifié</span>
+            <span className="pill-item">Aérien & maritime</span>
+            <Link className="pill-item highlight" to="/messages">Un projet ? Parlons-en ↗</Link>
           </div>
         </section>
       )}
@@ -550,7 +557,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
       {/* 3. Vitrine Flash 2 Colonnes (comme Temu Clearance & Lightning Deals) */}
       {!search && !universe && (
         <section className="app-flash-showcase">
-          <div
+          <button type="button"
             className="flash-card card-motors"
             onClick={() => {
               const next = new URLSearchParams(params);
@@ -559,16 +566,16 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
             }}
           >
             <div className="flash-card-head">
-              <span className="flash-label">🚗 Arrivages Dubaï ›</span>
-              <h3>Véhicules & 4x4 GCC</h3>
-              <p>Hilux, Prado, Jetour neufs / occasions</p>
+              <span className="flash-label">L’UNIVERS AUTO ↗</span>
+              <h3>Véhicules & 4×4</h3>
+              <p>4×4, utilitaires & accessoires</p>
             </div>
             <div className="flash-card-foot">
-              <span className="flash-badge">Conteneur maritime dédié</span>
+              <span className="flash-badge">Explorer les véhicules →</span>
             </div>
-          </div>
+          </button>
 
-          <div
+          <button type="button"
             className="flash-card card-solar"
             onClick={() => {
               const next = new URLSearchParams(params);
@@ -578,14 +585,14 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
             }}
           >
             <div className="flash-card-head">
-              <span className="flash-label">⚡ Climat & Énergie ›</span>
-              <h3>Solaire & Clim Tropicale</h3>
-              <p>Onduleurs 5–10kW & splits tropicaux T3</p>
+              <span className="flash-label">ÉNERGIE SOLAIRE ↗</span>
+              <h3>Solaire & batteries</h3>
+              <p>Panneaux, batteries & onduleurs</p>
             </div>
             <div className="flash-card-foot">
-              <span className="flash-badge">Prix sortie d'usine</span>
+              <span className="flash-badge">Découvrir la sélection →</span>
             </div>
-          </div>
+          </button>
         </section>
       )}
 
@@ -598,27 +605,29 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
               className={`feed-chip ${!params.get("sort") ? "active" : ""}`}
               onClick={() => filter("sort", "")}
             >
-              🔥 Recommandés
+              Nouveautés
             </button>
             <button
               type="button"
               className={`feed-chip ${params.get("sort") === "price-asc" ? "active" : ""}`}
               onClick={() => filter("sort", "price-asc")}
             >
-              💰 Prix croissants
+              Petits prix
             </button>
             <button
               type="button"
               className={`feed-chip ${params.get("sort") === "price-desc" ? "active" : ""}`}
               onClick={() => filter("sort", "price-desc")}
             >
-              💎 Prestige
+              Prix décroissants
             </button>
           </div>
           <span className="feed-counter">
             {loading ? "..." : `${shown.length} offres`}
           </span>
         </div>
+        <details className="feed-filters">
+        <summary>Affiner la sélection <span>État, budget, catégorie</span></summary>
         <div className="filter-bar">
           {subs.length > 0 && (
             <select
@@ -677,6 +686,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
             </button>
           )}
         </div>
+        </details>
         {activeFilters.length > 0 && (
           <div className="active-filters" aria-label="Filtres actifs">
             {activeFilters.map((f) => (
@@ -791,15 +801,28 @@ export function ListingDetail() {
         : freight.mode === "CARGO"
           ? "Fret Aérien Cargo (14 à 16 jours, 8 600 F/kg)"
           : `Fret Maritime / Conteneur (45 à 50 jours, ${money(dest.cbmRate)}/m³)`;
+      const bodyText = `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} : ${p.name}. Destination : ${dest.name} en ${modeDescription}. Poids estimé : ${totalWeight} kg. Total estimé : ${money(estimatedGrandTotal)}.`;
+      const active = getDeviceActiveConversation();
+      if (active) {
+        try {
+          await call(
+            `/concierge/conversations/${active.id}/messages`,
+            { body: bodyText, requestKey: requestKey() },
+            active.token,
+          );
+          navigate(`/messages/${active.id}`);
+          return;
+        } catch {
+          // If active conversation expired or invalid on server, fall through to create a new one
+        }
+      }
+
       const c = await call("/concierge/conversations", {
         productId: id,
-        body: `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} : ${p.name}. Destination : ${dest.name} en ${modeDescription}. Poids estimé : ${totalWeight} kg. Total estimé : ${money(estimatedGrandTotal)}.`,
+        body: bodyText,
         requestKey: requestKey(),
       });
-      save("baobab_conversations", [
-        ...saved<any[]>("baobab_conversations", []),
-        c,
-      ]);
+      setDeviceActiveConversation(c);
       navigate(`/messages/${c.id}`);
     } catch (e: any) {
       setError(e.message);
@@ -1066,6 +1089,18 @@ export function Inbox() {
     [busy, setBusy] = useState(false);
   const contacts = saved<any[]>("baobab_conversations", []),
     selected = contacts.find((c) => c.id === id);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-route device to its active conversation if /messages opened directly
+  useEffect(() => {
+    if (!id) {
+      const active = getDeviceActiveConversation();
+      if (active) {
+        navigate(`/messages/${active.id}`, { replace: true });
+      }
+    }
+  }, [id, navigate]);
+
   useEffect(() => {
     let active = true;
     setConversation(null);
@@ -1086,39 +1121,84 @@ export function Inbox() {
         })
         .catch((e) => active && setError(e.message));
     refresh();
-    const timer = setInterval(refresh, 5000);
+
+    // Fast 1.2s polling for instantaneous admin reply updates
+    const timer = setInterval(() => {
+      if (!document.hidden) refresh();
+    }, 1200);
+
+    const onFocus = () => refresh();
+    const onVisibility = () => {
+      if (!document.hidden) refresh();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
       active = false;
       clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [id]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [conversation?.messages?.length]);
+
   async function send(e: FormEvent) {
     e.preventDefault();
-    if (!text.trim()) return;
+    const cleanText = text.trim();
+    if (!cleanText) return;
     setBusy(true);
+    const reqKey = requestKey();
+    const activeConv = selected || getDeviceActiveConversation();
+
+    // Optimistic UI update: display sent message immediately!
+    const optimisticMsg = {
+      id: `temp-${Date.now()}`,
+      role: "CLIENT",
+      body: cleanText,
+      createdAt: new Date().toISOString(),
+    };
+    setText("");
+    if (activeConv) {
+      setConversation((prev: any) =>
+        prev
+          ? { ...prev, messages: [...(prev.messages || []), optimisticMsg] }
+          : { id: activeConv.id, subject: activeConv.subject, messages: [optimisticMsg] }
+      );
+    }
+
     try {
-      if (id && selected) {
+      if (activeConv) {
         await call(
-          `/concierge/conversations/${id}/messages`,
-          { body: text, requestKey: requestKey() },
-          selected.token,
+          `/concierge/conversations/${activeConv.id}/messages`,
+          { body: cleanText, requestKey: reqKey },
+          activeConv.token,
         );
-        setConversation(
-          await call(
-            `/concierge/conversations/${id}`,
-            undefined,
-            selected.token,
-          ),
+        const updated = await call(
+          `/concierge/conversations/${activeConv.id}`,
+          undefined,
+          activeConv.token,
         );
+        setConversation(updated);
+        setDeviceActiveConversation({
+          id: activeConv.id,
+          token: activeConv.token,
+          subject: updated.subject || activeConv.subject,
+        });
+        if (!id || id !== activeConv.id) {
+          navigate(`/messages/${activeConv.id}`, { replace: true });
+        }
       } else {
         const c = await call("/concierge/conversations", {
-          body: text,
-          requestKey: requestKey(),
+          body: cleanText,
+          requestKey: reqKey,
         });
-        save("baobab_conversations", [...contacts, c]);
+        setDeviceActiveConversation(c);
         navigate(`/messages/${c.id}`);
       }
-      setText("");
       setError("");
     } catch (e: any) {
       setError(e.message);
@@ -1161,7 +1241,9 @@ export function Inbox() {
               <strong>
                 {conversation?.subject || "Bienvenue chez Baobab"}
               </strong>
-              <small>Une équipe humaine pour vous accompagner</small>
+              <small className="chat-live-badge">
+                <span className="live-dot" /> En direct · Réponse instantanée
+              </small>
             </div>
           </div>
           <div className="chat-messages" aria-live="polite">
@@ -1188,6 +1270,7 @@ export function Inbox() {
                 <time>{date(m.createdAt)}</time>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
           <Notice>{error}</Notice>
           <form className="chat-compose" onSubmit={send}>

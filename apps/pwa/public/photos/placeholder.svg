@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="520" viewBox="0 0 600 520">
+  <rect width="600" height="520" fill="#edf0e7"/>
+  <circle cx="300" cy="230" r="140" fill="#e1e7d8"/>
+  <g fill="none" stroke="#8a9e80" stroke-width="5" stroke-linejoin="round">
+    <path d="m210 200 90-50 90 50v110l-90 50-90-50Z" fill="#f8f8ee"/>
+    <path d="m210 200 90 50 90-50M300 250v110M255 175l90 50v45"/>
+  </g>
+  <text x="300" y="420" text-anchor="middle" fill="#52694d" font-family="Arial,sans-serif" font-size="20">Photo à venir</text>
+</svg>

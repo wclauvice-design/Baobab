@@ -70,8 +70,11 @@ export class CommercePublicController {
   @Get("config") config() {
     return this.service.configPublic();
   }
-  @Post("conversations") start(@Body() dto: StartConversationDto) {
-    return this.service.startConversation(dto);
+  @Post("conversations") start(
+    @Body() dto: StartConversationDto,
+    @Headers("x-baobab-access") token?: string,
+  ) {
+    return this.service.startConversation(dto, token);
   }
   @Get("conversations/:id") conversation(
     @Param("id") id: string,
