@@ -1,0 +1,93 @@
+import { getToken } from "./api";
+export const money = (v: any) =>
+  `${Number(v || 0).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} FCFA`;
+export const date = (v: string) =>
+  v
+    ? new Date(v).toLocaleString("fr-FR", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    : "";
+export const requestKey = () => crypto.randomUUID();
+export async function call(
+  path: string,
+  body?: unknown,
+  access?: string,
+  method?: string,
+) {
+  const base = import.meta.env.PROD
+    ? "/api"
+    : (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
+  let res: Response;
+  try {
+    res = await fetch(`${base}${path}`, {
+      method: method || (body ? "POST" : "GET"),
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+        ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
+        ...(access ? { "X-Baobab-Access": access } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new Error(
+      "Le serveur est momentanément indisponible. Réessayez dans quelques instants.",
+    );
+  }
+  const data = await res.json().catch(() => null);
+  if (!res.ok || data == null) {
+    const m = data?.message?.message || data?.message;
+    throw new Error(
+      typeof m === "string"
+        ? m
+        : Array.isArray(m)
+          ? m.join(", ")
+          : "Cette demande ne peut pas être traitée.",
+    );
+  }
+  return data;
+}
+export function saved<T>(key: string, fallback: T): T {
+  try {
+    return JSON.parse(localStorage.getItem(key) || "null") ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+export const save = (key: string, value: unknown) =>
+  localStorage.setItem(key, JSON.stringify(value));
+export const universes = [
+  { id: "motors", name: "Véhicules", subtitle: "Motors", icon: "car" },
+  {
+    id: "classifieds",
+    name: "Objets & équipements",
+    subtitle: "Tech, sport & quotidien",
+    icon: "phone",
+  },
+  {
+    id: "home",
+    name: "Maison & jardin",
+    subtitle: "Un intérieur à votre image",
+    icon: "home",
+  },
+  {
+    id: "trade",
+    name: "Travaux & artisans",
+    subtitle: "Pour tous vos projets",
+    icon: "tool",
+  },
+];
+export const stages: Record<string, string> = {
+  DRAFT: "Devis en préparation",
+  QUOTED: "Devis à confirmer",
+  CONFIRMED: "Commande confirmée",
+  PREPARING: "Préparation à Dubaï",
+  HANDED_TO_CARRIER: "Remise au transporteur",
+  IN_TRANSIT: "En transit",
+  ARRIVED: "Arrivée au pays",
+  CUSTOMS: "Dédouanement",
+  LOCAL_DELIVERY: "Livraison locale",
+  DELIVERED: "Livrée",
+  CANCELLED: "Annulée",
+};

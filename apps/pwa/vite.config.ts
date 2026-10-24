@@ -12,8 +12,8 @@ export default defineConfig({
         name: 'Baobab',
         short_name: 'Baobab',
         description: 'Marketplace e-commerce indépendante — Afrique de l\'Ouest',
-        theme_color: '#0b0e14',
-        background_color: '#0b0e14',
+        theme_color: '#263e2f',
+        background_color: '#fafbf7',
         display: 'standalone',
         start_url: '/',
         icons: [
@@ -24,9 +24,9 @@ export default defineConfig({
       workbox: {
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.pathname.startsWith('/api/products'),
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'catalog-cache' },
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+            handler: 'NetworkOnly',
+
           },
         ],
       },

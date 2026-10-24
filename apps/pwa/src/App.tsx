@@ -1,60 +1,71 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { useAuth } from './lib/auth';
-import { BottomNav } from './components/BottomNav';
-import { PageLoader } from './components/PageLoader';
-import { Login } from './pages/Login';
-import { Catalog } from './pages/Catalog';
-import { ProductDetail } from './pages/ProductDetail';
-import { Cart } from './pages/Cart';
-import { Checkout } from './pages/Checkout';
-import { Payment } from './pages/Payment';
-import { OrderHistory } from './pages/OrderHistory';
-import { OrderDetail } from './pages/OrderDetail';
-import { Account } from './pages/Account';
-import { Addresses } from './pages/Addresses';
-import { Following } from './pages/Following';
-import { MyReviews } from './pages/MyReviews';
-import { BrowsingHistory } from './pages/BrowsingHistory';
-import { Messages } from './pages/Messages';
-import { Settings } from './pages/Settings';
-
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useAuth } from "./lib/auth";
+import { PageLoader } from "./components/PageLoader";
+import { Login } from "./pages/Login";
+import { OrderHistory } from "./pages/OrderHistory";
+import { OrderDetail } from "./pages/OrderDetail";
+import {
+  MarketShell,
+  Marketplace,
+  ListingDetail,
+  Inbox,
+  Tracking,
+  Purchases,
+  MarketAccount,
+} from "./pages/Marketplace";
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { user, loading } = useAuth();
   const location = useLocation();
-
   if (loading) return <PageLoader />;
-  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
-  return children;
+  return user ? (
+    children
+  ) : (
+    <Navigate to="/login" state={{ from: location }} replace />
+  );
 }
-
 export default function App() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const location = useLocation();
-  const hideNav = location.pathname === '/login';
-
-  if (loading) return <PageLoader />;
-
+  if (location.pathname === "/login")
+    return user ? <Navigate to="/account" replace /> : <Login />;
   return (
-    <>
+    <MarketShell>
       <Routes>
-        <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-        <Route path="/" element={<RequireAuth><Catalog /></RequireAuth>} />
-        <Route path="/search" element={<RequireAuth><Catalog autoFocusSearch /></RequireAuth>} />
-        <Route path="/products/:id" element={<RequireAuth><ProductDetail /></RequireAuth>} />
-        <Route path="/cart" element={<RequireAuth><Cart /></RequireAuth>} />
-        <Route path="/checkout" element={<RequireAuth><Checkout /></RequireAuth>} />
-        <Route path="/orders" element={<RequireAuth><OrderHistory /></RequireAuth>} />
-        <Route path="/orders/:id" element={<RequireAuth><OrderDetail /></RequireAuth>} />
-        <Route path="/orders/:id/payment" element={<RequireAuth><Payment /></RequireAuth>} />
-        <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
-        <Route path="/account/addresses" element={<RequireAuth><Addresses /></RequireAuth>} />
-        <Route path="/account/following" element={<RequireAuth><Following /></RequireAuth>} />
-        <Route path="/account/reviews" element={<RequireAuth><MyReviews /></RequireAuth>} />
-        <Route path="/account/history" element={<RequireAuth><BrowsingHistory /></RequireAuth>} />
-        <Route path="/account/messages" element={<RequireAuth><Messages /></RequireAuth>} />
-        <Route path="/account/settings" element={<RequireAuth><Settings /></RequireAuth>} />
+        <Route path="/" element={<Marketplace />} />
+        <Route path="/search" element={<Marketplace />} />
+        <Route path="/favorites" element={<Marketplace favorites />} />
+        <Route path="/products/:id" element={<ListingDetail />} />
+        <Route path="/messages" element={<Inbox />} />
+        <Route path="/messages/:id" element={<Inbox />} />
+        <Route path="/tracking/:id" element={<Tracking />} />
+        <Route
+          path="/my-orders/:id"
+          element={
+            <RequireAuth>
+              <Tracking account />
+            </RequireAuth>
+          }
+        />
+        <Route path="/orders" element={<Purchases />} />
+        <Route path="/account" element={<MarketAccount />} />
+        <Route
+          path="/legacy-orders"
+          element={
+            <RequireAuth>
+              <OrderHistory />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/orders/:id"
+          element={
+            <RequireAuth>
+              <OrderDetail />
+            </RequireAuth>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      {!hideNav && user && <BottomNav />}
-    </>
+    </MarketShell>
   );
 }

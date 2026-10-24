@@ -1,3 +1,4 @@
+import { quantity } from '../commerce/rules';
 import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
@@ -24,6 +25,8 @@ export class OrdersService {
     for (const item of dto.items) {
       const product = products.find((p) => p.id === item.productId);
       if (!product) throw new NotFoundException(`Produit ${item.productId} introuvable`);
+      if (product.moderation !== 'PUBLISHED') throw new BadRequestException('Annonce indisponible');
+      quantity(item.quantity, product.minimumOrder, product.packSize);
       if (product.stock < item.quantity) {
         throw new BadRequestException(`Stock insuffisant pour ${product.name}`);
       }
@@ -75,7 +78,7 @@ export class OrdersService {
   findMine(buyerId: string) {
     return this.prisma.order.findMany({
       where: { buyerId },
-      include: { items: { include: { product: true } }, payment: true },
+      include: { items: { include: { product: { select: { id: true, name: true, images: true, price: true } } } }, payment: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -84,7 +87,7 @@ export class OrdersService {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: {
-        items: { include: { product: true } },
+        items: { include: { product: { select: { id: true, name: true, images: true, price: true } } } },
         payment: true,
         deliveryEvents: { orderBy: { createdAt: 'asc' } },
       },
@@ -92,11 +95,8 @@ export class OrdersService {
     if (!order) throw new NotFoundException('Commande introuvable');
 
     if (role === Role.BUYER && order.buyerId !== userId) throw new ForbiddenException();
-    if (role === Role.SELLER) {
-      const seller = await this.prisma.seller.findUnique({ where: { userId } });
-      const owns = order.items.some((i) => i.product.sellerId === seller?.id);
-      if (!owns) throw new ForbiddenException();
-    }
+    if (role === Role.SELLER) throw new ForbiddenException('Les commandes clients sont gérées exclusivement par Baobab');
+
 
     return order;
   }
@@ -104,15 +104,12 @@ export class OrdersService {
   async updateStatus(userId: string, role: Role, orderId: string, status: OrderStatus) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      include: { items: { include: { product: true } } },
+      include: { items: { include: { product: { select: { id: true, name: true, images: true, price: true } } } } },
     });
     if (!order) throw new NotFoundException('Commande introuvable');
 
-    if (role === Role.SELLER) {
-      const seller = await this.prisma.seller.findUnique({ where: { userId } });
-      const owns = order.items.some((i) => i.product.sellerId === seller?.id);
-      if (!owns) throw new ForbiddenException();
-    }
+    if (role === Role.SELLER) throw new ForbiddenException('Les commandes clients sont gérées exclusivement par Baobab');
+
 
     const updated = await this.prisma.order.update({ where: { id: orderId }, data: { status } });
     await this.prisma.deliveryEvent.create({ data: { orderId, status } });
@@ -142,16 +139,12 @@ export class OrdersService {
   }
 
   listForSeller(sellerId: string) {
-    return this.prisma.order.findMany({
-      where: { items: { some: { product: { sellerId } } } },
-      include: { items: { include: { product: true } }, buyer: true },
-      orderBy: { createdAt: 'desc' },
-    });
+    throw new ForbiddenException('Les commandes clients sont gérées exclusivement par Baobab');
   }
 
   listAllForAdmin() {
     return this.prisma.order.findMany({
-      include: { items: { include: { product: true } }, buyer: true, payment: true },
+      include: { items: { include: { product: { select: { id: true, name: true, images: true, price: true } } } }, buyer: true, payment: true },
       orderBy: { createdAt: 'desc' },
     });
   }

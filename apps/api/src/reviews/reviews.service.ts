@@ -26,7 +26,7 @@ export class ReviewsService {
   findForProduct(productId: string) {
     return this.prisma.review.findMany({
       where: { productId },
-      include: { buyer: true },
+      select: { id: true, rating: true, comment: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -34,7 +34,7 @@ export class ReviewsService {
   findMine(buyerId: string) {
     return this.prisma.review.findMany({
       where: { buyerId },
-      include: { product: true },
+      include: { product: { select: { id: true, name: true, images: true, price: true } } },
       orderBy: { createdAt: 'desc' },
     });
   }

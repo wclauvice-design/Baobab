@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { GoneException, Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -16,7 +16,7 @@ export class OrdersController {
   @UseGuards(RolesGuard)
   @Roles(Role.BUYER)
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateOrderDto) {
-    return this.ordersService.create(user.id, dto);
+    throw new GoneException('Contactez Baobab pour recevoir et accepter un devis définitif.');
   }
 
   @Get()

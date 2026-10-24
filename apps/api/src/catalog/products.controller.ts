@@ -1,3 +1,4 @@
+import { ModerateDto } from '../commerce/dto';
 import {
   BadRequestException,
   Body,
@@ -29,9 +30,14 @@ export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Get()
-  findAll(@Query('search') search?: string, @Query('categoryId') categoryId?: string) {
-    return this.productsService.findAll({ search, categoryId });
+  findAll(@Query() params: { search?: string; categoryId?: string; universe?: string; condition?: string; subcategory?: string; minPrice?: string; maxPrice?: string; sort?: string }) {
+    return this.productsService.findAll(params);
   }
+
+  @Patch(':id/moderation')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  moderate(@Param('id') id: string, @Body() dto: ModerateDto) { return this.productsService.moderate(id, dto); }
 
   @Get('mine')
   @UseGuards(JwtAuthGuard, RolesGuard)

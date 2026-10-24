@@ -74,7 +74,7 @@ describe('OrdersService.expireUnpaidOrders', () => {
 
 describe('OrdersService.create', () => {
   function buildService() {
-    const product = { id: 'p1', price: 3500, stock: 10, name: 'Beurre de karité' };
+    const product = { id: 'p1', price: 3500, stock: 10, moderation: 'PUBLISHED', minimumOrder: 1, packSize: 1, name: 'Beurre de karité' };
     const tx = {
       order: { create: jest.fn().mockResolvedValue({ id: 'order1', status: OrderStatus.PENDING_PAYMENT }) },
       product: { update: jest.fn() },

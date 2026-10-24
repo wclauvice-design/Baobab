@@ -13,6 +13,8 @@ export class SellersController {
   constructor(private sellersService: SellersService) {}
 
   @Post('sellers/register')
+  @UseGuards(RolesGuard)
+  @Roles(Role.BUYER)
   register(@CurrentUser() user: AuthUser, @Body() dto: RegisterSellerDto) {
     return this.sellersService.register(user.id, dto.shopName, dto.city);
   }
