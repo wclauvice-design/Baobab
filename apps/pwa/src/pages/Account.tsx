@@ -41,7 +41,7 @@ export function Account() {
         shopName: form.get('shopName'),
         city: form.get('city'),
       });
-      setMessage('Demande envoyée ! Un admin va vérifier votre boutique.');
+      setMessage('Demande envoyée ! Notre équipe vérifie votre boutique sous 24h.');
       setShowSellerForm(false);
     } catch (err) {
       setMessage(err instanceof ApiError ? err.message : 'Erreur réseau');
