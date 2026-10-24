@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../lib/api";
 import "./operations.css";
@@ -73,13 +73,25 @@ function useLoad(path: string, interval = 0) {
         })
         .catch((e) => active && setError(e.message));
     run();
-    const t = interval ? setInterval(run, interval) : undefined;
+    const t = interval
+      ? setInterval(() => {
+          if (!document.hidden) run();
+        }, interval)
+      : undefined;
+    const onFocus = () => run();
+    const onVisibility = () => {
+      if (!document.hidden) run();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
       active = false;
-      clearInterval(t);
+      if (t) clearInterval(t);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [path]);
-  return { data, error, refresh };
+  }, [path, interval]);
+  return { data, error, refresh, setData };
 }
 function OrderTable({ orders }: { orders: any[] }) {
   return (
@@ -366,12 +378,19 @@ export function Customers() {
 export function OperationsInbox() {
   const { id } = useParams(),
     navigate = useNavigate();
-  const list = useLoad(`${base}/conversations`, 7000),
-    detail = useLoad(`${base}/conversations/${id || "none"}`, id ? 7000 : 0),
+  // Fast polling: 1.5s for open conversation, 3s for conversation list
+  const list = useLoad(`${base}/conversations`, 3000),
+    detail = useLoad(`${base}/conversations/${id || "none"}`, id ? 1500 : 0),
     customers = useLoad(`${base}/customers`);
   const [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false),
     [text, setText] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [detail.data?.messages?.length]);
+
   async function act(fn: () => Promise<any>) {
     setBusy(true);
     try {
@@ -467,17 +486,32 @@ export function OperationsInbox() {
                     <p>{m.body}</p>
                   </div>
                 ))}
+                <div ref={messagesEndRef} />
               </div>
               <form
                 className="op-row"
                 onSubmit={(e) => {
                   e.preventDefault();
+                  const replyText = text.trim();
+                  if (!replyText) return;
+                  const optimisticMsg = {
+                    id: `temp-${Date.now()}`,
+                    role: "BAOBAB",
+                    body: replyText,
+                    createdAt: new Date().toISOString(),
+                  };
+                  if (detail.data) {
+                    detail.setData({
+                      ...detail.data,
+                      messages: [...(detail.data.messages || []), optimisticMsg],
+                    });
+                  }
+                  setText("");
                   act(async () => {
                     await api.post(`${base}/conversations/${id}/messages`, {
-                      body: text,
+                      body: replyText,
                       requestKey: crypto.randomUUID(),
                     });
-                    setText("");
                   });
                 }}
               >

@@ -105,7 +105,24 @@ export class CommerceService {
     if (!c) throw new NotFoundException("Conversation inaccessible");
     return c;
   }
-  async startConversation(dto: StartConversationDto) {
+  async startConversation(dto: StartConversationDto, existingToken?: string) {
+    // If device already has an existing active conversation, append message to avoid duplicate conversations
+    if (existingToken && dto.conversationId) {
+      try {
+        const existing = await this.conversation(dto.conversationId, existingToken);
+        if (existing && existing.state !== "CLOSED") {
+          await this.message(
+            existing.id,
+            { body: dto.body, requestKey: dto.requestKey },
+            "CLIENT",
+            existingToken,
+          );
+          return { id: existing.id, token: existingToken, subject: existing.subject };
+        }
+      } catch {
+        // Fall back to creating a new conversation
+      }
+    }
     const product = dto.productId
       ? await this.db.product.findFirst({
           where: {
@@ -117,10 +134,10 @@ export class CommerceService {
       : null;
     if (dto.productId && !product)
       throw new NotFoundException("Annonce indisponible");
-    const token = secret();
+    const createdToken = secret();
     const c = await this.db.conversation.create({
       data: {
-        tokenHash: hash(token),
+        tokenHash: hash(createdToken),
         productId: product?.id,
         subject: product?.name || "Demande à Baobab",
         messages: {
@@ -132,7 +149,7 @@ export class CommerceService {
         },
       },
     });
-    return { id: c.id, token, subject: c.subject };
+    return { id: c.id, token: createdToken, subject: c.subject };
   }
   async readConversation(id: string, token: string) {
     const c = await this.conversation(id, token || "");

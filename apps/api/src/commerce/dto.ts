@@ -23,6 +23,7 @@ export class MessageDto {
 }
 export class StartConversationDto extends MessageDto {
   @IsOptional() @IsString() @MaxLength(100) productId?: string;
+  @IsOptional() @IsString() @MaxLength(100) conversationId?: string;
 }
 export class CustomerDto {
   @IsString() @MinLength(1) @MaxLength(100) firstName: string;
