@@ -17,27 +17,152 @@ export function SellerDetail() {
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<"adds" | "inquiries" | "commandes" | "ventes">("adds");
 
-  function load() {
+  // Quick moderation & product completion modal
+  const [modifyingProduct, setModifyingProduct] = useState<any>(null);
+  const [modalWeight, setModalWeight] = useState("");
+  const [modalPrice, setModalPrice] = useState("");
+  const [modalPublicPrice, setModalPublicPrice] = useState("");
+  const [modalNote, setModalNote] = useState("");
+  const [modifyingBusy, setModifyingBusy] = useState(false);
+
+  async function load() {
     if (!id) return;
     setLoading(true);
-    api
-      .get<any>(`/admin/sellers/${id}`)
-      .then((res) => {
+    setError("");
+
+    // 1. First attempt: Dedicated admin seller endpoint
+    try {
+      const res = await api.get<any>(`/admin/sellers/${id}`);
+      if (res && res.seller) {
         setData(res);
         setError("");
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+        setLoading(false);
+        return;
+      }
+    } catch (e: any) {
+      console.warn("Direct /admin/sellers/:id not ready, using real-time aggregation fallback:", e);
+    }
+
+    // 2. Resilient fallback: aggregate from live endpoints
+    try {
+      const sellers = await api.get<any[]>("/admin/sellers");
+      const seller = sellers.find((s) => s.id === id);
+
+      if (!seller) {
+        setError("Commerçant introuvable dans la base de données.");
+        setLoading(false);
+        return;
+      }
+
+      const [allProducts, allConversations, allOrders] = await Promise.all([
+        api.get<any[]>("/products").catch(() => []),
+        api.get<any[]>("/admin/concierge/conversations").catch(() => []),
+        api.get<any[]>("/admin/orders").catch(() => []),
+      ]);
+
+      const sellerProducts = allProducts.filter(
+        (p: any) => p.sellerId === id || p.seller?.id === id
+      );
+      const productIds = new Set(sellerProducts.map((p: any) => p.id));
+
+      const inquiries = allConversations.filter(
+        (c: any) =>
+          (c.productId && productIds.has(c.productId)) ||
+          c.sellerId === id ||
+          (c.customer && c.customer.phone === seller.user?.phone)
+      );
+
+      const sellerOrders = allOrders.filter(
+        (o: any) =>
+          o.sellerId === id ||
+          o.items?.some((it: any) => productIds.has(it.productId))
+      );
+
+      const commandes = sellerOrders.filter(
+        (o: any) =>
+          o.status === "DRAFT" ||
+          o.status === "QUOTED" ||
+          o.status === "PENDING"
+      );
+
+      const ventes = sellerOrders.filter(
+        (o: any) =>
+          o.status !== "DRAFT" &&
+          o.status !== "QUOTED" &&
+          o.status !== "PENDING" &&
+          o.status !== "CANCELLED"
+      );
+
+      const totalInquiries = inquiries.length;
+      const totalCommands = commandes.length;
+      const totalSales = ventes.length;
+
+      const conversionInquiryToCommand =
+        totalInquiries > 0
+          ? Math.round((totalCommands / totalInquiries) * 100)
+          : 0;
+      const conversionCommandToSale =
+        totalCommands > 0 ? Math.round((totalSales / totalCommands) * 100) : 0;
+
+      let totalSalesVolume = 0;
+      let totalSupplierRevenue = 0;
+      let totalBaobabCommission = 0;
+
+      for (const v of ventes) {
+        const quote =
+          v.quotes?.find((q: any) => q.revision === v.acceptedRevision) ||
+          v.quotes?.[0];
+        const vol = Number(quote?.total || v.totalAmount || 0);
+        const sup = Number(quote?.supplierTotal || v.sellerAmount || vol * 0.9);
+        const comm = Number(quote?.marginBaobab || vol - sup);
+        totalSalesVolume += vol;
+        totalSupplierRevenue += sup;
+        totalBaobabCommission += comm;
+      }
+
+      const totalPaidToSeller = 0;
+      const dueToSeller = Math.max(0, totalSupplierRevenue - totalPaidToSeller);
+
+      setData({
+        seller,
+        metrics: {
+          totalInquiries,
+          totalCommands,
+          totalSales,
+          conversionInquiryToCommand,
+          conversionCommandToSale,
+          totalSalesVolume,
+          totalSupplierRevenue,
+          totalBaobabCommission,
+          totalPaidToSeller,
+          dueToSeller,
+        },
+        products: sellerProducts,
+        inquiries,
+        commandes,
+        ventes,
+      });
+      setError("");
+    } catch (fallbackErr: any) {
+      setError(
+        fallbackErr?.message ||
+          "Impossible de charger les données de ce commerçant pour l'instant."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
-  useEffect(load, [id]);
+  useEffect(() => {
+    load();
+  }, [id]);
 
   async function updateStatus(status: string) {
     if (!id) return;
     setBusy(true);
     try {
       await api.patch(`/admin/sellers/${id}/status`, { status });
-      load();
+      await load();
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -45,10 +170,48 @@ export function SellerDetail() {
     }
   }
 
+  function openModifier(product: any) {
+    setModifyingProduct(product);
+    setModalWeight(product.weightKg ? String(product.weightKg) : "");
+    setModalPrice(product.sellerPrice ? String(product.sellerPrice) : "");
+    setModalPublicPrice(product.price ? String(product.price) : "");
+    setModalNote("");
+  }
+
+  async function handleSaveAndPublish(moderation: "PUBLISHED" | "REJECTED") {
+    if (!modifyingProduct) return;
+    setModifyingBusy(true);
+    try {
+      // 1. Update weight and optional price details
+      const updatePayload: any = {};
+      if (modalWeight) updatePayload.weightKg = Number(modalWeight);
+      if (modalPublicPrice) updatePayload.price = Number(modalPublicPrice);
+
+      if (Object.keys(updatePayload).length > 0) {
+        await api.patch(`/products/${modifyingProduct.id}`, updatePayload).catch(() => {});
+      }
+
+      // 2. Apply moderation status
+      await api.patch(`/products/${modifyingProduct.id}/moderation`, {
+        moderation,
+        note: modalNote || undefined,
+        publicPrice: modalPublicPrice ? String(modalPublicPrice) : undefined,
+      });
+
+      setModifyingProduct(null);
+      await load();
+    } catch (e: any) {
+      alert("Erreur lors de la mise à jour : " + (e?.message || e));
+    } finally {
+      setModifyingBusy(false);
+    }
+  }
+
   if (loading) {
     return (
-      <div className="p-8 text-center text-slate-500">
-        Chargement des détails du commerçant…
+      <div className="flex min-h-[400px] flex-col items-center justify-center space-y-3 p-8 text-center text-slate-500">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-700 border-t-transparent" />
+        <p className="font-semibold text-slate-700">Chargement du dossier commerçant…</p>
       </div>
     );
   }
@@ -56,20 +219,28 @@ export function SellerDetail() {
   if (error || !data) {
     return (
       <div className="p-8">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 shadow-sm">
           {error || "Commerçant introuvable"}
         </div>
-        <Link
-          to="/sellers"
-          className="mt-4 inline-block font-semibold text-emerald-800 hover:underline"
-        >
-          ← Retour à la liste des commerçants
-        </Link>
+        <div className="mt-4 flex gap-3">
+          <button
+            onClick={load}
+            className="rounded-lg bg-emerald-700 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-800"
+          >
+            Réessayer
+          </button>
+          <Link
+            to="/sellers"
+            className="inline-flex items-center rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+          >
+            ← Retour à la liste des commerçants
+          </Link>
+        </div>
       </div>
     );
   }
 
-  const { seller, metrics, products, inquiries, commandes, ventes } = data;
+  const { seller, metrics, products = [], inquiries = [], commandes = [], ventes = [] } = data;
 
   return (
     <div className="space-y-6">
@@ -176,7 +347,8 @@ export function SellerDetail() {
             <span className="text-lg">💵</span>
           </div>
           <div className="mt-2 text-xl font-black text-slate-900">
-            {Number(metrics.totalSalesVolume || 0).toLocaleString("fr-FR")} <span className="text-xs font-semibold">FCFA</span>
+            {Number(metrics.totalSalesVolume || 0).toLocaleString("fr-FR")}{" "}
+            <span className="text-xs font-semibold">FCFA</span>
           </div>
           <p className="mt-1 text-xs text-slate-500">
             Commissions Baobab : {Number(metrics.totalBaobabCommission || 0).toLocaleString("fr-FR")} F
@@ -190,7 +362,8 @@ export function SellerDetail() {
             <span className="text-lg">🪙</span>
           </div>
           <div className="mt-2 text-xl font-black text-amber-600">
-            {Number(metrics.dueToSeller || 0).toLocaleString("fr-FR")} <span className="text-xs font-semibold">FCFA</span>
+            {Number(metrics.dueToSeller || 0).toLocaleString("fr-FR")}{" "}
+            <span className="text-xs font-semibold">FCFA</span>
           </div>
           <p className="mt-1 text-xs text-slate-500">
             Déjà reversé : {Number(metrics.totalPaidToSeller || 0).toLocaleString("fr-FR")} F
@@ -248,7 +421,7 @@ export function SellerDetail() {
 
       {/* ONGLET 1 : ANNONCES */}
       {tab === "adds" && (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white text-slate-900">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
               <tr>
@@ -258,14 +431,14 @@ export function SellerDetail() {
                 <th className="px-4 py-3">Prix Commerçant</th>
                 <th className="px-4 py-3">Poids</th>
                 <th className="px-4 py-3">Statut</th>
-                <th className="px-4 py-3">Action</th>
+                <th className="px-4 py-3">Action Admin</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {products.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
-                    Aucune annonce publiée par ce commerçant pour le moment.
+                    Aucune annonce enregistrée pour ce commerçant.
                   </td>
                 </tr>
               ) : (
@@ -297,10 +470,18 @@ export function SellerDetail() {
                     <td className="px-4 py-3 text-slate-600">
                       {p.sellerPrice
                         ? `${Number(p.sellerPrice).toLocaleString("fr-FR")} FCFA`
+                        : p.supplierPrice
+                        ? `${Number(p.supplierPrice).toLocaleString("fr-FR")} FCFA`
                         : "—"}
                     </td>
                     <td className="px-4 py-3 text-slate-600">
-                      {p.weightKg ? `${p.weightKg} kg` : <span className="text-amber-600">Non renseigné</span>}
+                      {p.weightKg ? (
+                        `${p.weightKg} kg`
+                      ) : (
+                        <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                          Non renseigné
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -320,12 +501,12 @@ export function SellerDetail() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        to="/catalog"
-                        className="font-semibold text-emerald-700 hover:text-emerald-900 hover:underline"
+                      <button
+                        onClick={() => openModifier(p)}
+                        className="rounded-lg bg-slate-800 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-slate-900"
                       >
-                        Éditer →
-                      </Link>
+                        Compléter & modérer →
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -337,7 +518,7 @@ export function SellerDetail() {
 
       {/* ONGLET 2 : RENSEIGNEMENTS (LEADS) */}
       {tab === "inquiries" && (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white text-slate-900">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
               <tr>
@@ -353,7 +534,7 @@ export function SellerDetail() {
               {inquiries.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
-                    Aucun renseignement ou question client enregistré sur les articles de ce commerçant.
+                    Aucun renseignement enregistré sur les articles de ce commerçant.
                   </td>
                 </tr>
               ) : (
@@ -364,14 +545,14 @@ export function SellerDetail() {
                     </td>
                     <td className="px-4 py-3 text-slate-700">
                       {inq.customer
-                        ? `${inq.customer.firstName} ${inq.customer.lastName} (${inq.customer.phone})`
+                        ? `${inq.customer.firstName || ""} ${inq.customer.lastName || ""} (${inq.customer.phone})`
                         : "Client invité"}
                     </td>
                     <td className="max-w-xs truncate px-4 py-3 text-slate-500">
-                      {inq.messages?.[0]?.body || "—"}
+                      {inq.messages?.[0]?.body || inq.messages?.[inq.messages.length - 1]?.body || "—"}
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-400">
-                      {new Date(inq.updatedAt).toLocaleDateString("fr-FR")}
+                      {new Date(inq.updatedAt || inq.createdAt).toLocaleDateString("fr-FR")}
                     </td>
                     <td className="px-4 py-3">
                       {inq.tradeOrders?.length > 0 ? (
@@ -385,12 +566,14 @@ export function SellerDetail() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        to={`/messages/${inq.id}`}
-                        className="font-bold text-emerald-700 hover:text-emerald-900 hover:underline"
-                      >
-                        Ouvrir discussion →
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          to={`/messages/${inq.id}`}
+                          className="font-bold text-emerald-700 hover:text-emerald-900 hover:underline"
+                        >
+                          Discuter →
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -402,7 +585,7 @@ export function SellerDetail() {
 
       {/* ONGLET 3 : COMMANDES (EN COURS DE NÉGOCIATION / DEVIS) */}
       {tab === "commandes" && (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white text-slate-900">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
               <tr>
@@ -418,17 +601,19 @@ export function SellerDetail() {
               {commandes.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
-                    Aucune commande en préparation pour ce commerçant.
+                    Aucune commande en cours de devis pour ce commerçant.
                   </td>
                 </tr>
               ) : (
                 commandes.map((cmd: any) => (
                   <tr key={cmd.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-mono font-bold text-slate-900">
-                      {cmd.reference}
+                      {cmd.reference || cmd.id.slice(0, 8)}
                     </td>
                     <td className="px-4 py-3 text-slate-700">
-                      {cmd.customer?.firstName} {cmd.customer?.lastName} ({cmd.customer?.city})
+                      {cmd.customer
+                        ? `${cmd.customer.firstName} ${cmd.customer.lastName} (${cmd.customer.city || cmd.customer.phone})`
+                        : cmd.buyer?.phone || "Client"}
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-500">
                       {new Date(cmd.createdAt).toLocaleDateString("fr-FR")}
@@ -441,6 +626,8 @@ export function SellerDetail() {
                     <td className="px-4 py-3 font-bold text-slate-900">
                       {cmd.quotes?.[0]?.total
                         ? `${Number(cmd.quotes[0].total).toLocaleString("fr-FR")} FCFA`
+                        : cmd.totalAmount
+                        ? `${Number(cmd.totalAmount).toLocaleString("fr-FR")} FCFA`
                         : "En calcul"}
                     </td>
                     <td className="px-4 py-3">
@@ -461,7 +648,7 @@ export function SellerDetail() {
 
       {/* ONGLET 4 : VENTES CONFIRMÉES */}
       {tab === "ventes" && (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white text-slate-900">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
               <tr>
@@ -482,21 +669,31 @@ export function SellerDetail() {
                 </tr>
               ) : (
                 ventes.map((v: any) => {
-                  const quote = v.quotes.find((q: any) => q.revision === v.acceptedRevision) || v.quotes[0];
+                  const quote =
+                    v.quotes?.find((q: any) => q.revision === v.acceptedRevision) ||
+                    v.quotes?.[0];
                   return (
                     <tr key={v.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 font-mono font-bold text-emerald-800">
-                        {v.reference}
+                        {v.reference || v.id.slice(0, 8)}
                       </td>
                       <td className="px-4 py-3 text-slate-700">
-                        {v.customer?.firstName} {v.customer?.lastName} ({v.customer?.city})
+                        {v.customer
+                          ? `${v.customer.firstName} ${v.customer.lastName} (${v.customer.city || v.customer.phone})`
+                          : v.buyer?.phone || "Client"}
                       </td>
                       <td className="px-4 py-3 font-bold text-slate-900">
-                        {quote?.total ? `${Number(quote.total).toLocaleString("fr-FR")} FCFA` : "—"}
+                        {quote?.total
+                          ? `${Number(quote.total).toLocaleString("fr-FR")} FCFA`
+                          : v.totalAmount
+                          ? `${Number(v.totalAmount).toLocaleString("fr-FR")} FCFA`
+                          : "—"}
                       </td>
                       <td className="px-4 py-3 font-semibold text-amber-700">
                         {quote?.supplierTotal
                           ? `${Number(quote.supplierTotal).toLocaleString("fr-FR")} FCFA`
+                          : v.sellerAmount
+                          ? `${Number(v.sellerAmount).toLocaleString("fr-FR")} FCFA`
                           : "—"}
                       </td>
                       <td className="px-4 py-3">
@@ -518,6 +715,90 @@ export function SellerDetail() {
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* MODAL ADMIN : Compléter le poids, prix et modérer l'annonce */}
+      {modifyingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl text-slate-900">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div>
+                <h3 className="text-lg font-black text-slate-900">Compléter & Modérer l'Annonce</h3>
+                <p className="text-xs text-slate-500">{modifyingProduct.name}</p>
+              </div>
+              <button
+                onClick={() => setModifyingProduct(null)}
+                className="text-slate-400 hover:text-slate-600 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Poids du colis (en kg) <span className="text-emerald-700 font-semibold">*Important pour le calcul de fret</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={modalWeight}
+                  onChange={(e) => setModalWeight(e.target.value)}
+                  placeholder="Ex : 2.5"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                />
+                <p className="mt-1 text-xs text-slate-500">
+                  Permet à l'algorithme logistique de calculer les frais de transport aérien / maritime.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Prix public affiché sur la marketplace (FCFA)
+                </label>
+                <input
+                  type="number"
+                  value={modalPublicPrice}
+                  onChange={(e) => setModalPublicPrice(e.target.value)}
+                  placeholder="Ex : 25000"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Note interne / Remarque pour le commerçant
+                </label>
+                <textarea
+                  rows={2}
+                  value={modalNote}
+                  onChange={(e) => setModalNote(e.target.value)}
+                  placeholder="Remarque éventuelle sur la fiche produit..."
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t">
+                <button
+                  type="button"
+                  disabled={modifyingBusy}
+                  onClick={() => handleSaveAndPublish("REJECTED")}
+                  className="rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-xs font-bold text-red-700 hover:bg-red-100 disabled:opacity-50"
+                >
+                  ✕ Rejeter l'annonce
+                </button>
+                <button
+                  type="button"
+                  disabled={modifyingBusy}
+                  onClick={() => handleSaveAndPublish("PUBLISHED")}
+                  className="rounded-lg bg-emerald-700 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50"
+                >
+                  {modifyingBusy ? "Enregistrement…" : "✓ Valider & Publier"}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

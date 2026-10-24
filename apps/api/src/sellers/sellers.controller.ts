@@ -40,6 +40,13 @@ export class SellersController {
     return this.sellersService.getAdminDetail(id);
   }
 
+  @Get('sellers/:id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  getSellerDetailAlias(@Param('id') id: string) {
+    return this.sellersService.getAdminDetail(id);
+  }
+
   @Patch('admin/sellers/:id/status')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
