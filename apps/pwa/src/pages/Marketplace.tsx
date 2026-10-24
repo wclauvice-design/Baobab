@@ -18,6 +18,7 @@ import {
   universes,
 } from "../lib/concierge";
 import "./marketplace.css";
+import "./marketplace-premium.css";
 
 export function Icon({ name, size = 22 }: { name: string; size?: number }) {
   const paths: Record<string, React.ReactNode> = {
@@ -113,7 +114,7 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
           baobab<span>Le bon achat, bien accompagné.</span>
         </Link>
         <nav>
-          <NavLink to="/">Explorer</NavLink>
+          <NavLink to="/" end>Explorer</NavLink>
           <NavLink to="/favorites">Favoris</NavLink>
           <NavLink to="/messages">Messages</NavLink>
           <NavLink to="/orders">Mes commandes</NavLink>
@@ -208,6 +209,7 @@ function ProductTile({ p, onFavorite }: { p: any; onFavorite?: () => void }) {
         <button
           className={`favorite ${favorite ? "selected" : ""}`}
           aria-label={favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+          aria-pressed={favorite}
           onClick={toggle}
         >
           <Icon name="heart" size={19} />
@@ -221,7 +223,7 @@ function ProductTile({ p, onFavorite }: { p: any; onFavorite?: () => void }) {
         </span>
       </div>
       <div className="listing-copy">
-        <p className="eyebrow">{p.subcategory || p.category?.name}</p>
+        <p className="eyebrow">{p.subcategory && p.subcategory !== "Autres" ? p.subcategory : p.category?.name}</p>
         <Link to={`/products/${p.id}`}>
           <h3>{p.name}</h3>
         </Link>
@@ -242,6 +244,9 @@ function ProductTile({ p, onFavorite }: { p: any; onFavorite?: () => void }) {
             ? `Livraison incluse · ${p.shippingDestination}`
             : "Transport & importation sur devis"}
         </p>
+        <Link className="listing-discover" to={`/products/${p.id}`}>
+          Découvrir l’annonce <Icon name="arrow" size={16} />
+        </Link>
       </div>
     </article>
   );
@@ -293,21 +298,21 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
     <>
       <section className="discovery-hero">
         <div className="hero-copy">
-          <p className="eyebrow">DUBAÏ → AFRIQUE</p>
+          <p className="eyebrow"><span className="hero-dot" /> DUBAÏ → AFRIQUE · LE COMMERCE, ACCOMPAGNÉ</p>
           <h1>
             {favorites ? (
               "Vos belles trouvailles."
             ) : (
               <>
-                De belles découvertes.
+                Vos envies, ici.
                 <br />
-                <em>De grandes possibilités.</em>
+                <em>Le meilleur de Dubaï, à portée.</em>
               </>
             )}
           </h1>
           <p>
-            Véhicules, équipements, maison et projets. Trouvez ce qu’il vous
-            faut, Baobab s’occupe de la suite.
+            Pour vous, votre maison ou votre activité. Explorez les annonces,
+            échangez avec notre équipe et recevez un devis adapté à votre destination.
           </p>
           <form
             className="market-search"
@@ -321,7 +326,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
             <input
               name="search"
               defaultValue={search}
-              placeholder="Un téléphone, un canapé, une machine de gym…"
+              placeholder="Quel sera votre prochain achat ?"
               aria-label="Rechercher une annonce"
             />
             <button type="submit">
@@ -355,13 +360,25 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
           <div className="art-caption">
             SÉLECTION À DUBAÏ<span>Accompagnement Baobab</span>
           </div>
+          <div className="hero-passport">
+            <span className="passport-label">VOTRE ACHAT, EN TOUTE CLARTÉ</span>
+            <div className="passport-route"><strong>Dubaï</strong><Icon name="arrow" size={24} /><strong>Chez vous</strong></div>
+            <div className="passport-divider" />
+            <div className="passport-service"><Icon name="shield" size={25} /><div><strong>Un devis avant de décider.</strong><span>Un interlocuteur à chaque étape.</span></div></div>
+          </div>
         </div>
       </section>
+      <div className="purchase-steps" aria-label="Comment acheter avec Baobab">
+        <div><span>01</span><p><strong>Trouvez votre prochain achat</strong><small>À l’unité ou pour votre activité</small></p></div>
+        <div><span>02</span><p><strong>Validez votre devis</strong><small>Prix et conditions avant de commander</small></p></div>
+        <div><span>03</span><p><strong>Suivez chaque étape</strong><small>De la préparation à la livraison</small></p></div>
+      </div>
       <section className="universe-grid" aria-label="Grands univers">
         {universes.map((u) => (
           <button
             className={`universe ${universe === u.id ? "active" : ""}`}
             key={u.id}
+            aria-pressed={universe === u.id}
             onClick={() => filter("universe", universe === u.id ? "" : u.id)}
           >
             <div className={`universe-icon ${u.id}`}>
@@ -390,7 +407,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
           <span>
             {loading
               ? "Chargement…"
-              : `${shown.length} annonce${shown.length > 1 ? "s" : ""}`}
+              : `${shown.length} annonce${shown.length > 1 ? "s" : ""} à découvrir`}
           </span>
         </div>
         <div className="filter-bar">
@@ -497,6 +514,15 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
     </>
   );
 }
+const DESTINATIONS = [
+  { id: "CI", name: "Côte d'Ivoire (Abidjan)", airRate: 8500, seaRate: 180000, daysAir: "5–8 j", daysSea: "25–30 j" },
+  { id: "BF", name: "Burkina Faso (Ouagadougou)", airRate: 9000, seaRate: 210000, daysAir: "6–9 j", daysSea: "30–35 j" },
+  { id: "TG", name: "Togo (Lomé)", airRate: 8000, seaRate: 175000, daysAir: "5–8 j", daysSea: "22–28 j" },
+  { id: "BJ", name: "Bénin (Cotonou)", airRate: 8200, seaRate: 175000, daysAir: "5–8 j", daysSea: "22–28 j" },
+  { id: "ML", name: "Mali (Bamako)", airRate: 9200, seaRate: 220000, daysAir: "7–10 j", daysSea: "32–38 j" },
+  { id: "NE", name: "Niger (Niamey)", airRate: 9500, seaRate: 230000, daysAir: "7–10 j", daysSea: "35–40 j" },
+];
+
 export function ListingDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -505,7 +531,9 @@ export function ListingDetail() {
     [image, setImage] = useState(0),
     [qty, setQty] = useState(1),
     [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [dest, setDest] = useState(DESTINATIONS[0]),
+    [shippingMode, setShippingMode] = useState<"AIR" | "SEA">("AIR");
   useEffect(() => {
     setP(null);
     call(`/products/${id}`)
@@ -518,12 +546,22 @@ export function ListingDetail() {
       .then(setConfig)
       .catch(() => {});
   }, [id]);
+
+  const unitWeight = Number(p?.weightKg) || 0.45;
+  const totalWeight = Math.max(0.5, unitWeight * qty);
+  const estimatedFreight = shippingMode === "AIR"
+    ? Math.round(totalWeight * dest.airRate)
+    : Math.max(45000, Math.round((totalWeight / 200) * dest.seaRate));
+  const productSubtotal = p ? Math.round(Number(p.price) * qty) : 0;
+  const estimatedGrandTotal = p?.shippingIncluded ? productSubtotal : productSubtotal + estimatedFreight;
+
   async function discuss() {
     setBusy(true);
     try {
+      const modeLabel = shippingMode === "AIR" ? `Fret Aérien Express (${dest.daysAir})` : `Fret Maritime (${dest.daysSea})`;
       const c = await call("/concierge/conversations", {
         productId: id,
-        body: `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} : ${p.name}.`,
+        body: `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} : ${p.name}. Destination : ${dest.name} en ${modeLabel}. Total estimé : ${money(estimatedGrandTotal)}.`,
         requestKey: requestKey(),
       });
       save("baobab_conversations", [
@@ -546,7 +584,7 @@ export function ListingDetail() {
         />
       </>
     );
-  const message = `Bonjour Baobab, je suis intéressé par ${p.name} (${qty} ${p.unit}), référence ${p.id}. ${window.location.href}`;
+  const message = `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} de "${p.name}" vers ${dest.name} en ${shippingMode === "AIR" ? "Fret Aérien Express" : "Fret Maritime"}. Référence ${p.id}. ${window.location.href}`;
   return (
     <>
       <div className="breadcrumb">
@@ -640,6 +678,57 @@ export function ListingDetail() {
             Minimum produits : {money(Math.round(Number(p.price) * 100) * Math.ceil((p.minimumOrder || 1) / (p.packSize || 1)) * (p.packSize || 1) / 100)}.
             {" "}{p.shippingIncluded ? "Frais d’importation éventuels à confirmer au devis." : "Hors transport et frais d’importation."}
           </p>
+          <div className="freight-calculator">
+            <div className="freight-header">
+              <Icon name="shield" size={17} />
+              <strong>Simulateur Fret & Transit Dubaï ➔ Afrique</strong>
+            </div>
+            <label>
+              Destination d’arrivée
+              <select
+                value={dest.id}
+                onChange={(e) =>
+                  setDest(DESTINATIONS.find((d) => d.id === e.target.value) || DESTINATIONS[0])
+                }
+              >
+                {DESTINATIONS.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="shipping-mode-selector">
+              <button
+                type="button"
+                className={`mode-btn ${shippingMode === "AIR" ? "active" : ""}`}
+                onClick={() => setShippingMode("AIR")}
+              >
+                ✈️ Aérien ({dest.daysAir})
+              </button>
+              <button
+                type="button"
+                className={`mode-btn ${shippingMode === "SEA" ? "active" : ""}`}
+                onClick={() => setShippingMode("SEA")}
+              >
+                🚢 Maritime ({dest.daysSea})
+              </button>
+            </div>
+            <div className="freight-breakdown">
+              <div>
+                <span>Marchandise ({qty} {p.unit || "pcs"})</span>
+                <b>{money(productSubtotal)}</b>
+              </div>
+              <div>
+                <span>Fret & dédouanement estimé (~{totalWeight.toFixed(1)} kg)</span>
+                <b>{p.shippingIncluded ? "Inclus" : money(estimatedFreight)}</b>
+              </div>
+              <div className="freight-total">
+                <span>Total estimé rendu {dest.name.split(" ")[0]}</span>
+                <strong>{money(estimatedGrandTotal)}</strong>
+              </div>
+            </div>
+          </div>
           <Notice>{error}</Notice>
           <button
             className="market-button full"
@@ -1029,6 +1118,14 @@ export function Tracking({ account = false }: { account?: boolean }) {
                     </button>
                   </>
                 )}
+                <button
+                  type="button"
+                  className="market-button secondary full"
+                  style={{ marginTop: "12px" }}
+                  onClick={() => window.print()}
+                >
+                  <Icon name="box" size={17} /> Télécharger / Imprimer la Proforma (PDF)
+                </button>
               </>
             ) : (
               <p>

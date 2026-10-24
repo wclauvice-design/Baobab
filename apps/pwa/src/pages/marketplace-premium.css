@@ -1,0 +1,1148 @@
+/* ==========================================================================
+   BAOBAB — PRESTIGE OBSIDIAN & GOLD DESIGN SYSTEM (DUBAI ➔ AFRIQUE DE L'OUEST)
+   Direction artistique professionnelle, souveraine et puissante.
+   ========================================================================== */
+
+:root {
+  --ink: #f8fafc;
+  --ink-heading: #ffffff;
+  --ink-muted: #94a3b8;
+  --ink-subtle: #64748b;
+  --bg-root: #080b11;
+  --bg-surface: #0f1523;
+  --bg-surface-elevated: #151d30;
+  --bg-surface-card: #121929;
+  --accent: #f59e0b;
+  --accent-gold-light: #fde68a;
+  --accent-gold-dark: #d97706;
+  --accent-gradient: linear-gradient(135deg, #fde68a 0%, #f59e0b 50%, #d97706 100%);
+  --accent-glow: 0 0 25px rgba(245, 158, 11, 0.35);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-gold: rgba(245, 158, 11, 0.35);
+  --emerald: #10b981;
+  --emerald-glow: 0 0 20px rgba(16, 185, 129, 0.3);
+  --sky-transit: #38bdf8;
+  --card-shadow: 0 12px 35px -8px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --card-shadow-hover: 0 20px 45px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(245, 158, 11, 0.18), 0 0 0 1px rgba(245, 158, 11, 0.4);
+}
+
+.market {
+  --ink: #f8fafc;
+  --accent: #f59e0b;
+  --muted: #94a3b8;
+  --line: rgba(255, 255, 255, 0.09);
+  background: var(--bg-root);
+  background-image:
+    radial-gradient(1200px circle at 15% -10%, rgba(245, 158, 11, 0.12), transparent 55%),
+    radial-gradient(900px circle at 90% 15%, rgba(56, 189, 248, 0.07), transparent 50%),
+    radial-gradient(800px circle at 50% 100%, rgba(16, 185, 129, 0.06), transparent 60%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: "Sora", system-ui, -apple-system, sans-serif;
+  line-height: 1.65;
+  min-height: 100vh;
+}
+
+.market h1, .market h2, .market h3, .market .brand {
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  color: var(--ink-heading);
+  letter-spacing: -0.035em;
+}
+
+.market a, .market button, .market input, .market select, .market textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.market button, .market a {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.market input, .market textarea, .market select {
+  background: #111726;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  border-radius: 12px;
+}
+
+.market input:focus, .market textarea:focus, .market select:focus {
+  outline: 2px solid var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
+}
+
+.market :is(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   TOP NOTE & HEADER
+   ========================================================================== */
+.top-note {
+  background: #05070c;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.25);
+  color: #fde68a;
+  padding: 10px 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.top-note span {
+  color: #94a3b8;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.market-header {
+  padding: 20px 40px;
+  min-height: 94px;
+  background: rgba(8, 11, 17, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.brand {
+  font-size: 32px;
+  letter-spacing: -1.5px;
+  font-weight: 700;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand svg {
+  color: #f59e0b;
+  filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.5));
+}
+
+.brand > span {
+  top: 38px;
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  color: #f59e0b;
+  font-family: "Sora", sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.market-header nav {
+  padding: 6px;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50px;
+}
+
+.market-header nav a {
+  padding: 10px 20px;
+  border-radius: 40px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.market-header nav a.active {
+  background: var(--accent-gradient);
+  color: #070a10;
+  font-weight: 700;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.4);
+}
+
+.market-header nav a:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.account-link {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 30px;
+  padding: 11px 19px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #f8fafc;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.account-link:hover {
+  border-color: var(--accent);
+  color: var(--accent-gold-light);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+}
+
+/* ==========================================================================
+   DISCOVERY HERO (DUBAI TO WEST AFRICA)
+   ========================================================================== */
+.discovery-hero {
+  min-height: 440px;
+  padding: 50px;
+  border-radius: 28px;
+  background:
+    radial-gradient(ellipse at 95% 15%, rgba(245, 158, 11, 0.18), transparent 52%),
+    radial-gradient(ellipse at 15% 85%, rgba(56, 189, 248, 0.1), transparent 50%),
+    linear-gradient(145deg, #111827 0%, #080c14 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #fff;
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+}
+
+.discovery-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.08), transparent 70%);
+}
+
+.hero-copy {
+  width: 58%;
+  max-width: 650px;
+}
+
+.hero-copy .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #fde68a;
+  text-transform: uppercase;
+}
+
+.hero-dot {
+  width: 8px;
+  height: 8px;
+  background: #f59e0b;
+  box-shadow: 0 0 10px #f59e0b;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.market .hero-copy h1 {
+  font-size: clamp(36px, 4.2vw, 56px);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  margin: 22px 0;
+  color: #ffffff;
+}
+
+.hero-copy h1 em {
+  font-style: normal;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  filter: drop-shadow(0 2px 14px rgba(245, 158, 11, 0.3));
+}
+
+.hero-copy > p:not(.eyebrow) {
+  max-width: 520px;
+  color: #cbd5e1;
+  font-size: 13.5px;
+  line-height: 1.8;
+}
+
+.market-search {
+  background: rgba(15, 21, 35, 0.95);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(245, 158, 11, 0.15);
+  margin-top: 28px;
+  padding: 6px 6px 6px 16px;
+  gap: 12px;
+}
+
+.market-search > svg {
+  color: #f59e0b;
+}
+
+.market-search input {
+  font-size: 13px;
+  color: #ffffff;
+  padding: 12px 0;
+  background: transparent;
+  border: none;
+}
+
+.market-search input::placeholder {
+  color: #64748b;
+}
+
+.market-search button {
+  background: var(--accent-gradient);
+  color: #070a10;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 12px;
+  padding: 14px 22px;
+  min-height: 46px;
+  border: none;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+}
+
+.market-search button:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 6px 22px rgba(245, 158, 11, 0.55);
+}
+
+.hero-promises {
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 600;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.hero-promises span svg {
+  color: #10b981;
+}
+
+/* ==========================================================================
+   HERO PASSPORT / AIR WAYBILL CARD
+   ========================================================================== */
+.hero-art {
+  width: 36%;
+  right: 3%;
+  top: 0;
+  bottom: 0;
+  opacity: 1;
+  display: flex;
+  align-items: center;
+}
+
+.hero-art > svg {
+  position: absolute;
+  width: 110%;
+  left: -5%;
+  bottom: -6%;
+  opacity: 0.15;
+  color: #f59e0b;
+}
+
+.art-sun {
+  width: 240px;
+  height: 240px;
+  right: -25px;
+  top: 30px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.25), transparent 70%);
+  opacity: 0.6;
+}
+
+.hero-passport {
+  position: relative;
+  width: 100%;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 24px;
+  background: linear-gradient(155deg, #131b2c 0%, #0a0f1b 100%);
+  color: #f8fafc;
+  padding: 30px;
+  transform: rotate(2.5deg);
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.8),
+    0 0 35px rgba(245, 158, 11, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  animation: passport-arrive 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.passport-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #fde68a;
+  text-transform: uppercase;
+}
+
+.passport-route {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 24px 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: #ffffff;
+}
+
+.passport-route svg {
+  color: #f59e0b;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
+}
+
+.passport-divider {
+  border-top: 1px dashed rgba(245, 158, 11, 0.3);
+  margin: 0 -30px 24px;
+}
+
+.passport-service {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.passport-service svg {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.passport-service strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.passport-service span {
+  display: block;
+  color: #94a3b8;
+  font-size: 10px;
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   PURCHASE STEPS (1-2-3)
+   ========================================================================== */
+.purchase-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 32px 0 38px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 10px 28px;
+  gap: 30px;
+}
+
+.purchase-steps > div {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.purchase-steps > div > span {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #f59e0b;
+  opacity: 0.9;
+  letter-spacing: -1px;
+}
+
+.purchase-steps strong {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.purchase-steps small {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 3px;
+}
+
+/* ==========================================================================
+   UNIVERSES GRID
+   ========================================================================== */
+.universe-grid {
+  gap: 16px;
+  margin: 0 0 45px;
+}
+
+.universe-grid > button {
+  border-radius: 18px;
+  padding: 22px 18px;
+  gap: 14px;
+  background: linear-gradient(150deg, #111828 0%, #0d121f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  color: #f8fafc;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.universe-grid > button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.universe-grid > button.active {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent), 0 12px 30px rgba(245, 158, 11, 0.25);
+  background: linear-gradient(150deg, #172238 0%, #0e1526 100%);
+}
+
+.universe-grid h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.universe-grid p {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.universe-grid .universe-icon {
+  width: 48px;
+  height: 50px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f59e0b;
+}
+
+.universe-grid .motors { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+.universe-grid .classifieds { background: rgba(56, 189, 248, 0.12); color: #38bdf8; }
+.universe-grid .home { background: rgba(234, 179, 8, 0.12); color: #eab308; }
+.universe-grid .trade { background: rgba(249, 115, 22, 0.12); color: #f97316; }
+
+/* ==========================================================================
+   SECTION HEADING & FILTERS
+   ========================================================================== */
+.market .section-heading h2 {
+  font-size: 32px;
+  letter-spacing: -0.04em;
+  color: #ffffff;
+}
+
+.eyebrow {
+  color: #fde68a;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.section-heading > span {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fde68a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.filter-bar {
+  padding: 14px 18px;
+  background: #0f1523;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  gap: 12px;
+}
+
+.filter-bar select, .filter-bar input {
+  min-height: 44px;
+  font-size: 12px;
+  background: #141c2e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  border-radius: 10px;
+}
+
+/* ==========================================================================
+   PRODUCT LISTINGS & TILES
+   ========================================================================== */
+.listing-grid {
+  gap: 24px;
+}
+
+.listing-tile {
+  border-radius: 20px;
+  background: linear-gradient(160deg, #111828 0%, #0d121f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.listing-tile:hover {
+  transform: translateY(-6px);
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75), 0 0 25px rgba(245, 158, 11, 0.16);
+}
+
+.listing-picture {
+  height: 220px;
+  background: #070a11;
+  overflow: hidden;
+  position: relative;
+}
+
+.listing-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.listing-tile:hover .listing-picture img {
+  transform: scale(1.055);
+}
+
+.photo-missing {
+  color: #64748b;
+  background: radial-gradient(ellipse at 50% 45%, #151d2f, #090e17);
+}
+
+.photo-missing > svg {
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #f59e0b;
+}
+
+.favorite {
+  width: 38px;
+  height: 38px;
+  background: rgba(10, 14, 23, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+}
+
+.favorite.selected {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.favorite:hover {
+  transform: scale(1.1);
+}
+
+.picture-tag {
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: rgba(10, 14, 23, 0.9);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fde68a;
+  text-transform: uppercase;
+}
+
+.listing-copy {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.listing-copy .eyebrow {
+  font-size: 9px;
+  color: #f59e0b;
+  letter-spacing: 0.12em;
+}
+
+.listing-copy h3 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #ffffff;
+  min-height: 44px;
+}
+
+.listing-copy > strong {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+.listing-copy strong small {
+  font-family: "Sora", sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.listing-location {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 12px 0 !important;
+}
+
+.listing-location svg {
+  color: #f59e0b;
+}
+
+.listing-location span {
+  color: #fde68a;
+  font-weight: 600;
+}
+
+.shipping-note {
+  font-size: 10px;
+  color: #cbd5e1;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.listing-discover {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: auto;
+  padding-top: 14px;
+  color: #f59e0b;
+}
+
+.listing-discover:hover {
+  color: #fde68a;
+  transform: translateX(3px);
+}
+
+/* ==========================================================================
+   BUTTONS & ACTIONS
+   ========================================================================== */
+.market-button {
+  border-radius: 14px;
+  min-height: 48px;
+  background: var(--accent-gradient);
+  border: none;
+  color: #070a10 !important;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.38);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.market-button:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 6px 26px rgba(245, 158, 11, 0.55);
+}
+
+.market-button.secondary {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fde68a !important;
+  box-shadow: none;
+}
+
+.market-button.secondary:hover {
+  background: rgba(245, 158, 11, 0.12);
+  color: #ffffff !important;
+  border-color: #f59e0b;
+}
+
+.market-button.full {
+  width: 100%;
+}
+
+/* ==========================================================================
+   CONCIERGE BANNER
+   ========================================================================== */
+.concierge-banner {
+  padding: 42px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 26px;
+  background:
+    radial-gradient(ellipse at 85% 15%, rgba(245, 158, 11, 0.15), transparent 60%),
+    linear-gradient(150deg, #131b2c 0%, #0a0f1b 100%);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+  margin-top: 50px;
+}
+
+.concierge-banner h2 {
+  font-size: 28px;
+  color: #ffffff;
+}
+
+.concierge-banner p {
+  color: #cbd5e1;
+}
+
+/* ==========================================================================
+   DETAIL PAGE (LISTING DETAIL)
+   ========================================================================== */
+.detail-grid {
+  gap: 35px;
+}
+
+.detail-photo {
+  border-radius: 22px;
+  overflow: hidden;
+  background: #090e18;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.detail-photo img {
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+}
+
+.thumbnails img {
+  border-radius: 10px;
+  border: 2px solid transparent;
+}
+
+.thumbnails button:focus-visible img,
+.thumbnails button:hover img {
+  border-color: var(--accent);
+}
+
+.detail-description {
+  background: #0f1523;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  padding: 30px;
+  margin-top: 25px;
+}
+
+.detail-description h2 {
+  font-size: 20px;
+  color: #ffffff;
+}
+
+.detail-description p {
+  color: #cbd5e1;
+  line-height: 1.8;
+}
+
+.specs > div {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.specs strong {
+  color: #ffffff;
+}
+
+.detail-panel {
+  background: linear-gradient(165deg, #121929 0%, #0c111e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+  border-radius: 24px;
+  padding: 32px;
+}
+
+.detail-panel h1 {
+  font-size: 28px;
+  color: #ffffff;
+}
+
+.detail-price {
+  font-size: 34px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.detail-price small {
+  color: #94a3b8;
+}
+
+.delivery-label {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.reassurance {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.reassurance svg {
+  color: #f59e0b;
+}
+
+/* ==========================================================================
+   CHAT / INBOX (CONCIERGE MESSAGING)
+   ========================================================================== */
+.inbox-grid {
+  border-radius: 22px;
+  background: #0f1523;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.inbox-grid > aside {
+  background: #0a0f1b;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.inbox-grid aside > a:not(.market-button) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+}
+
+.inbox-grid aside > a.active {
+  background: rgba(245, 158, 11, 0.12);
+  border-left: 3px solid #f59e0b;
+  color: #ffffff;
+}
+
+.chat-title {
+  background: #111828;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chat-title svg {
+  color: #f59e0b;
+}
+
+.chat-message {
+  background: #141c2e;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #f8fafc;
+  border-radius: 16px;
+}
+
+.chat-message.mine {
+  background: var(--accent-gradient);
+  color: #070a10;
+  border: none;
+}
+
+.chat-message.mine small {
+  color: #451a03;
+  font-weight: 700;
+}
+
+.chat-compose textarea {
+  background: #141c2e;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   TRACKING & QUOTES (TRADE ORDER)
+   ========================================================================== */
+.tracking-card {
+  border-radius: 24px;
+  background: linear-gradient(160deg, #111827 0%, #0d121f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  padding: 32px;
+}
+
+.order-line {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 14px 0;
+}
+
+.amount-list .total {
+  border-top: 2px solid var(--accent);
+  color: #ffffff;
+}
+
+.amount-list .total dd {
+  color: #fde68a;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.status-pill {
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fde68a;
+  border-radius: 30px;
+  padding: 8px 18px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.timeline-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 12px #f59e0b;
+}
+
+/* ==========================================================================
+   FOOTER & MOBILE NAV
+   ========================================================================== */
+.market-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: #06090f;
+  color: #94a3b8;
+  padding: 40px 20px 120px;
+}
+
+.mobile-nav {
+  background: rgba(10, 14, 23, 0.94);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.7);
+}
+
+.mobile-nav a {
+  color: #94a3b8;
+}
+
+.mobile-nav a.active {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.loading-card {
+  border-radius: 20px;
+  background: linear-gradient(100deg, #111828 25%, #192338 45%, #111828 65%);
+  background-size: 200% 100%;
+  animation: commerce-loading 1.6s linear infinite;
+}
+
+@keyframes commerce-loading {
+  to { background-position: -200% 0; }
+}
+
+@keyframes passport-arrive {
+  from { opacity: 0; transform: translateY(16px) rotate(0); }
+  to { opacity: 1; transform: translateY(0) rotate(2.5deg); }
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS
+   ========================================================================== */
+@media (max-width: 700px) {
+  .top-note { font-size: 9px; padding: 8px 14px; }
+  .market-header { padding: 18px 20px; min-height: 84px; }
+  .brand { font-size: 28px; }
+  .discovery-hero { padding: 28px 20px; border-radius: 20px; }
+  .market .hero-copy h1 { font-size: 34px; line-height: 1.1; margin: 18px 0; }
+  .purchase-steps { grid-template-columns: 1fr; gap: 14px; }
+  .universe-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .listing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .listing-picture { height: 160px; }
+  .listing-copy { padding: 14px; }
+  .listing-copy > strong { font-size: 19px; }
+}
+
+
+/* ==========================================================================
+   FREIGHT & CUSTOMS SIMULATOR (DUBAI ➔ WEST AFRICA)
+   ========================================================================== */
+.freight-calculator {
+  background: rgba(245, 158, 11, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 16px;
+  padding: 18px;
+  margin: 18px 0;
+}
+
+.freight-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fde68a;
+  font-size: 11.5px;
+  margin-bottom: 14px;
+}
+
+.freight-header strong {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.shipping-mode-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.mode-btn {
+  padding: 9px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 10px;
+  background: #141c2e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-btn.active {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
+  color: #fde68a;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+}
+
+.freight-breakdown {
+  margin-top: 14px;
+  border-top: 1px solid rgba(245, 158, 11, 0.2);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.freight-breakdown > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #cbd5e1;
+}
+
+.freight-breakdown .freight-total {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.freight-breakdown .freight-total strong {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 16px;
+  color: #f59e0b;
+}
+
+/* ==========================================================================
+   PROFORMA PRINT STYLES
+   ========================================================================== */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .top-note, .market-header, .mobile-nav, .market-footer, button:not(.print-btn), nav {
+    display: none !important;
+  }
+  .market {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+  }
+  .tracking-card {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #000000 !important;
+    box-shadow: none !important;
+  }
+  .tracking-card h2, .tracking-card strong, .tracking-card b {
+    color: #000000 !important;
+  }
+  .amount-list .total dd, .amount-list .total dt {
+    color: #000000 !important;
+  }
+}
