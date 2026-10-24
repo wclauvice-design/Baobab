@@ -1717,3 +1717,32 @@ html, body, #root, .market {
 }
 
 
+
+.seller-trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(229, 184, 105, 0.08);
+  border: 1px solid rgba(229, 184, 105, 0.22);
+  border-radius: 999px;
+  padding: 5px 12px;
+  margin: 6px 0 10px 0;
+  font-size: 11.5px;
+  color: #cbd5e1;
+  width: fit-content;
+}
+.seller-trust-badge strong {
+  color: #f3c77c;
+  font-weight: 600;
+  margin: 0 4px;
+}
+.seller-verified-tag {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 4px;
+}

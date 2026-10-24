@@ -793,6 +793,7 @@ export function ListingDetail() {
             <p>{p.description}</p>
             <div className="specs">
               {Object.entries({
+                Vendeur: p.seller?.shopName || "Baobab Dubaï Officiel",
                 État:
                   p.condition === "NEW"
                     ? "Neuf"
@@ -819,6 +820,13 @@ export function ListingDetail() {
           <div className="detail-price">
             {money(p.price)}
             <small>par {p.unit}</small>
+          </div>
+          <div className="seller-trust-badge">
+            <span className="seller-badge-icon">👑</span>
+            <span className="seller-badge-text">
+              Vendu par <strong>{p.seller?.shopName || "Baobab Dubaï Officiel"}</strong>
+              <em className="seller-verified-tag">✓ Vérifié</em>
+            </span>
           </div>
           <p className="delivery-label">
             {p.shippingIncluded

@@ -352,7 +352,12 @@ export class ProductsService {
     userId: string,
     role: Role,
   ): Promise<string | null> {
-    if (role === Role.ADMIN) return null;
+    if (role === Role.ADMIN) {
+      const official = await this.prisma.seller.findFirst({
+        where: { OR: [{ id: "seller-baobab-official" }, { userId }] },
+      });
+      return official ? official.id : "seller-baobab-official";
+    }
     const seller = await this.prisma.seller.findUnique({ where: { userId } });
     if (!seller || seller.status !== "APPROVED")
       throw new ForbiddenException("Votre profil vendeur doit être approuvé");
