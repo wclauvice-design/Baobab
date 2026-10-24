@@ -1,6 +1,12 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../lib/api";
+import {
+  getNotificationPermission,
+  hasNotificationSupport,
+  notifyNewClientMessage,
+  requestNotificationPermission,
+} from "../lib/notifications";
 import "./operations.css";
 export const money = (v: any) =>
   `${Number(v || 0).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} FCFA`;
@@ -385,7 +391,38 @@ export function OperationsInbox() {
   const [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false),
     [text, setText] = useState("");
+  const [notifState, setNotifState] = useState<NotificationPermission>(getNotificationPermission);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const prevUrgentCountRef = useRef<number | null>(null);
+  const prevDetailMsgsRef = useRef<number>(0);
+
+  const urgentCount = list.data?.filter((c: any) => c.needsReply).length || 0;
+
+  // Real-time notification when a client message arrives in conversation list
+  useEffect(() => {
+    if (!list.data) return;
+    const currentUrgent = list.data.filter((c: any) => c.needsReply).length;
+    if (prevUrgentCountRef.current !== null && currentUrgent > prevUrgentCountRef.current) {
+      const latest = list.data.find((c: any) => c.needsReply);
+      const name = latest?.customer ? `${latest.customer.firstName} ${latest.customer.lastName}` : "Client Baobab";
+      const snippet = latest?.messages?.[0]?.body || "Nouveau message";
+      notifyNewClientMessage(name, snippet);
+    }
+    prevUrgentCountRef.current = currentUrgent;
+  }, [list.data]);
+
+  // Real-time notification when client sends message in open thread
+  useEffect(() => {
+    const msgs = detail.data?.messages || [];
+    if (prevDetailMsgsRef.current > 0 && msgs.length > prevDetailMsgsRef.current) {
+      const added = msgs.slice(prevDetailMsgsRef.current);
+      const incoming = added.find((m: any) => m.role === "CLIENT");
+      if (incoming) {
+        notifyNewClientMessage("Client", incoming.body);
+      }
+    }
+    prevDetailMsgsRef.current = msgs.length;
+  }, [detail.data?.messages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -407,10 +444,37 @@ export function OperationsInbox() {
   return (
     <div className="ops">
       <header>
-        <h1>Messages clients</h1>
-        <Link className="op-button secondary" to="/customers">
-          Créer une fiche client
-        </Link>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <h1>Messages clients</h1>
+          {urgentCount > 0 && (
+            <span className="op-pill" style={{ background: "#ef4444", color: "#fff", fontWeight: 700 }}>
+              {urgentCount} à traiter
+            </span>
+          )}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {hasNotificationSupport() && notifState !== "granted" && (
+            <button
+              type="button"
+              className="op-button"
+              style={{ background: "#f59e0b", color: "#000", fontWeight: 600 }}
+              onClick={async () => {
+                const p = await requestNotificationPermission();
+                setNotifState(p);
+              }}
+            >
+              🔔 Activer alertes sonores
+            </button>
+          )}
+          {notifState === "granted" && (
+            <span style={{ fontSize: 12, color: "#10b981", fontWeight: 600 }}>
+              ✓ Alertes actives
+            </span>
+          )}
+          <Link className="op-button secondary" to="/customers">
+            Créer une fiche client
+          </Link>
+        </div>
       </header>
       <Alert>{list.error || message}</Alert>
       <div className="op-inbox">

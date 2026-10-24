@@ -10,6 +10,7 @@ import { Cron } from "@nestjs/schedule";
 import { createHash, randomBytes, randomUUID } from "crypto";
 import { Prisma, Role } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import {
   AcceptQuoteDto,
   CreateTradeDto,
@@ -47,6 +48,7 @@ export class CommerceService {
   constructor(
     private db: PrismaService,
     private config: ConfigService,
+    private notifications: NotificationsService,
   ) {}
   async configPublic() {
     const setting = await this.db.businessSetting.findUnique({
@@ -149,6 +151,21 @@ export class CommerceService {
         },
       },
     });
+    try {
+      const admins = await this.db.user.findMany({
+        where: { role: Role.ADMIN },
+        select: { id: true, phone: true },
+      });
+      for (const admin of admins) {
+        await this.notifications.notifyUser(
+          admin.id,
+          admin.phone,
+          `[Baobab Concierge] Nouvelle demande de devis : "${dto.body.slice(0, 100)}..."`,
+        );
+      }
+    } catch {
+      // Non-blocking notification dispatch
+    }
     return { id: c.id, token: createdToken, subject: c.subject };
   }
   async readConversation(id: string, token: string) {
@@ -206,6 +223,34 @@ export class CommerceService {
         where: { id },
         data: { needsReply: role === "CLIENT" },
       });
+      try {
+        if (role === "CLIENT") {
+          const admins = await tx.user.findMany({
+            where: { role: Role.ADMIN },
+            select: { id: true, phone: true },
+          });
+          for (const admin of admins) {
+            await this.notifications.notifyUser(
+              admin.id,
+              admin.phone,
+              `[Baobab Message] Nouveau message d'un client : "${dto.body.slice(0, 100)}..."`,
+            );
+          }
+        } else if (role === "BAOBAB" && c.customerId) {
+          const cust = await tx.customer.findUnique({
+            where: { id: c.customerId },
+          });
+          if (cust && cust.phone) {
+            await this.notifications.notifyUser(
+              cust.userId || cust.id,
+              cust.phone,
+              `[Baobab Dubaï] L'équipe vous a répondu : "${dto.body.slice(0, 100)}..."`,
+            );
+          }
+        }
+      } catch {
+        // Non-blocking notification dispatch
+      }
       return m;
     });
   }

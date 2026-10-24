@@ -5,7 +5,10 @@ import {
   CommercePublicController,
   PublicRateGuard,
 } from "./commerce.controller";
+import { NotificationsModule } from "../notifications/notifications.module";
+
 @Module({
+  imports: [NotificationsModule],
   controllers: [CommerceAdminController, CommercePublicController],
   providers: [CommerceService, PublicRateGuard],
 })
