@@ -488,29 +488,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .discovery-search-field input { display: block; width: 100%; position: relative; z-index: 1; }
 .search-ideas { position: absolute; inset: 0; display: flex; align-items: center; overflow: hidden; pointer-events: none; color: #73776d; font-size: 13px; }
 .search-ideas > span { display: block; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.baobab-promises { margin: 0 0 10px; }
-.promise-bar { display: flex; align-items: center; gap: 12px; padding: 4px 8px 4px 10px; min-height: 42px; border-radius: 10px; background: #173e32; color: #fff8e6; }
-.promise-toggle { display: flex; align-items: center; gap: 8px; border: 0; background: none; color: inherit; padding: 0; min-height: 36px; cursor: pointer; text-align: left; font: inherit; font-size: 12px; }
-.promise-seal { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50% 50% 50% 8%; background: #f2c35e; color: #173e32; transform: rotate(-8deg); font-weight: 800; }
-.promise-chevron { color: #f2c35e; font-size: 18px; }
-.promise-ticker { flex: 1; min-width: 0; height: 20px; overflow: hidden; text-align: right; font-size: 12px; color: #e0e9d9; }
-.promise-ticker > span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.motion-toggle { border: 1px solid #ffffff35; border-radius: 50%; background: transparent; color: #fff8e6; width: 36px; height: 36px; flex-shrink: 0; cursor: pointer; }
-.promise-conditions { font-size: 10px; color: #65725f; margin: 4px 3px 0; }
-.promise-details { background: #fffdf6; padding: 16px; border: 1px solid #d4decf; border-radius: 0 0 12px 12px; }
-.promise-details:not([hidden]) { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.promise-details strong { font-size: 13px; color: #173e32; }
-.promise-details p { font-size: 12px; color: #52624e; margin: 6px 0 0; line-height: 1.6; }
-.promise-details a { grid-column: 1 / -1; color: #235f45; font-size: 12px; font-weight: 700; }
-.baobab-promises :focus-visible { outline: 3px solid #dcae45; outline-offset: 3px; }
-@media (max-width: 480px) {
-  .promise-bar { display: grid; grid-template-columns: minmax(0,1fr) 36px; gap: 0 6px; padding: 4px 8px; }
-  .promise-toggle { min-height: 28px; }
-  .promise-ticker { grid-row: 2; text-align: left; padding-left: 30px; font-size: 11px; }
-  .motion-toggle { grid-column: 2; grid-row: 1 / 3; }
-  .promise-details:not([hidden]) { grid-template-columns: 1fr; }
-  .search-ideas { font-size: 12px; }
-}
+/* Consolidated promise styling located at end of file */
 @media (prefers-reduced-motion: reduce) { .discovery-roll { animation: none !important; } }
 .market:has(.app-sticky-header) { background: #f6f4ee; color: #20372f; }
 .market:has(.app-sticky-header) .market-main { max-width: 1440px; }
