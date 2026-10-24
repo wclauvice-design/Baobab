@@ -6,7 +6,8 @@ interface SellerRow {
   shopName: string;
   city: string;
   status: 'PENDING' | 'APPROVED' | 'SUSPENDED';
-  user: { phone: string };
+  createdAt: string;
+  user: { phone: string; country?: string | null; language?: string; createdAt?: string };
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -32,13 +33,16 @@ export function Sellers() {
   return (
     <div>
       <h1 className="mb-6 text-2xl font-bold">Vendeurs partenaires</h1>
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white text-slate-900">
         <table className="w-full text-sm">
           <thead className="bg-slate-100 text-left text-xs uppercase text-slate-500">
             <tr>
               <th className="px-4 py-3">Boutique</th>
               <th className="px-4 py-3">Ville</th>
+              <th className="px-4 py-3">Pays</th>
               <th className="px-4 py-3">Téléphone</th>
+              <th className="px-4 py-3">Langue</th>
+              <th className="px-4 py-3">Demande</th>
               <th className="px-4 py-3">Statut</th>
               <th className="px-4 py-3">Action</th>
             </tr>
@@ -46,9 +50,12 @@ export function Sellers() {
           <tbody>
             {sellers.map((s) => (
               <tr key={s.id} className="border-t border-slate-100">
-                <td className="px-4 py-3 font-medium">{s.shopName}</td>
-                <td className="px-4 py-3">{s.city}</td>
-                <td className="px-4 py-3">{s.user.phone}</td>
+                <td className="px-4 py-3 font-medium text-slate-900">{s.shopName}</td>
+                <td className="px-4 py-3 text-slate-700">{s.city}</td>
+                <td className="px-4 py-3 text-slate-700">{s.user.country || "-"}</td>
+                <td className="px-4 py-3 text-slate-700">{s.user.phone}</td>
+                <td className="px-4 py-3 text-slate-700">{s.user.language || "-"}</td>
+                <td className="px-4 py-3 text-slate-700">{new Date(s.createdAt).toLocaleString("fr-FR")}</td>
                 <td className="px-4 py-3">
                   <span className={`rounded-full px-2 py-1 text-xs ${STATUS_STYLES[s.status]}`}>
                     {s.status}
