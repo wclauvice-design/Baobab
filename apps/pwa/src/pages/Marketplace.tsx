@@ -20,6 +20,7 @@ import {
 import { estimateFreight } from "../lib/freight";
 import "./marketplace.css";
 import "./marketplace-premium.css";
+import "./marketplace-motion.css";
 
 export function Icon({ name, size = 22 }: { name: string; size?: number }) {
   const paths: Record<string, React.ReactNode> = {
@@ -86,6 +87,9 @@ export function Icon({ name, size = 22 }: { name: string; size?: number }) {
         <path d="M7 14a4 4 0 0 1-2-7 5 5 0 0 1 10-3 5 5 0 0 1 3 10Z" />
       </>
     ),
+    close: <path d="M6 6l12 12M18 6 6 18" />,
+    check: <path d="m5 12 5 5 9-10" />,
+    plane: <path d="M2 16l20-8-6 14-4-6-6-2Zm10 0 10-8" />,
   };
   return (
     <svg
@@ -103,7 +107,36 @@ export function Icon({ name, size = 22 }: { name: string; size?: number }) {
     </svg>
   );
 }
+const FAVORITES_KEY = "baobab_favorites";
+const FAVORITES_EVENT = "baobab:favorites";
+
+/** Favoris partagés entre l'accueil, la navigation et les fiches, synchronisés entre onglets. */
+function useFavorites() {
+  const [ids, setIds] = useState<string[]>(() =>
+    saved<string[]>(FAVORITES_KEY, []),
+  );
+  useEffect(() => {
+    const sync = () => setIds(saved<string[]>(FAVORITES_KEY, []));
+    window.addEventListener(FAVORITES_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(FAVORITES_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+  const toggle = (id: string) => {
+    const current = saved<string[]>(FAVORITES_KEY, []);
+    save(
+      FAVORITES_KEY,
+      current.includes(id) ? current.filter((x) => x !== id) : [...current, id],
+    );
+    window.dispatchEvent(new Event(FAVORITES_EVENT));
+  };
+  return { ids, toggle };
+}
+
 export function MarketShell({ children }: { children: React.ReactNode }) {
+  const { ids: favoriteIds } = useFavorites();
   return (
     <div className="market">
       <div className="top-note">
@@ -116,7 +149,14 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
         </Link>
         <nav>
           <NavLink to="/" end>Explorer</NavLink>
-          <NavLink to="/favorites">Favoris</NavLink>
+          <NavLink to="/favorites">
+            Favoris
+            {favoriteIds.length > 0 && (
+              <em className="nav-count" data-testid="nav-favorites-count">
+                {favoriteIds.length}
+              </em>
+            )}
+          </NavLink>
           <NavLink to="/messages">Messages</NavLink>
           <NavLink to="/orders">Mes commandes</NavLink>
         </nav>
@@ -145,8 +185,15 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
           ["/account", "user", "Compte"],
         ].map(([to, icon, label]) => (
           <NavLink key={to} to={to} end={to === "/"}>
-            <Icon name={icon} />
-            <span>{label}</span>
+            <span className="mobile-nav-icon">
+              <Icon name={icon} size={21} />
+              {to === "/favorites" && favoriteIds.length > 0 && (
+                <b className="mobile-nav-badge" data-testid="mobile-favorites-count">
+                  {favoriteIds.length}
+                </b>
+              )}
+            </span>
+            <span className="mobile-nav-label">{label}</span>
           </NavLink>
         ))}
       </nav>
@@ -175,21 +222,15 @@ export function Empty({
     </div>
   );
 }
-function ProductTile({ p, onFavorite }: { p: any; onFavorite?: () => void }) {
-  const [favorite, setFavorite] = useState(
-    saved<string[]>("baobab_favorites", []).includes(p.id),
-  );
-  function toggle() {
-    const ids = saved<string[]>("baobab_favorites", []);
-    save(
-      "baobab_favorites",
-      favorite ? ids.filter((id) => id !== p.id) : [...ids, p.id],
-    );
-    setFavorite(!favorite);
-    onFavorite?.();
-  }
+function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
+  const { ids, toggle } = useFavorites();
+  const favorite = ids.includes(p.id);
   return (
-    <article className="listing-tile">
+    <article
+      className="listing-tile"
+      data-testid="product-tile"
+      style={{ animationDelay: `${Math.min(index, 11) * 45}ms` }}
+    >
       <div className="listing-picture">
         <Link to={`/products/${p.id}`}>
           {p.images?.[0] ? (
@@ -211,7 +252,8 @@ function ProductTile({ p, onFavorite }: { p: any; onFavorite?: () => void }) {
           className={`favorite ${favorite ? "selected" : ""}`}
           aria-label={favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
           aria-pressed={favorite}
-          onClick={toggle}
+          data-testid="favorite-button"
+          onClick={() => toggle(p.id)}
         >
           <Icon name="heart" size={19} />
         </button>
@@ -257,8 +299,8 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
   const [products, setProducts] = useState<any[]>([]),
     [config, setConfig] = useState<any>(null),
     [error, setError] = useState(""),
-    [loading, setLoading] = useState(true),
-    [favoriteVersion, setFavoriteVersion] = useState(0);
+    [loading, setLoading] = useState(true);
+  const { ids: favoriteIds } = useFavorites();
   const universe = params.get("universe") || "",
     search = params.get("search") || "";
   useEffect(() => {
@@ -289,10 +331,44 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
     setParams(next);
   }
   const shown = favorites
-    ? products.filter((p) =>
-        saved<string[]>("baobab_favorites", []).includes(p.id),
-      )
+    ? products.filter((p) => favoriteIds.includes(p.id))
     : products;
+  const conditionLabels: Record<string, string> = {
+    NEW: "Neuf",
+    USED: "Occasion",
+    REFURBISHED: "Reconditionné",
+  };
+  const sortLabels: Record<string, string> = {
+    "price-asc": "Prix croissant",
+    "price-desc": "Prix décroissant",
+  };
+  const activeFilters: { key: string; label: string }[] = [
+    universe && {
+      key: "universe",
+      label: universes.find((u) => u.id === universe)?.name || universe,
+    },
+    params.get("subcategory") && {
+      key: "subcategory",
+      label: params.get("subcategory") as string,
+    },
+    params.get("condition") && {
+      key: "condition",
+      label: conditionLabels[params.get("condition") as string] || "État",
+    },
+    params.get("minPrice") && {
+      key: "minPrice",
+      label: `Dès ${Number(params.get("minPrice")).toLocaleString("fr-FR")} FCFA`,
+    },
+    params.get("maxPrice") && {
+      key: "maxPrice",
+      label: `Jusqu’à ${Number(params.get("maxPrice")).toLocaleString("fr-FR")} FCFA`,
+    },
+    params.get("sort") && {
+      key: "sort",
+      label: sortLabels[params.get("sort") as string] || "Tri",
+    },
+    search && { key: "search", label: `« ${search} »` },
+  ].filter(Boolean) as { key: string; label: string }[];
   const subs =
     config?.universes?.find((u: any) => u.id === universe)?.categories || [];
   return (
@@ -369,10 +445,16 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
           </div>
         </div>
       </section>
-      <div className="purchase-steps" aria-label="Comment acheter avec Baobab">
-        <div><span>01</span><p><strong>Trouvez votre prochain achat</strong><small>À l’unité ou pour votre activité</small></p></div>
-        <div><span>02</span><p><strong>Validez votre devis</strong><small>Prix et conditions avant de commander</small></p></div>
-        <div><span>03</span><p><strong>Suivez chaque étape</strong><small>De la préparation à la livraison</small></p></div>
+      <ol className="purchase-steps" aria-label="Comment acheter avec Baobab">
+        <li><span>01</span><p><strong>Choisissez</strong><small>Une annonce, à l’unité ou en lot</small></p></li>
+        <li><span>02</span><p><strong>Recevez votre devis</strong><small>Fret et douane détaillés, avant de payer</small></p></li>
+        <li><span>03</span><p><strong>Suivez en direct</strong><small>De Dubaï jusqu’à votre porte</small></p></li>
+      </ol>
+      <div className="trust-strip" aria-label="Nos engagements">
+        <span><Icon name="check" size={15} /> Annonces vérifiées</span>
+        <span><Icon name="plane" size={15} /> Aérien 5–10 j · Maritime 22–40 j</span>
+        <span><Icon name="shield" size={15} /> Aucun paiement avant accord</span>
+        <span><Icon name="chat" size={15} /> Support WhatsApp</span>
       </div>
       <section className="universe-grid" aria-label="Grands univers">
         {universes.map((u) => (
@@ -439,16 +521,20 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
             min="0"
             placeholder="Prix min."
             aria-label="Prix minimum"
+            key={`min-${params.get("minPrice") || ""}`}
             defaultValue={params.get("minPrice") || ""}
-            onBlur={(e) => filter("minPrice", e.target.value)}
+            onBlur={(e) => e.target.value !== (params.get("minPrice") || "") && filter("minPrice", e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
           />
           <input
             type="number"
             min="0"
             placeholder="Prix max."
             aria-label="Prix maximum"
+            key={`max-${params.get("maxPrice") || ""}`}
             defaultValue={params.get("maxPrice") || ""}
-            onBlur={(e) => filter("maxPrice", e.target.value)}
+            onBlur={(e) => e.target.value !== (params.get("maxPrice") || "") && filter("maxPrice", e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
           />
           <select
             aria-label="Tri"
@@ -465,6 +551,22 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
             </button>
           )}
         </div>
+        {activeFilters.length > 0 && (
+          <div className="active-filters" aria-label="Filtres actifs">
+            {activeFilters.map((f) => (
+              <button
+                key={f.key}
+                type="button"
+                className="filter-chip"
+                data-testid="filter-chip"
+                aria-label={`Retirer le filtre ${f.label}`}
+                onClick={() => filter(f.key, "")}
+              >
+                {f.label} <Icon name="close" size={13} />
+              </button>
+            ))}
+          </div>
+        )}
         <Notice>{error}</Notice>
         {loading ? (
           <div className="listing-grid">
@@ -474,12 +576,8 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
           </div>
         ) : shown.length ? (
           <div className="listing-grid">
-            {shown.map((p) => (
-              <ProductTile
-                key={p.id}
-                p={p}
-                onFavorite={() => setFavoriteVersion(favoriteVersion + 1)}
-              />
+            {shown.map((p, i) => (
+              <ProductTile key={p.id} p={p} index={i} />
             ))}
           </div>
         ) : (
