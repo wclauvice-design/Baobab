@@ -22,9 +22,9 @@ export function DubizzleVehicleDetail({
   const [isFavorite, setIsFavorite] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    entertainment: true,
-    comfort: true,
-    exterior: true,
+    entertainment: false,
+    comfort: false,
+    exterior: false,
   });
 
   const specs = parseVehicleData(product);
@@ -47,7 +47,7 @@ export function DubizzleVehicleDetail({
   const displayedDesc = isLongDesc && !showFullDesc ? `${rawDescription.slice(0, 240)}…` : rawDescription;
 
   return (
-    <div className="mx-auto max-w-4xl pb-28 text-slate-100">
+    <div className="product-detail-page mx-auto max-w-4xl pb-28 text-slate-100">
       {/* Top back navigation bar */}
       <div className="mb-3 flex items-center justify-between text-xs text-slate-400">
         <button
@@ -65,11 +65,11 @@ export function DubizzleVehicleDetail({
       </div>
 
       {/* 1. VISUEL HERO SUPÉRIEUR (Image en partie supérieure de l'écran - Acheter par la vue) */}
-      <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-2xl bg-black border border-slate-800 shadow-2xl">
+      <div className="product-detail-hero relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-2xl bg-black border border-slate-800 shadow-2xl">
         <img
           src={images[activePhotoIdx]}
           alt={product.name}
-          className="h-full w-full object-cover transition-opacity duration-300"
+          className="h-full w-full object-contain transition-opacity duration-300"
         />
 
         {/* Compteur photo Dubizzle en haut à gauche : 📷 1 / 15 */}
@@ -156,6 +156,8 @@ export function DubizzleVehicleDetail({
               key={i}
               type="button"
               onClick={() => setActivePhotoIdx(i)}
+              aria-label={`Afficher la photo ${i + 1}`}
+              aria-pressed={activePhotoIdx === i}
               className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                 activePhotoIdx === i
                   ? 'border-amber-400 ring-2 ring-amber-400/30 scale-102'
@@ -169,7 +171,7 @@ export function DubizzleVehicleDetail({
       )}
 
       {/* 2. NOM & PRIX (Immédiatement après les images) */}
-      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl backdrop-blur-sm">
+      <div className="product-detail-summary mt-5 rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl backdrop-blur-sm">
         {/* Prix mis en avant en grand */}
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <div>
@@ -198,39 +200,13 @@ export function DubizzleVehicleDetail({
           {product.name}
         </h1>
 
-        {/* Barre d'icônes & spécifications clés Dubizzle */}
-        <div className="mt-4 flex flex-wrap items-center gap-3 sm:gap-6 border-t border-slate-800 pt-4 text-sm font-semibold text-slate-300">
-          <div className="flex items-center gap-2">
-            <span className="text-base text-amber-400">📅</span>
-            <span>{specs.year}</span>
-          </div>
-          <span className="text-slate-700 hidden sm:inline">•</span>
-          <div className="flex items-center gap-2">
-            <span className="text-base text-amber-400">⏱</span>
-            <span>{specs.mileage}</span>
-          </div>
-          <span className="text-slate-700 hidden sm:inline">•</span>
-          <div className="flex items-center gap-2">
-            <span className="text-base text-amber-400">🌐</span>
-            <span>{specs.regionalSpecs}</span>
-          </div>
-          <span className="text-slate-700 hidden sm:inline">•</span>
-          <div className="flex items-center gap-2">
-            <span className="text-base text-amber-400">⛽</span>
-            <span>{specs.fuelType}</span>
-          </div>
-          <span className="text-slate-700 hidden sm:inline">•</span>
-          <div className="flex items-center gap-2">
-            <span className="text-base text-amber-400">🛡</span>
-            <span>Volant à gauche (LHD)</span>
-          </div>
-        </div>
+        <p className="product-detail-meta">{specs.year} · {specs.mileage} · {specs.fuelType}</p>
       </div>
 
       {/* 3. DESCRIPTION AVEC OPTION « VOIR PLUS... » (Ensuite, directement après nom et prix) */}
       <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
         <h2 className="text-base sm:text-lg font-black text-slate-100 mb-2 flex items-center gap-2">
-          <span>📝</span> Description du Véhicule
+          À propos du véhicule
         </h2>
 
         <div className="prose prose-invert max-w-none text-sm text-slate-300 leading-relaxed whitespace-pre-line">
@@ -242,26 +218,18 @@ export function DubizzleVehicleDetail({
           <button
             type="button"
             onClick={() => setShowFullDesc(!showFullDesc)}
+            aria-expanded={showFullDesc}
             className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors"
           >
             <span>{showFullDesc ? '▲ Voir moins' : '▼ Voir plus de détails...'}</span>
           </button>
         )}
 
-        <div className="mt-3 pt-3 border-t border-slate-800 text-[11px] text-slate-500">
-          Source vérifiée Temu / Dubizzle UAE · Inspection technique concessionnaire Dubaï
-        </div>
+
       </div>
 
-      {/* 4. CAR OVERVIEW (Fiche technique 2 colonnes Dubizzle Motors) */}
-      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
-        <div className="mb-4 flex items-center justify-between border-b border-slate-800 pb-3">
-          <h2 className="text-base sm:text-lg font-black text-slate-100 flex items-center gap-2">
-            <span className="text-amber-400">📋</span> Car Overview (Fiche Technique Complète)
-          </h2>
-          <span className="text-xs text-slate-400">Format Dubizzle Motors UAE</span>
-        </div>
-
+      <details className="product-detail-section">
+        <summary>Caractéristiques du véhicule</summary>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3.5 text-sm">
           <div className="flex justify-between items-baseline border-b border-slate-800/60 pb-2">
             <span className="text-slate-400">Trim / Finition</span>
@@ -348,15 +316,15 @@ export function DubizzleVehicleDetail({
             <strong className="font-bold text-amber-300">{specs.targetMarket}</strong>
           </div>
         </div>
-      </div>
+      </details>
 
       {/* 5. FEATURES / ÉQUIPEMENTS & OPTIONS (Dubizzle Accordions) */}
       <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between border-b border-slate-800 pb-3">
           <h2 className="text-base sm:text-lg font-black text-slate-100 flex items-center gap-2">
-            <span className="text-amber-400">⭐</span> Équipements & Options (Features)
+            Équipements
           </h2>
-          <span className="text-xs text-slate-400">Inclus d'origine</span>
+
         </div>
 
         <div className="space-y-3">
@@ -369,7 +337,7 @@ export function DubizzleVehicleDetail({
             >
               <div className="flex items-center gap-2">
                 <span>📱</span>
-                <span>Divertissement & Technologie (Entertainment & Technology)</span>
+                <span>Multimédia</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="rounded-md bg-slate-800 px-2 py-0.5 text-xs text-amber-400 font-bold">
@@ -400,7 +368,7 @@ export function DubizzleVehicleDetail({
             >
               <div className="flex items-center gap-2">
                 <span>🛋️</span>
-                <span>Confort & Commodité (Comfort & Convenience)</span>
+                <span>Confort</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="rounded-md bg-slate-800 px-2 py-0.5 text-xs text-amber-400 font-bold">
@@ -431,7 +399,7 @@ export function DubizzleVehicleDetail({
             >
               <div className="flex items-center gap-2">
                 <span>🛡️</span>
-                <span>Extérieur, Sécurité & 4x4 (Exterior & Off-Road)</span>
+                <span>Sécurité et extérieur</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="rounded-md bg-slate-800 px-2 py-0.5 text-xs text-amber-400 font-bold">
@@ -455,33 +423,11 @@ export function DubizzleVehicleDetail({
         </div>
       </div>
 
-      {/* 6. EXPÉDITION & TRANSIT BAOBAB DUBAÏ ➔ AFRIQUE */}
-      <div className="mt-5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-slate-900 to-amber-500/5 p-5 sm:p-6 shadow-xl">
-        <div className="flex items-start gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-2xl text-slate-950 font-black shadow-lg shadow-amber-500/30">
-            🚢
-          </div>
-          <div>
-            <h3 className="text-base font-black text-amber-400">
-              Procédure d'Achat & Expédition Maritime Dubaï ➔ {destination?.name || 'Afrique de l’Ouest'}
-            </h3>
-            <p className="mt-1 text-xs text-slate-300 leading-relaxed">
-              Baobab prend en charge l'ensemble de la chaîne logistique : inspection technique chez le concessionnaire à Dubaï, empotage en conteneur sécurisé ou navire roulier (Ro-Ro), fret maritime jusqu’aux ports de Cotonou, Lomé ou Abidjan, et convoyage sous douane jusqu’à Ouagadougou / Bamako / Niamey.
-            </p>
-
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-200">
-              <div className="rounded-lg bg-black/40 p-2.5 border border-white/5">
-                <span className="block font-bold text-amber-300">⏱ Délais de livraison :</span>
-                <span>25 à 35 jours de mer + 4 à 6 jours de convoi terrestre sécurisé.</span>
-              </div>
-              <div className="rounded-lg bg-black/40 p-2.5 border border-white/5">
-                <span className="block font-bold text-emerald-400">📄 Dédouanement & Formalités :</span>
-                <span>Assistance complète pour la déclaration en douane et l’immatriculation locale.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <details className="product-detail-section">
+        <summary>Livraison vers {destination?.name || 'votre destination'}</summary>
+        <p>Demandez un devis pour connaître le transport adapté, les frais et les formalités d’importation de ce véhicule.</p>
+        <p>La disponibilité, l’état du véhicule et les délais sont à confirmer avant toute commande.</p>
+      </details>
 
       {/* 7. Vendeur / Concessionnaire */}
       <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 flex items-center justify-between">

@@ -928,7 +928,7 @@ export function ListingDetail() {
 
   return (
     <>
-      <div className="mx-auto max-w-4xl pb-16 text-slate-100">
+      <div className="product-detail-page mx-auto max-w-4xl pb-16 text-slate-100">
       {/* Navigation retour rapide */}
       <div className="mb-3 flex items-center justify-between text-xs text-slate-400">
         <button
@@ -946,7 +946,7 @@ export function ListingDetail() {
 
       {/* 1. VISUEL HERO SUPÉRIEUR (Image en partie supérieure de l'écran - Les gens achètent par la vue) */}
       <div className="detail-hero-top">
-        <div className="relative aspect-square sm:aspect-[4/3] w-full max-h-[460px] overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-black border border-slate-800 shadow-2xl flex items-center justify-center">
+        <div className="product-detail-hero relative aspect-square sm:aspect-[4/3] w-full max-h-[460px] overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-black border border-slate-800 shadow-2xl flex items-center justify-center">
           <img
             src={
               p.images?.[image] ||
@@ -982,6 +982,8 @@ export function ListingDetail() {
                 key={url}
                 type="button"
                 onClick={() => setImage(i)}
+                aria-label={`Afficher la photo ${i + 1}`}
+                aria-pressed={image === i}
                 className={`relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all ${
                   image === i
                     ? "border-amber-400 ring-2 ring-amber-400/30 scale-102"
@@ -996,7 +998,7 @@ export function ListingDetail() {
       </div>
 
       {/* 2. NOM & PRIX (Immédiatement après les images) */}
-      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl backdrop-blur-sm">
+      <div className="product-detail-summary mt-5 rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl backdrop-blur-sm">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <div>
             <div className="font-heading text-3xl sm:text-4xl font-black text-amber-400 tracking-tight">
@@ -1034,10 +1036,12 @@ export function ListingDetail() {
         </div>
       </div>
 
+      <a className="product-detail-jump" href="#product-purchase">Livraison et demande de devis →</a>
+
       {/* 3. DESCRIPTION AVEC OPTION « VOIR PLUS... » (Ensuite, directement après nom et prix) */}
       <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
         <h2 className="text-base sm:text-lg font-black text-slate-100 mb-2 flex items-center gap-2">
-          <span>📝</span> Description du produit
+          À propos du produit
         </h2>
 
         <div className="prose prose-invert max-w-none text-sm text-slate-300 leading-relaxed whitespace-pre-line">
@@ -1048,6 +1052,7 @@ export function ListingDetail() {
           <button
             type="button"
             onClick={() => setShowFullDesc(!showFullDesc)}
+            aria-expanded={showFullDesc}
             className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
           >
             <span>{showFullDesc ? "▲ Voir moins" : "▼ Voir plus de description..."}</span>
@@ -1055,12 +1060,8 @@ export function ListingDetail() {
         )}
       </div>
 
-      {/* 4. CARACTÉRISTIQUES & SPÉCIFICATIONS TECHNIQUES */}
-      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
-        <h2 className="text-base sm:text-lg font-black text-slate-100 mb-3 flex items-center gap-2">
-          <span>📋</span> Caractéristiques & Spécifications
-        </h2>
-
+      <details className="product-detail-section">
+        <summary>Caractéristiques du produit</summary>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5 text-xs sm:text-sm">
           {Object.entries({
             État: p.condition === "NEW" ? "Neuf" : p.condition === "USED" ? "Occasion" : "Reconditionné",
@@ -1076,10 +1077,10 @@ export function ListingDetail() {
             </div>
           ))}
         </div>
-      </div>
+      </details>
 
       {/* 5. COMMANDE, FRET & ACTIONS RAPIDES */}
-      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/90 p-5 sm:p-6 shadow-xl">
+      <div id="product-purchase" className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/90 p-5 sm:p-6 shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <label className="text-sm font-bold text-slate-200 flex items-center gap-2">
             <span>Quantité souhaitée :</span>
