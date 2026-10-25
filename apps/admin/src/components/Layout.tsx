@@ -1,10 +1,37 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useAuth } from "../lib/auth";
+import { api } from "../lib/api";
 import { NotificationBell } from "./NotificationBell";
 import "../pages/operations.css";
 
 export function Layout() {
   const { user, logout, impersonatedShopName, stopImpersonation } = useAuth();
+  const [counts, setCounts] = useState({ pendingSellers: 0, pendingListings: 0, unreadMessages: 0 });
+
+  useEffect(() => {
+    if (user?.role !== "ADMIN") return;
+    let active = true;
+    const load = async () => {
+      try {
+        const data = await api.get<{ pendingSellers: number; pendingListings: number; unreadMessages: number }>("/admin/counts");
+        if (active) setCounts(data);
+      } catch {
+        // ignore
+      }
+    };
+    load();
+    const id = setInterval(load, 30000);
+    return () => { active = false; clearInterval(id); };
+  }, [user?.role]);
+
+  const badgeFor = (to: string): number => {
+    if (to === "/messages") return counts.unreadMessages;
+    if (to === "/sellers") return counts.pendingSellers;
+    if (to === "/catalog") return counts.pendingListings;
+    return 0;
+  };
+
   const links =
     user?.role === "ADMIN"
       ? [
@@ -52,11 +79,23 @@ export function Layout() {
           <NotificationBell />
         </div>
         <nav>
-          {links.map(([to, label]) => (
-            <NavLink key={to} to={to} end={to === "/"}>
-              {label}
-            </NavLink>
-          ))}
+          {links.map(([to, label]) => {
+            const n = badgeFor(to);
+            return (
+              <NavLink key={to} to={to} end={to === "/"}>
+                {label}
+                {n > 0 && (
+                  <span style={{
+                    marginLeft: 8, background: '#ef4444', color: '#fff', borderRadius: '9999px',
+                    fontSize: '0.7rem', fontWeight: 700, padding: '1px 6px', minWidth: 18, textAlign: 'center',
+                    display: 'inline-block',
+                  }}>
+                    {n}
+                  </span>
+                )}
+              </NavLink>
+            );
+          })}
         </nav>
         <footer>
           {user?.phone}
