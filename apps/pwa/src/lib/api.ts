@@ -7,10 +7,6 @@ const SUPABASE_SERVICE_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwdHltdHpyZmFobGhqY3FwdHRnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODA0MDQ0NCwiZXhwIjoyMTAzNjE2NDQ0fQ.Pt2xVt29tobsaqEjG6EKZ7sG6unZ9OpdoG3pd9wjBDs';
 const SUPABASE_BUCKET = 'product-images';
 
-/**
- * Préchauffe silencieusement le backend Render en arrière-plan
- * pour éviter les délais de démarrage à froid (spin-down Render).
- */
 export function warmUpBackend(): void {
   try {
     fetch(`${DEFAULT_API_RENDER_URL}/health`, { method: 'GET', keepalive: true }).catch(() => {});
@@ -44,7 +40,6 @@ export class ApiError extends Error {
 
 function getBaseUrl(): string {
   const envUrl = (import.meta.env.VITE_API_URL || '').trim();
-  // Ignorer tout résidu d'ancien domaine Railway ou localhost hors développement local
   if (envUrl && !envUrl.includes('railway.app')) {
     if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && envUrl.includes('localhost')) {
       return '/api';
@@ -62,15 +57,12 @@ async function fetchApi(path: string, init: RequestInit = {}): Promise<Response>
 
   try {
     const res = await fetch(primaryUrl, init);
-    // Si le proxy Vercel (/api) renvoie 502/504 à cause d'un délai de réveil de Render,
-    // on bascule directement sur l'URL Render ouverte en CORS
     if ((res.status === 502 || res.status === 504) && base === '/api') {
       console.warn(`[API] Proxy ${res.status} sur ${primaryUrl}, bascule directe Render...`);
       return await fetch(directRenderUrl, init);
     }
     return res;
   } catch (err) {
-    // Si la requête vers /api échoue au niveau réseau, basculer sur Render direct
     if (base === '/api') {
       console.warn(`[API] Erreur réseau proxy sur ${primaryUrl}, bascule directe Render:`, err);
       return await fetch(directRenderUrl, init);
@@ -122,7 +114,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return readResponse<T>(res);
 }
 
-async function fallbackDirectSupabaseUpload<T>(productId: string, file: File): Promise<T> {
+export async function uploadFileToStorage(productId: string, file: File): Promise<string> {
+  const optimizedFile = await compressImage(file);
   const ext = (file.name.split('.').pop() || 'webp').toLowerCase().replace(/[^a-z0-9]/g, '');
   const objectPath = `${productId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
@@ -131,9 +124,9 @@ async function fallbackDirectSupabaseUpload<T>(productId: string, file: File): P
     headers: {
       apikey: SUPABASE_SERVICE_KEY,
       Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-      'Content-Type': file.type || 'image/webp',
+      'Content-Type': optimizedFile.type || 'image/webp',
     },
-    body: file,
+    body: optimizedFile,
   });
 
   if (!uploadRes.ok) {
@@ -141,8 +134,72 @@ async function fallbackDirectSupabaseUpload<T>(productId: string, file: File): P
     throw new Error(`Échec envoi Supabase (${uploadRes.status}): ${errText}`);
   }
 
-  const publicUrl = `${SUPABASE_STORAGE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${objectPath}`;
+  return `${SUPABASE_STORAGE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${objectPath}`;
+}
 
+export async function replaceProductImage(productId: string, oldUrl: string, fileOrUrl: File | string): Promise<string[]> {
+  let newUrl: string;
+  if (typeof fileOrUrl === 'string') {
+    newUrl = fileOrUrl.trim();
+  } else {
+    newUrl = await uploadFileToStorage(productId, fileOrUrl);
+  }
+
+  const currentProduct = await api.get<any>(`/products/${productId}`);
+  const currentImages: string[] = Array.isArray(currentProduct.images) ? [...currentProduct.images] : [];
+  const idx = currentImages.indexOf(oldUrl);
+
+  if (idx !== -1) {
+    currentImages[idx] = newUrl;
+  } else {
+    currentImages.push(newUrl);
+  }
+
+  const updated = await api.patch<any>(`/products/${productId}`, { images: currentImages });
+  return updated.images || currentImages;
+}
+
+export async function addProductImages(productId: string, items: Array<File | string>): Promise<string[]> {
+  const newUrls: string[] = [];
+  for (const item of items) {
+    if (typeof item === 'string') {
+      const clean = item.trim();
+      if (clean) newUrls.push(clean);
+    } else if (item instanceof File) {
+      const uploaded = await uploadFileToStorage(productId, item);
+      newUrls.push(uploaded);
+    }
+  }
+
+  const currentProduct = await api.get<any>(`/products/${productId}`);
+  const currentImages: string[] = Array.isArray(currentProduct.images) ? [...currentProduct.images] : [];
+  const updatedImages = [...currentImages, ...newUrls];
+
+  const updated = await api.patch<any>(`/products/${productId}`, { images: updatedImages });
+  return updated.images || updatedImages;
+}
+
+export async function removeProductImage(productId: string, urlToRemove: string): Promise<string[]> {
+  const currentProduct = await api.get<any>(`/products/${productId}`);
+  const currentImages: string[] = Array.isArray(currentProduct.images) ? [...currentProduct.images] : [];
+  const updatedImages = currentImages.filter((u) => u !== urlToRemove);
+
+  const updated = await api.patch<any>(`/products/${productId}`, { images: updatedImages });
+  return updated.images || updatedImages;
+}
+
+export async function setProductMainImage(productId: string, mainUrl: string): Promise<string[]> {
+  const currentProduct = await api.get<any>(`/products/${productId}`);
+  const currentImages: string[] = Array.isArray(currentProduct.images) ? [...currentProduct.images] : [];
+  const otherImages = currentImages.filter((u) => u !== mainUrl);
+  const updatedImages = [mainUrl, ...otherImages];
+
+  const updated = await api.patch<any>(`/products/${productId}`, { images: updatedImages });
+  return updated.images || updatedImages;
+}
+
+async function fallbackDirectSupabaseUpload<T>(productId: string, file: File): Promise<T> {
+  const publicUrl = await uploadFileToStorage(productId, file);
   const currentProduct = await api.get<any>(`/products/${productId}`);
   const currentImages = Array.isArray(currentProduct.images) ? currentProduct.images : [];
   const updatedImages = [...currentImages, publicUrl];
@@ -203,4 +260,9 @@ export const api = {
     request<T>(path, { method: 'PATCH', body: body ? JSON.stringify(body) : undefined }),
   delete: <T>(path: string, body?: unknown) => deleteImageWithFallback<T>(path, body),
   upload: <T>(path: string, file: File) => uploadRequest<T>(path, file),
+  uploadFileToStorage,
+  replaceProductImage,
+  addProductImages,
+  removeProductImage,
+  setProductMainImage,
 };

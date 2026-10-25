@@ -637,3 +637,9 @@ body {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* Product Image Gallery Hover Controls */
+.group:hover .hover-overlay {
+  opacity: 1 !important;
+}
+

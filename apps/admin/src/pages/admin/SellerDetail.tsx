@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { api } from "../../lib/api";
+import { api, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -249,6 +249,104 @@ export function SellerDetail() {
       await load();
     } catch (err: any) {
       alert("Erreur suppression photo : " + (err?.message || err));
+    }
+  }
+
+    // Quick row replace
+  async function handleRowReplace(productId: string, oldUrl: string, file: File) {
+    if (!file) return;
+    setUploadingProductId(productId);
+    try {
+      await replaceProductImage(productId, oldUrl, file);
+      await load();
+    } catch (e: any) {
+      alert("Erreur remplacement photo : " + (e?.message || e));
+    } finally {
+      setUploadingProductId(null);
+    }
+  }
+
+  // Quick row add multiple
+  async function handleRowAddMultiple(productId: string, files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setUploadingProductId(productId);
+    try {
+      await addProductImages(productId, Array.from(files));
+      await load();
+    } catch (e: any) {
+      alert("Erreur ajout photos : " + (e?.message || e));
+    } finally {
+      setUploadingProductId(null);
+    }
+  }
+
+  // Quick row add by URL
+  async function handleRowAddByUrl(productId: string) {
+    const url = window.prompt("Collez l'URL de l'image (Temu, Dubizzle, WhatsApp ou web) :");
+    if (!url || !url.trim()) return;
+    setUploadingProductId(productId);
+    try {
+      await addProductImages(productId, [url.trim()]);
+      await load();
+    } catch (e: any) {
+      alert("Erreur ajout URL : " + (e?.message || e));
+    } finally {
+      setUploadingProductId(null);
+    }
+  }
+
+  // Set main photo on row
+  async function handleSetMainPhoto(productId: string, url: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    try {
+      await setProductMainImage(productId, url);
+      await load();
+    } catch (e: any) {
+      alert("Erreur photo principale : " + (e?.message || e));
+    }
+  }
+
+  // Modal photo replace
+  async function handleModalReplace(oldUrl: string, file: File) {
+    if (!file || !modifyingProduct) return;
+    setModalUploadingPhotos(true);
+    try {
+      const newImages = await replaceProductImage(modifyingProduct.id, oldUrl, file);
+      setModalImages(newImages);
+      await load();
+    } catch (e: any) {
+      alert("Erreur remplacement photo : " + (e?.message || e));
+    } finally {
+      setModalUploadingPhotos(false);
+    }
+  }
+
+  // Modal add photo by URL
+  async function handleModalAddByUrl() {
+    if (!modifyingProduct) return;
+    const url = window.prompt("Collez l'URL de l'image (Temu, Dubizzle, WhatsApp ou web) :");
+    if (!url || !url.trim()) return;
+    setModalUploadingPhotos(true);
+    try {
+      const newImages = await addProductImages(modifyingProduct.id, [url.trim()]);
+      setModalImages(newImages);
+      await load();
+    } catch (e: any) {
+      alert("Erreur ajout URL : " + (e?.message || e));
+    } finally {
+      setModalUploadingPhotos(false);
+    }
+  }
+
+  // Modal set main photo
+  async function handleModalSetMain(url: string) {
+    if (!modifyingProduct) return;
+    try {
+      const newImages = await setProductMainImage(modifyingProduct.id, url);
+      setModalImages(newImages);
+      await load();
+    } catch (e: any) {
+      alert("Erreur photo principale : " + (e?.message || e));
     }
   }
 
@@ -656,52 +754,109 @@ export function SellerDetail() {
               ) : (
                 products.map((p: any) => (
                   <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                    {/* Photos Column with Instant Upload & Thumbnail Gallery */}
+                    {/* Photos Column with Instant Upload, Replace & Gallery */}
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         {p.images && p.images.length > 0 ? (
-                          p.images.slice(0, 3).map((imgUrl: string, idx: number) => (
-                            <div key={idx} className="group relative h-10 w-10 shrink-0">
+                          p.images.map((imgUrl: string, idx: number) => (
+                            <div key={idx} className="group relative h-11 w-11 shrink-0 rounded-md overflow-hidden border border-slate-200 shadow-xs bg-slate-100">
                               <img
                                 src={imgUrl}
-                                alt={`Photo ${idx + 1}`}
-                                className="h-10 w-10 rounded-md object-cover border border-slate-200 shadow-xs"
+                                alt=""
+                                className="h-full w-full object-cover"
                               />
-                              <button
-                                onClick={(e) => handleDeleteImage(p.id, imgUrl, e)}
-                                title="Supprimer cette photo"
-                                className="absolute -top-1.5 -right-1.5 hidden h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow group-hover:flex"
-                              >
-                                ×
-                              </button>
+
+                              {idx === 0 && (
+                                <span className="absolute bottom-0 inset-x-0 bg-slate-900/80 text-[7px] text-amber-300 font-bold text-center py-0.2">
+                                  ★ 1ère
+                                </span>
+                              )}
+
+                              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-0.5">
+                                <div className="flex justify-between items-center">
+                                  <label
+                                    title="Remplacer cette photo"
+                                    className="h-4 w-4 rounded bg-blue-600 text-white text-[9px] flex items-center justify-center hover:bg-blue-700 cursor-pointer shadow"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    🔄
+                                    <input
+                                      type="file"
+                                      accept="image/jpeg,image/png,image/webp"
+                                      className="hidden"
+                                      disabled={uploadingProductId === p.id}
+                                      onChange={(e) => {
+                                        const f = e.target.files?.[0];
+                                        if (f) handleRowReplace(p.id, imgUrl, f);
+                                        e.target.value = "";
+                                      }}
+                                    />
+                                  </label>
+
+                                  <button
+                                    type="button"
+                                    onClick={(e) => handleDeleteImage(p.id, imgUrl, e)}
+                                    title="Supprimer cette photo"
+                                    className="h-4 w-4 rounded bg-red-600 text-white text-[9px] flex items-center justify-center hover:bg-red-700 shadow"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+
+                                {idx > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => handleSetMainPhoto(p.id, imgUrl, e)}
+                                    title="Définir comme photo principale"
+                                    className="w-full rounded bg-amber-500 text-slate-950 font-black text-[7px] py-0.5 hover:bg-amber-400 shadow"
+                                  >
+                                    ★ 1ère
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           ))
                         ) : (
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 text-[10px] font-semibold text-slate-400">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 text-[10px] font-semibold text-slate-400">
                             Sans photo
                           </div>
                         )}
 
-                        {/* Quick Add Photo Button */}
-                        <label
-                          className={`flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-dashed border-emerald-400 bg-emerald-50 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition-colors ${
-                            uploadingProductId === p.id ? "animate-pulse" : ""
-                          }`}
-                          title="Téléverser une photo pour cet article"
-                        >
-                          {uploadingProductId === p.id ? "…" : "+"}
-                          <input
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp"
-                            className="hidden"
-                            disabled={uploadingProductId === p.id}
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleRowUpload(p.id, file);
-                              e.target.value = "";
-                            }}
-                          />
-                        </label>
+                        {/* Action buttons: Multi upload & Add by URL */}
+                        <div className="flex flex-col gap-1">
+                          <label
+                            className="flex h-5 items-center justify-center gap-1 px-1.5 rounded border border-dashed border-emerald-400 bg-emerald-50 text-[9px] font-bold text-emerald-800 hover:bg-emerald-100 cursor-pointer transition-colors shadow-xs"
+                            title="Ajouter une ou plusieurs photos à cet article"
+                          >
+                            <span>+ Photos</span>
+                            <input
+                              type="file"
+                              multiple
+                              accept="image/jpeg,image/png,image/webp"
+                              className="hidden"
+                              disabled={uploadingProductId === p.id}
+                              onChange={(e) => {
+                                handleRowAddMultiple(p.id, e.target.files);
+                                e.target.value = "";
+                              }}
+                            />
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRowAddByUrl(p.id)}
+                            className="flex h-5 items-center justify-center gap-1 px-1.5 rounded border border-slate-300 bg-white text-[9px] font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs"
+                            title="Ajouter une photo par lien URL (Temu, Dubizzle, WhatsApp)"
+                          >
+                            🔗 Lien
+                          </button>
+                        </div>
+
+                        {uploadingProductId === p.id && (
+                          <span className="text-[10px] font-semibold text-emerald-600 animate-pulse">
+                            Envoi...
+                          </span>
+                        )}
                       </div>
                     </td>
 
@@ -1016,38 +1171,83 @@ export function SellerDetail() {
             <div className="mt-4 space-y-4">
               {/* SECTION PHOTOS DU PRODUIT */}
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">
-                  Photos réelles du produit ({modalImages.length} photo{modalImages.length > 1 ? "s" : ""})
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-800">
+                    Photos réelles du produit ({modalImages.length} photo{modalImages.length > 1 ? "s" : ""})
+                  </label>
+                  <span className="text-[11px] text-slate-500">
+                    Survolez une photo pour la <strong>Remplacer</strong>, la <strong>Supprimer</strong> ou la mettre en <strong>1ère</strong>.
+                  </span>
+                </div>
 
                 {/* Existing Photos Grid */}
                 <div className="flex flex-wrap gap-2.5 mb-3">
                   {modalImages.map((imgUrl, idx) => (
-                    <div key={idx} className="group relative h-16 w-16">
+                    <div key={idx} className="group relative h-20 w-20 rounded-lg overflow-hidden border border-slate-300 shadow-xs bg-slate-100">
                       <img
                         src={imgUrl}
                         alt={`Photo ${idx + 1}`}
-                        className="h-16 w-16 rounded-lg object-cover border border-slate-300 shadow-xs"
+                        className="h-full w-full object-cover"
                       />
-                      <button
-                        type="button"
-                        onClick={(e) => handleDeleteImage(modifyingProduct.id, imgUrl, e)}
-                        className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow hover:bg-red-700"
-                        title="Supprimer cette photo"
-                      >
-                        ×
-                      </button>
+
+                      {idx === 0 && (
+                        <span className="absolute bottom-0 inset-x-0 bg-slate-900/85 text-[8px] text-amber-300 font-bold text-center py-0.5">
+                          ★ 1ère Photo
+                        </span>
+                      )}
+
+                      <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-1">
+                        <div className="flex justify-between items-center">
+                          <label
+                            title="Remplacer cette photo par une nouvelle"
+                            className="h-5 w-5 rounded bg-blue-600 text-white text-[10px] flex items-center justify-center hover:bg-blue-700 cursor-pointer shadow"
+                          >
+                            🔄
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              className="hidden"
+                              disabled={modalUploadingPhotos}
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) handleModalReplace(imgUrl, f);
+                                e.target.value = "";
+                              }}
+                            />
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={(e) => handleDeleteImage(modifyingProduct.id, imgUrl, e)}
+                            className="h-5 w-5 rounded bg-red-600 text-white text-[10px] flex items-center justify-center hover:bg-red-700 shadow"
+                            title="Supprimer cette photo"
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        {idx > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => handleModalSetMain(imgUrl)}
+                            title="Définir comme photo principale"
+                            className="w-full rounded bg-amber-500 text-slate-950 font-bold text-[8px] py-0.5 hover:bg-amber-400 shadow"
+                          >
+                            ★ Mettre en 1ère
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
 
                   {/* Multi-upload dropzone / trigger */}
                   <label
-                    className={`flex h-16 w-28 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-emerald-500 bg-emerald-50 text-center text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors ${
+                    className={`flex h-20 w-28 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-emerald-500 bg-emerald-50 text-center text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors ${
                       modalUploadingPhotos ? "animate-pulse" : ""
                     }`}
                   >
                     <span>{modalUploadingPhotos ? "Envoi…" : "+ Ajouter"}</span>
-                    <span className="text-[10px] font-normal text-emerald-600">JPG/PNG/WebP</span>
+                    <span className="text-[10px] font-normal text-emerald-600">Plusieurs photos</span>
                     <input
                       type="file"
                       multiple
@@ -1057,6 +1257,19 @@ export function SellerDetail() {
                       onChange={(e) => handleModalUploadPhotos(e.target.files)}
                     />
                   </label>
+
+                  {/* Add by URL button */}
+                  <button
+                    type="button"
+                    onClick={handleModalAddByUrl}
+                    disabled={modalUploadingPhotos}
+                    className="flex h-20 w-24 flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white text-center text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs"
+                    title="Ajouter une photo par lien URL web"
+                  >
+                    <span className="text-base">🔗</span>
+                    <span>Par lien</span>
+                    <span className="text-[9px] font-normal text-slate-400">Temu/Dubizzle</span>
+                  </button>
                 </div>
               </div>
 

@@ -122,19 +122,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return readResponse<T>(res);
 }
 
-async function fallbackDirectSupabaseUpload<T>(productId: string, file: File): Promise<T> {
+/**
+ * Téléverse directement un fichier d'image vers le bucket Supabase public
+ * et renvoie son URL publique pérenne.
+ */
+export async function uploadFileToStorage(productId: string, file: File): Promise<string> {
+  const optimizedFile = await compressImage(file);
   const ext = (file.name.split('.').pop() || 'webp').toLowerCase().replace(/[^a-z0-9]/g, '');
   const objectPath = `${productId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-  // 1. Direct upload to Supabase storage
   const uploadRes = await fetch(`${SUPABASE_STORAGE_URL}/storage/v1/object/${SUPABASE_BUCKET}/${objectPath}`, {
     method: 'POST',
     headers: {
       apikey: SUPABASE_SERVICE_KEY,
       Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-      'Content-Type': file.type || 'image/webp',
+      'Content-Type': optimizedFile.type || 'image/webp',
     },
-    body: file,
+    body: optimizedFile,
   });
 
   if (!uploadRes.ok) {
@@ -142,14 +146,88 @@ async function fallbackDirectSupabaseUpload<T>(productId: string, file: File): P
     throw new Error(`Échec envoi Supabase (${uploadRes.status}): ${errText}`);
   }
 
-  const publicUrl = `${SUPABASE_STORAGE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${objectPath}`;
+  return `${SUPABASE_STORAGE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${objectPath}`;
+}
 
-  // 2. Fetch current product to append image
+/**
+ * Remplace une image précise d'un produit par une nouvelle photo (par fichier ou URL)
+ */
+export async function replaceProductImage(productId: string, oldUrl: string, fileOrUrl: File | string): Promise<string[]> {
+  let newUrl: string;
+  if (typeof fileOrUrl === 'string') {
+    newUrl = fileOrUrl.trim();
+  } else {
+    newUrl = await uploadFileToStorage(productId, fileOrUrl);
+  }
+
+  const currentProduct = await api.get<any>(`/products/${productId}`);
+  const currentImages: string[] = Array.isArray(currentProduct.images) ? [...currentProduct.images] : [];
+  const idx = currentImages.indexOf(oldUrl);
+
+  if (idx !== -1) {
+    currentImages[idx] = newUrl;
+  } else {
+    currentImages.push(newUrl);
+  }
+
+  const updated = await api.patch<any>(`/products/${productId}`, { images: currentImages });
+  return updated.images || currentImages;
+}
+
+/**
+ * Ajoute une ou plusieurs images au même produit (fichiers ou URLs directes)
+ */
+export async function addProductImages(productId: string, items: Array<File | string>): Promise<string[]> {
+  const newUrls: string[] = [];
+  for (const item of items) {
+    if (typeof item === 'string') {
+      const clean = item.trim();
+      if (clean) newUrls.push(clean);
+    } else if (item instanceof File) {
+      const uploaded = await uploadFileToStorage(productId, item);
+      newUrls.push(uploaded);
+    }
+  }
+
+  const currentProduct = await api.get<any>(`/products/${productId}`);
+  const currentImages: string[] = Array.isArray(currentProduct.images) ? [...currentProduct.images] : [];
+  const updatedImages = [...currentImages, ...newUrls];
+
+  const updated = await api.patch<any>(`/products/${productId}`, { images: updatedImages });
+  return updated.images || updatedImages;
+}
+
+/**
+ * Supprime une image d'un produit
+ */
+export async function removeProductImage(productId: string, urlToRemove: string): Promise<string[]> {
+  const currentProduct = await api.get<any>(`/products/${productId}`);
+  const currentImages: string[] = Array.isArray(currentProduct.images) ? [...currentProduct.images] : [];
+  const updatedImages = currentImages.filter((u) => u !== urlToRemove);
+
+  const updated = await api.patch<any>(`/products/${productId}`, { images: updatedImages });
+  return updated.images || updatedImages;
+}
+
+/**
+ * Définit une image comme image principale (index 0)
+ */
+export async function setProductMainImage(productId: string, mainUrl: string): Promise<string[]> {
+  const currentProduct = await api.get<any>(`/products/${productId}`);
+  const currentImages: string[] = Array.isArray(currentProduct.images) ? [...currentProduct.images] : [];
+  const otherImages = currentImages.filter((u) => u !== mainUrl);
+  const updatedImages = [mainUrl, ...otherImages];
+
+  const updated = await api.patch<any>(`/products/${productId}`, { images: updatedImages });
+  return updated.images || updatedImages;
+}
+
+async function fallbackDirectSupabaseUpload<T>(productId: string, file: File): Promise<T> {
+  const publicUrl = await uploadFileToStorage(productId, file);
   const currentProduct = await api.get<any>(`/products/${productId}`);
   const currentImages = Array.isArray(currentProduct.images) ? currentProduct.images : [];
   const updatedImages = [...currentImages, publicUrl];
 
-  // 3. Update product via PATCH /products/:id
   return await api.patch<T>(`/products/${productId}`, {
     images: updatedImages,
   });
@@ -172,7 +250,6 @@ async function uploadRequest<T>(path: string, file: File): Promise<T> {
 
     return await readResponse<T>(res);
   } catch (err: any) {
-    // Si l'endpoint backend échoue (ex: stockage non configuré sur Render), bascule immédiate vers Supabase direct
     if (matchProduct) {
       return await fallbackDirectSupabaseUpload<T>(matchProduct[1], optimizedFile);
     }
@@ -207,4 +284,9 @@ export const api = {
     request<T>(path, { method: 'PATCH', body: body ? JSON.stringify(body) : undefined }),
   delete: <T>(path: string, body?: unknown) => deleteImageWithFallback<T>(path, body),
   upload: <T>(path: string, file: File) => uploadRequest<T>(path, file),
+  uploadFileToStorage,
+  replaceProductImage,
+  addProductImages,
+  removeProductImage,
+  setProductMainImage,
 };
