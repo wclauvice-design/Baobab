@@ -15,13 +15,36 @@ export function Layout() {
     const load = async () => {
       try {
         const data = await api.get<{ pendingSellers: number; pendingListings: number; unreadMessages: number }>("/admin/counts");
-        if (active) setCounts(data);
+        if (active && data) {
+          let unread = data.unreadMessages || 0;
+          if (unread === 0) {
+            const convs = await api.get<any[]>('/admin/concierge/conversations').catch(() => []);
+            unread = (convs || []).filter((c: any) => c.needsReply && c.state === 'OPEN').length;
+          }
+          setCounts({ ...data, unreadMessages: unread });
+          return;
+        }
       } catch {
-        // ignore
+        // Resilient fallback
+        try {
+          const [convs, sellers, prods] = await Promise.all([
+            api.get<any[]>('/admin/concierge/conversations').catch(() => []),
+            api.get<any[]>('/admin/sellers').catch(() => []),
+            api.get<any[]>('/products').catch(() => []),
+          ]);
+          if (active) {
+            const unread = (convs || []).filter((c: any) => c.needsReply && c.state === 'OPEN').length;
+            const pendingSellers = (sellers || []).filter((s: any) => s.status === 'PENDING').length;
+            const pendingListings = (Array.isArray(prods) ? prods : (prods as any)?.data || []).filter((p: any) => p.moderation === 'PENDING').length;
+            setCounts({ unreadMessages: unread, pendingSellers, pendingListings });
+          }
+        } catch {
+          // ignore
+        }
       }
     };
     load();
-    const id = setInterval(load, 30000);
+    const id = setInterval(load, 12000);
     return () => { active = false; clearInterval(id); };
   }, [user?.role]);
 
@@ -83,16 +106,26 @@ export function Layout() {
             const n = badgeFor(to);
             return (
               <NavLink key={to} to={to} end={to === "/"}>
-                {label}
-                {n > 0 && (
-                  <span style={{
-                    marginLeft: 8, background: '#ef4444', color: '#fff', borderRadius: '9999px',
-                    fontSize: '0.7rem', fontWeight: 700, padding: '1px 6px', minWidth: 18, textAlign: 'center',
-                    display: 'inline-block',
-                  }}>
-                    {n}
-                  </span>
-                )}
+                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  <span>{label}</span>
+                  {n > 0 && (
+                    <span style={{
+                      background: '#ef4444',
+                      color: '#ffffff',
+                      borderRadius: '9999px',
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      padding: '2px 7px',
+                      minWidth: '20px',
+                      textAlign: 'center',
+                      boxShadow: '0 1px 3px rgba(239, 68, 68, 0.4)',
+                      display: 'inline-block',
+                      lineHeight: 1,
+                    }}>
+                      {n}
+                    </span>
+                  )}
+                </span>
               </NavLink>
             );
           })}
@@ -103,9 +136,14 @@ export function Layout() {
           {user?.role === "ADMIN" ? (
             "Administration"
           ) : (
-            <span className="text-amber-400 font-semibold">Commerçant Partenaire</span>
+            <span style={{ color: "#10b981", fontWeight: 700 }}>
+              Boutique Commerçant
+            </span>
           )}
-          <button onClick={logout}>Se déconnecter</button>
+          <br />
+          <button className="backoffice-link" onClick={logout}>
+            Se déconnecter
+          </button>
         </footer>
       </aside>
       <main className="backoffice-main">

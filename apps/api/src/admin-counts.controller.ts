@@ -13,10 +13,16 @@ export class AdminCountsController {
 
   @Get('counts')
   async counts() {
-    const [pendingSellers, pendingListings] = await Promise.all([
+    const [pendingSellers, pendingListings, unreadMessages] = await Promise.all([
       this.prisma.seller.count({ where: { status: 'PENDING' } }),
       this.prisma.product.count({ where: { moderation: 'PENDING' } }),
+      this.prisma.conversation.count({ where: { needsReply: true, state: 'OPEN' } }),
     ]);
-    return { pendingSellers, pendingListings, unreadMessages: 0 };
+    return {
+      pendingSellers,
+      pendingListings,
+      unreadMessages,
+      totalAlerts: pendingSellers + pendingListings + unreadMessages,
+    };
   }
 }

@@ -8,6 +8,8 @@ import {
 } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useCurrency } from "../lib/currency";
+import { useUnreadMessages } from "../lib/unreadMessages";
+import { ClientNotificationBell } from "../components/ClientNotificationBell";
 import {
   call,
   date,
@@ -234,6 +236,7 @@ export function CurrencySelector() {
 export function MarketShell({ children }: { children: React.ReactNode }) {
   const { ids: favoriteIds } = useFavorites();
   const { current: userDest } = useUserDestination();
+  const { unreadCount } = useUnreadMessages();
   return (
     <div className="market">
       <div className="top-note">
@@ -259,13 +262,33 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
               </em>
             )}
           </NavLink>
-          <NavLink to="/messages">Messages</NavLink>
+          <NavLink to="/messages">
+            Messages
+            {unreadCount > 0 && (
+              <em
+                className="nav-count"
+                style={{
+                  background: "#ef4444",
+                  color: "#ffffff",
+                  fontWeight: 800,
+                  minWidth: "18px",
+                  padding: "1px 5px",
+                  animation: "pulse 2s infinite",
+                }}
+              >
+                {unreadCount}
+              </em>
+            )}
+          </NavLink>
           <NavLink to="/orders">Mes commandes</NavLink>
         </nav>
-        <Link className="account-link" to="/account">
-          <Icon name="user" />
-          <span>Mon espace</span>
-        </Link>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <ClientNotificationBell unreadCount={unreadCount} />
+          <Link className="account-link" to="/account">
+            <Icon name="user" />
+            <span>Mon espace</span>
+          </Link>
+        </div>
       </header>
       <main className="market-main">{children}</main>
       <footer className="market-footer">
@@ -302,8 +325,19 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
                   {favoriteIds.length}
                 </b>
               )}
-              {to === "/messages" && Boolean(getDeviceActiveConversation()) && (
-                <span className="mobile-nav-dot" title="Conversation active" />
+              {to === "/messages" && unreadCount > 0 && (
+                <b
+                  className="mobile-nav-badge"
+                  style={{
+                    background: "#ef4444",
+                    color: "#ffffff",
+                    fontWeight: 800,
+                    boxShadow: "0 0 0 2px #fff",
+                    animation: "pulse 2s infinite",
+                  }}
+                >
+                  {unreadCount}
+                </b>
               )}
             </span>
             <span className="mobile-nav-label">{label}</span>
