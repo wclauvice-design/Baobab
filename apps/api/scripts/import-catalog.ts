@@ -14,13 +14,16 @@ function slugify(s: string): string {
 }
 
 async function main() {
-  const dataPath = path.join(__dirname, '..', 'prisma', 'data', 'catalog-massive.json');
+  const curatedPath = path.join(__dirname, '..', 'prisma', 'data', 'catalog-curated-100.json');
+  const fallbackPath = path.join(__dirname, '..', 'prisma', 'data', 'catalog-massive.json');
+  const dataPath = fs.existsSync(curatedPath) ? curatedPath : fallbackPath;
+
   if (!fs.existsSync(dataPath)) {
     throw new Error(`Catalogue introuvable : ${dataPath}`);
   }
 
   const products: any[] = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-  console.log(`Chargement de ${products.length} produits du catalogue Baobab...`);
+  console.log(`Chargement de ${products.length} produits du catalogue Baobab depuis ${path.basename(dataPath)}...`);
 
   // 1. Recenser et synchroniser les catégories uniques
   const categoryMap = new Map<string, { name: string; universe: string; slug: string }>();

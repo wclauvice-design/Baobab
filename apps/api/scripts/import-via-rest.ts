@@ -22,9 +22,11 @@ async function main() {
     process.exit(1);
   }
 
-  const dataPath = path.join(__dirname, '..', 'prisma', 'data', 'catalog-massive.json');
+  const curatedPath = path.join(__dirname, '..', 'prisma', 'data', 'catalog-curated-100.json');
+  const fallbackPath = path.join(__dirname, '..', 'prisma', 'data', 'catalog-massive.json');
+  const dataPath = fs.existsSync(curatedPath) ? curatedPath : fallbackPath;
   const products: any[] = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-  console.log(`📦 Chargement de ${products.length} produits...`);
+  console.log(`📦 Chargement de ${products.length} produits depuis ${path.basename(dataPath)}...`);
 
   // 1. Fetch all existing categories from Supabase
   console.log('🔄 Récupération des catégories existantes depuis Supabase...');
@@ -92,7 +94,7 @@ async function main() {
     const chunk = products.slice(i, i + CHUNK_SIZE);
     const payload = chunk.map((p) => {
       const slug = slugify(p.category || '');
-      const catId = slugToId.get(slug) || defaultCatId;
+      const catId = p.categoryId || slugToId.get(slug) || defaultCatId;
 
       return {
         id: p.id,
@@ -104,6 +106,7 @@ async function main() {
         stock: p.stock || 10,
         images: p.images || [],
         categoryId: catId,
+        sellerId: p.sellerId || 'seller-baobab-official',
         moderation: 'PUBLISHED',
         subcategory: p.subcategory || 'Autres',
         condition: p.condition || 'NEW',
