@@ -8,6 +8,7 @@ import {
   MarketShell,
   Marketplace,
   ListingDetail,
+  Storefront,
   Inbox,
   Tracking,
   Purchases,
@@ -35,6 +36,8 @@ export default function App() {
         <Route path="/search" element={<Marketplace />} />
         <Route path="/favorites" element={<Marketplace favorites />} />
         <Route path="/products/:id" element={<ListingDetail />} />
+        <Route path="/shop/:id" element={<Storefront />} />
+        <Route path="/store/:id" element={<Storefront />} />
         <Route path="/messages" element={<Inbox />} />
         <Route path="/messages/:id" element={<Inbox />} />
         <Route path="/tracking/:id" element={<Tracking />} />
