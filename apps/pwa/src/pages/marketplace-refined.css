@@ -1,0 +1,74 @@
+/* Quiet typography and surfaces. Keep the existing photo-first layout. */
+.market {
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.market :is(button, input, select, textarea) { font-family: inherit; }
+.market :is(h1, h2, h3, h4, .font-heading) {
+  font-family: inherit;
+  letter-spacing: -0.025em;
+  text-wrap: pretty;
+}
+.market :is(h1, h2) { font-weight: 650; line-height: 1.25; }
+.market :is(h3, h4) { font-weight: 600; line-height: 1.35; }
+.market :is(.font-black, .font-extrabold) { font-weight: 650; }
+.market .font-bold { font-weight: 600; }
+.market .uppercase { text-transform: none; letter-spacing: 0.025em; }
+.market .tracking-wider { letter-spacing: 0.025em; }
+.market .shadow-2xl { box-shadow: 0 6px 24px rgb(0 0 0 / 10%); }
+.market .shadow-xl { box-shadow: 0 3px 14px rgb(0 0 0 / 7%); }
+.market .shadow-lg { box-shadow: 0 2px 8px rgb(0 0 0 / 8%); }
+.market .rounded-2xl { border-radius: 14px; }
+.market .rounded-xl { border-radius: 10px; }
+.market .rounded-lg { border-radius: 8px; }
+.market .border-slate-800 { border-color: rgb(148 163 184 / 18%); }
+.market .text-3xl { font-size: clamp(1.5rem, 3vw, 1.875rem); line-height: 1.2; }
+.market .text-4xl { font-size: clamp(1.75rem, 3.5vw, 2.125rem); line-height: 1.2; }
+.market .prose { font-size: 15px; line-height: 1.7; }
+.market :is(.market-button, .app-filter-pill) {
+  font-weight: 600;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+.market :is(.app-feed-header h2, .listing-header-line h2) {
+  font-size: clamp(1.125rem, 2vw, 1.375rem);
+}
+.market :is(.market-header nav a, .account-link) { font-weight: 500; }
+.market .mobile-nav-label { font-size: 11px; font-weight: 500; }
+.market .listing-copy h3 {
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+}
+.market .listing-copy > strong {
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+.market .listing-copy .eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.market :is(.picture-tag, .origin-tag, .meta-moq) {
+  font-weight: 500;
+  border-radius: 6px;
+  letter-spacing: 0;
+}
+.market :is(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid #d6ab68;
+  outline-offset: 3px;
+}
+@media (max-width: 700px) {
+  .market { font-size: 14px; }
+  .market h1 { font-size: 1.25rem; line-height: 1.35; }
+  .market .prose { font-size: 14px; }
+  .market .p-5 { padding: 16px; }
+  .market .text-xs { font-size: 12px; line-height: 1.5; }
+}
