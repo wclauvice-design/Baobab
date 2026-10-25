@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
+import { isVehicleProduct } from "../lib/vehicles";
 import { api, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { Alert, money } from "./Operations";
@@ -14,6 +15,85 @@ export function ListingEditor() {
     [filter, setFilter] = useState("");
   const [busyProductId, setBusyProductId] = useState<string | null>(null);
   const [busyMessage, setBusyMessage] = useState<string>("");
+
+  // Smart Automotive Form State
+  const [formCategory, setFormCategory] = useState<string>("");
+  const [formSubcategory, setFormSubcategory] = useState<string>("Voitures & SUV");
+  const [formCondition, setFormCondition] = useState<string>("NEW");
+
+  const [vehBrand, setVehBrand] = useState("");
+  const [vehModel, setVehModel] = useState("");
+  const [vehTrim, setVehTrim] = useState("");
+  const [vehYear, setVehYear] = useState("2024");
+  const [vehMileage, setVehMileage] = useState("0 km");
+  const [vehFuel, setVehFuel] = useState("Essence (Petrol)");
+  const [vehTransmission, setVehTransmission] = useState("Automatique");
+  const [vehDrivetrain, setVehDrivetrain] = useState("4x4 Tout-Terrain");
+  const [vehEngine, setVehEngine] = useState("");
+  const [vehSeats, setVehSeats] = useState("7 Places");
+  const [vehExtColor, setVehExtColor] = useState("");
+  const [vehIntColor, setVehIntColor] = useState("Cuir Beige");
+  const [vehRegionalSpecs, setVehRegionalSpecs] = useState("GCC Specs (Dubaï)");
+  const [vehSteering, setVehSteering] = useState("Volant à gauche (LHD)");
+  const [vehEquipments, setVehEquipments] = useState<string[]>([]);
+
+  // Update vehicle states when editing changes
+  useEffect(() => {
+    if (!editing) return;
+    setFormCategory(editing.categoryId || "");
+    setFormSubcategory(editing.subcategory || "Voitures & SUV");
+    setFormCondition(editing.condition || "NEW");
+
+    const attrs = editing.attributes || {};
+    setVehBrand(attrs["Marque"] || (/toyota/i.test(editing.name) ? "Toyota" : /jetour/i.test(editing.name) ? "Jetour" : ""));
+    setVehModel(attrs["Modèle"] || "");
+    setVehTrim(attrs["Trim"] || attrs["Finition"] || "");
+    setVehYear(attrs["Année"] ? String(attrs["Année"]).match(/\b(201\d|202\d)\b/)?.[1] || attrs["Année"] : "2024");
+    setVehMileage(attrs["Kilométrage"] || (editing.condition === "USED" ? "25 000 km" : "0 km"));
+    setVehFuel(attrs["Carburant"] || (editing.name?.includes("Diesel") ? "Diesel" : "Essence (Petrol)"));
+    setVehTransmission(attrs["Boîte"] || (editing.name?.includes("Manuelle") ? "Manuelle" : "Automatique"));
+    setVehDrivetrain(attrs["Motricité"] || "4x4 Tout-Terrain");
+    setVehEngine(attrs["Moteur"] || "");
+    setVehSeats(attrs["Places"] || (editing.name?.includes("7 Places") ? "7 Places" : "5 Places"));
+    setVehExtColor(attrs["Couleur extérieure"] || "");
+    setVehIntColor(attrs["Couleur intérieure"] || "Cuir Beige");
+    setVehRegionalSpecs(attrs["Spécifications"] || "GCC Specs (Dubaï)");
+    setVehSteering(attrs["Direction"] || "Volant à gauche (LHD)");
+    setVehEquipments(
+      attrs["Équipements"]
+        ? String(attrs["Équipements"]).split(",").map((s: string) => s.trim())
+        : ["Climatisation Tropicalisée", "Écran Tactile & Apple CarPlay", "Caméra de recul", "4x4 Sélecteur de terrain"]
+    );
+  }, [editing]);
+
+  const isVehCategory =
+    (formSubcategory.toLowerCase().includes("voiture") ||
+      formSubcategory.toLowerCase().includes("utilitaire") ||
+      formSubcategory.toLowerCase().includes("moto") ||
+      categories.find((c) => c.id === formCategory)?.name?.toLowerCase().includes("véhicule") ||
+      categories.find((c) => c.id === formCategory)?.slug?.includes("motors")) &&
+    !formSubcategory.toLowerCase().includes("pièce") &&
+    !formSubcategory.toLowerCase().includes("accessoire");
+
+  function handleAutoFillVehicleDetails() {
+    const brand = vehBrand || "Toyota";
+    const model = vehModel || "Land Cruiser Prado";
+    const trim = vehTrim ? ` ${vehTrim}` : "";
+    const year = vehYear || "2024";
+    const engine = vehEngine || "V6 4.0L";
+    const fuel = vehFuel || "Essence";
+    const seats = vehSeats || "7 Places";
+
+    const autoTitle = `${brand} ${model}${trim} ${year} — ${engine} ${fuel} ${seats} (${vehRegionalSpecs})`;
+    const autoDesc = `Véhicule d'exception importé directement de Dubaï. Spécifications GCC tropicalisées avec système de refroidissement renforcé pour les fortes chaleurs d'Afrique de l'Ouest.\n\nCaractéristiques principales :\n- Marque : ${brand}\n- Modèle : ${model}${trim}\n- Année : ${year}\n- Kilométrage : ${vehMileage}\n- Boîte de vitesses : ${vehTransmission}\n- Carburant : ${fuel}\n- Motricité : ${vehDrivetrain}\n- Nombre de places : ${seats}\n- Conduite : ${vehSteering}\n- Équipements inclus : ${vehEquipments.join(", ")}.\n\nExpédition sécurisée par Baobab : fret maritime Dubaï Port Jebel Ali vers Cotonou/Lomé/Abidjan puis convoyage sous douane vers Ouagadougou. Assistance dédouanement et immatriculation incluse.`;
+
+    // Update form elements
+    const nameInput = document.querySelector('input[name="name"]') as HTMLInputElement;
+    if (nameInput) nameInput.value = autoTitle;
+
+    const descTextarea = document.querySelector('textarea[name="description"]') as HTMLTextAreaElement;
+    if (descTextarea) descTextarea.value = autoDesc;
+  }
 
   async function handleRowReplace(productId: string, oldUrl: string, file: File) {
     if (!file) return;
@@ -141,6 +221,37 @@ export function ListingEditor() {
         body[name] = Number(fd.get(name) || (name === "minimumOrder" || name === "packSize" ? 1 : 0));
       if (!admin) body.price = body.supplierPrice;
       body.shippingIncluded = fd.get("shippingIncluded") === "on";
+
+      // If category is a vehicle, enrich with smart automotive specs
+      if (isVehCategory) {
+        body.condition = formCondition;
+        body.unit = "véhicule";
+        if (!body.weightKg) {
+          body.weightKg = vehModel.toLowerCase().includes("prado") || vehModel.toLowerCase().includes("cruiser") ? 2200 : 1850;
+        }
+        body.attributes = {
+          "Marque": vehBrand || "Toyota",
+          "Modèle": vehModel || "Véhicule",
+          "Trim": vehTrim || "Standard",
+          "Année": vehYear,
+          "Kilométrage": vehMileage,
+          "Carburant": vehFuel,
+          "Boîte": vehTransmission,
+          "Motricité": vehDrivetrain,
+          "Moteur": vehEngine || "Moteur Tropicalisé",
+          "Places": vehSeats,
+          "Couleur extérieure": vehExtColor || "Origine",
+          "Couleur intérieure": vehIntColor || "Cuir Beige",
+          "Spécifications": vehRegionalSpecs,
+          "Direction": vehSteering,
+          "Garantie": "1 an constructeur / Assistance Baobab",
+          "Équipements": vehEquipments.join(", "),
+          "Marge Baobab": "+15% appliquée",
+          "Source": "Temu / Dubizzle Export",
+          "Expédition": "Fret maritime (25-35j) vers Cotonou/Lomé/Abidjan + convoi Ouagadougou",
+          ...(body.attributes || {}),
+        };
+      }
       body.images = String(fd.get("images") || "")
         .split("\n")
         .map((s) => s.trim())
@@ -272,7 +383,8 @@ export function ListingEditor() {
               Sous-catégorie
               <select
                 name="subcategory"
-                defaultValue={editing.subcategory || "Autres"}
+                value={formSubcategory}
+                onChange={(e) => setFormSubcategory(e.target.value)}
               >
                 <option>Autres</option>
                 {config?.universes
@@ -282,17 +394,313 @@ export function ListingEditor() {
                   ))}
               </select>
             </label>
-            <label>
-              État
-              <select
-                name="condition"
-                defaultValue={editing.condition || "NEW"}
+
+            {/* Sélecteur d'État Visuel (Neuf, Occasion, Reconditionné) */}
+            <div className="op-span" style={{ margin: "4px 0 10px 0" }}>
+              <span style={{ display: "block", fontSize: "12px", fontWeight: 700, marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                État de l'article (Condition)
+              </span>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormCondition("NEW");
+                    if (isVehCategory) setVehMileage("0 km");
+                  }}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: formCondition === "NEW" ? "2px solid #10b981" : "1px solid rgba(255,255,255,0.15)",
+                    background: formCondition === "NEW" ? "rgba(16, 185, 129, 0.2)" : "rgba(255,255,255,0.03)",
+                    color: formCondition === "NEW" ? "#34d399" : "var(--admin-text, #cbd5e1)",
+                    fontWeight: formCondition === "NEW" ? 800 : 600,
+                    cursor: "pointer",
+                    fontSize: "12.5px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <span>🟢</span>
+                  <span>Neuf (Brand New / 0 km)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormCondition("USED");
+                    if (isVehCategory && vehMileage === "0 km") setVehMileage("35 000 km");
+                  }}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: formCondition === "USED" ? "2px solid #38bdf8" : "1px solid rgba(255,255,255,0.15)",
+                    background: formCondition === "USED" ? "rgba(56, 189, 248, 0.2)" : "rgba(255,255,255,0.03)",
+                    color: formCondition === "USED" ? "#38bdf8" : "var(--admin-text, #cbd5e1)",
+                    fontWeight: formCondition === "USED" ? 800 : 600,
+                    cursor: "pointer",
+                    fontSize: "12.5px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <span>🔵</span>
+                  <span>Occasion certifiée (Used)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormCondition("REFURBISHED");
+                    if (isVehCategory && vehMileage === "0 km") setVehMileage("15 000 km");
+                  }}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: formCondition === "REFURBISHED" ? "2px solid #f59e0b" : "1px solid rgba(255,255,255,0.15)",
+                    background: formCondition === "REFURBISHED" ? "rgba(245, 158, 11, 0.2)" : "rgba(255,255,255,0.03)",
+                    color: formCondition === "REFURBISHED" ? "#fbbf24" : "var(--admin-text, #cbd5e1)",
+                    fontWeight: formCondition === "REFURBISHED" ? 800 : 600,
+                    cursor: "pointer",
+                    fontSize: "12.5px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <span>🟠</span>
+                  <span>Reconditionné (Renewed)</span>
+                </button>
+              </div>
+              <input type="hidden" name="condition" value={formCondition} />
+            </div>
+
+            {/* FORMULAIRE INTELLIGENT AUTOMOBILE (Si catégorie Véhicule) */}
+            {isVehCategory && (
+              <div
+                className="op-span"
+                style={{
+                  background: "linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(15, 23, 42, 0.6) 100%)",
+                  border: "1.5px solid rgba(245, 158, 11, 0.35)",
+                  borderRadius: "14px",
+                  padding: "18px",
+                  margin: "12px 0 20px 0",
+                }}
               >
-                <option value="NEW">Neuf</option>
-                <option value="USED">Occasion</option>
-                <option value="REFURBISHED">Reconditionné</option>
-              </select>
-            </label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", borderBottom: "1px solid rgba(245,158,11,0.2)", paddingBottom: "10px" }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 800, color: "#fbbf24", display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span>🏎️</span> Formulaire Intelligent Véhicule (Spécifications Dubizzle Motors UAE)
+                    </h3>
+                    <p style={{ margin: "4px 0 0 0", fontSize: "11.5px", color: "#94a3b8" }}>
+                      Remplissez rapidement les caractéristiques clés du véhicule pour générer l'affichage Dubizzle professionnel.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAutoFillVehicleDetails}
+                    style={{
+                      background: "#f59e0b",
+                      color: "#0f172a",
+                      fontWeight: 800,
+                      fontSize: "11.5px",
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      border: "none",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      boxShadow: "0 4px 12px rgba(245, 158, 11, 0.25)",
+                    }}
+                  >
+                    <span>⚡</span>
+                    <span>Remplir Titre & Description</span>
+                  </button>
+                </div>
+
+                {/* Marques rapides */}
+                <div style={{ marginBottom: "14px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "#cbd5e1", textTransform: "uppercase" }}>
+                    Marque (Sélection rapide) :
+                  </span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "6px" }}>
+                    {["Toyota", "Jetour", "Lexus", "Mercedes-Benz", "Hyundai", "Nissan", "Mitsubishi", "Kia", "Land Rover", "Suzuki"].map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setVehBrand(m)}
+                        style={{
+                          padding: "5px 10px",
+                          borderRadius: "6px",
+                          border: vehBrand === m ? "1.5px solid #f59e0b" : "1px solid rgba(255,255,255,0.12)",
+                          background: vehBrand === m ? "rgba(245, 158, 11, 0.2)" : "rgba(255,255,255,0.03)",
+                          color: vehBrand === m ? "#fbbf24" : "#cbd5e1",
+                          fontSize: "11.5px",
+                          fontWeight: vehBrand === m ? 700 : 500,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Grille de champs automobiles */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
+                  <label>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Modèle</span>
+                    <input
+                      type="text"
+                      placeholder="Ex: Land Cruiser Prado, T2, Hilux"
+                      value={vehModel}
+                      onChange={(e) => setVehModel(e.target.value)}
+                    />
+                  </label>
+
+                  <label>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Finition / Trim</span>
+                    <input
+                      type="text"
+                      placeholder="Ex: TX-L, GXR, Traveller 4x4, Flagship"
+                      value={vehTrim}
+                      onChange={(e) => setVehTrim(e.target.value)}
+                    />
+                  </label>
+
+                  <label>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Année du modèle</span>
+                    <select value={vehYear} onChange={(e) => setVehYear(e.target.value)}>
+                      {["2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2015-2017", "Avant 2015"].map((y) => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Kilométrage</span>
+                    <input
+                      type="text"
+                      placeholder="Ex: 0 km, 25 000 km"
+                      value={vehMileage}
+                      onChange={(e) => setVehMileage(e.target.value)}
+                    />
+                  </label>
+
+                  <label>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Carburant</span>
+                    <select value={vehFuel} onChange={(e) => setVehFuel(e.target.value)}>
+                      <option value="Essence (Petrol)">Essence (Petrol)</option>
+                      <option value="Diesel">Diesel</option>
+                      <option value="Hybride">Hybride</option>
+                      <option value="100% Électrique">100% Électrique</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Boîte de vitesses</span>
+                    <select value={vehTransmission} onChange={(e) => setVehTransmission(e.target.value)}>
+                      <option value="Automatique">Automatique</option>
+                      <option value="Manuelle">Manuelle</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Motricité</span>
+                    <select value={vehDrivetrain} onChange={(e) => setVehDrivetrain(e.target.value)}>
+                      <option value="4x4 Tout-Terrain">4x4 Tout-Terrain Sélectif</option>
+                      <option value="Traction Intégrale (AWD)">Traction Intégrale (AWD)</option>
+                      <option value="Propulsion (RWD)">Propulsion (RWD)</option>
+                      <option value="Traction (FWD)">Traction (FWD)</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Moteur & Cylindrée</span>
+                    <input
+                      type="text"
+                      placeholder="Ex: 4.0L V6 (271 ch), 2.0T (254 ch)"
+                      value={vehEngine}
+                      onChange={(e) => setVehEngine(e.target.value)}
+                    />
+                  </label>
+
+                  <label>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Nombre de places</span>
+                    <select value={vehSeats} onChange={(e) => setVehSeats(e.target.value)}>
+                      <option value="7 Places">7 Places (5 portes)</option>
+                      <option value="5 Places">5 Places (5 portes)</option>
+                      <option value="8 Places">8 Places (Grand SUV)</option>
+                      <option value="2-3 Places">2-3 Places (Pick-up simple cabine)</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Couleur extérieure</span>
+                    <input
+                      type="text"
+                      placeholder="Ex: Sable Sahara, Blanc Arctique, Noir"
+                      value={vehExtColor}
+                      onChange={(e) => setVehExtColor(e.target.value)}
+                    />
+                  </label>
+
+                  <label>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Couleur intérieure</span>
+                    <input
+                      type="text"
+                      placeholder="Ex: Cuir Beige, Cuir Brun Cognac, Noir"
+                      value={vehIntColor}
+                      onChange={(e) => setVehIntColor(e.target.value)}
+                    />
+                  </label>
+
+                  <label>
+                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Spécifications régionales</span>
+                    <select value={vehRegionalSpecs} onChange={(e) => setVehRegionalSpecs(e.target.value)}>
+                      <option value="GCC Specs (Dubaï - Climat chaud)">GCC Specs (Dubaï / Émirats)</option>
+                      <option value="Tropicalisé Sahel / Afrique">Tropicalisé Sahel / Afrique</option>
+                      <option value="Euro Specs">Euro Specs</option>
+                    </select>
+                  </label>
+                </div>
+
+                {/* Options rapides (Checklist en 1 clic) */}
+                <div style={{ marginTop: "14px", paddingTop: "10px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+                  <span style={{ fontSize: "11.5px", fontWeight: 700, color: "#cbd5e1" }}>
+                    Options & Équipements inclus (Dubizzle Features) :
+                  </span>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "8px", marginTop: "8px" }}>
+                    {[
+                      "Climatisation Tropicalisée",
+                      "Écran Tactile & Apple CarPlay",
+                      "Caméra 360° / Recul",
+                      "Toit Panoramique / Ouvrant",
+                      "Sièges Cuir Ergonomiques",
+                      "Démarrage Sans Clé (Push Start)",
+                      "4x4 Sélecteur de terrain",
+                      "Double Réservoir Carburant",
+                      "Phares Full LED & Feux Diurnes",
+                      "Snorkel & Treuil Tout-Terrain"
+                    ].map((opt) => (
+                      <label key={opt} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11.5px", cursor: "pointer", color: "#e2e8f0" }}>
+                        <input
+                          type="checkbox"
+                          checked={vehEquipments.includes(opt)}
+                          onChange={(e) => {
+                            if (e.target.checked) setVehEquipments([...vehEquipments, opt]);
+                            else setVehEquipments(vehEquipments.filter((x) => x !== opt));
+                          }}
+                        />
+                        <span>{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
             <label>
               Localisation
               <input

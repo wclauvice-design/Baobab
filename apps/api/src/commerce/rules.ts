@@ -3,14 +3,14 @@ import { BadRequestException } from "@nestjs/common";
 export const UNIVERSES = [
   {
     id: "motors",
-    name: "Véhicules",
+    name: "Véhicules & Pièces Auto",
     subtitle: "Motors",
     icon: "car",
     categories: [
-      "Voitures",
+      "Voitures & SUV",
       "Motos & tricycles",
-      "Utilitaires",
-      "Pièces & accessoires",
+      "Utilitaires & Pick-up",
+      "Pièces détachées & Accessoires",
     ],
   },
   {

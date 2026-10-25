@@ -1,15 +1,22 @@
 import { Link } from 'react-router-dom';
 import { formatXof } from '../lib/format';
 import { BaobabMark, IconStar } from './icons';
+import { isVehicleProduct } from '../lib/vehicles';
+import { VehicleCard } from './VehicleCard';
 
 export interface Product {
   id: string;
   name: string;
-  price: number;
-  compareAtPrice?: number | null;
+  price: number | string;
+  compareAtPrice?: number | string | null;
   stock: number;
   images: string[];
-  category?: { name: string };
+  category?: { name: string; slug?: string; universe?: string };
+  subcategory?: string;
+  condition?: string;
+  location?: string;
+  attributes?: Record<string, any>;
+  seller?: { shopName: string; id?: string };
   avgRating?: number | null;
   reviewCount?: number;
   soldCount?: number;
@@ -21,6 +28,11 @@ function discountPercent(price: number, compareAtPrice?: number | null) {
 }
 
 export function ProductCard({ product }: { product: Product }) {
+  // If product is an actual vehicle, render dedicated Dubizzle Motors vehicle card
+  if (isVehicleProduct(product)) {
+    return <VehicleCard product={product} />;
+  }
+
   const discount = discountPercent(Number(product.price), product.compareAtPrice ? Number(product.compareAtPrice) : null);
 
   return (
@@ -89,13 +101,12 @@ export function ProductCard({ product }: { product: Product }) {
 
 export function ProductCardSkeleton() {
   return (
-    <div className="card flex flex-col overflow-hidden">
-      <div className="skeleton aspect-square" />
-      <div className="flex flex-col gap-2 p-3">
-        <div className="skeleton h-2.5 w-1/3" />
-        <div className="skeleton h-3.5 w-full" />
-        <div className="skeleton h-3.5 w-2/3" />
-        <div className="skeleton mt-1 h-4 w-1/2" />
+    <div className="card-interactive flex flex-col overflow-hidden animate-pulse">
+      <div className="aspect-square bg-base-700" />
+      <div className="flex flex-1 flex-col gap-2 p-3">
+        <div className="h-3 w-16 rounded bg-base-700" />
+        <div className="h-4 w-full rounded bg-base-700" />
+        <div className="mt-auto h-4 w-20 rounded bg-base-700" />
       </div>
     </div>
   );

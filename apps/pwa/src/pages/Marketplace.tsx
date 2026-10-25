@@ -31,6 +31,9 @@ import {
   notifyNewMessage,
   requestNotificationPermission,
 } from "../lib/notifications";
+import { isVehicleProduct } from "../lib/vehicles";
+import { VehicleCard } from "../components/VehicleCard";
+import { DubizzleVehicleDetail } from "../components/DubizzleVehicleDetail";
 import "./marketplace.css";
 import "./marketplace-premium.css";
 import "./marketplace-motion.css";
@@ -374,6 +377,18 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
   const { ids, toggle } = useFavorites();
   const favorite = ids.includes(p.id);
   const isRealPhoto = Boolean(p.images?.[0]);
+
+  if (isVehicleProduct(p)) {
+    return (
+      <div style={{ animationDelay: `${Math.min(index, 11) * 45}ms` }}>
+        <VehicleCard
+          product={p}
+          isFavorite={favorite}
+          onToggleFavorite={toggle}
+        />
+      </div>
+    );
+  }
 
   return (
     <article
@@ -920,6 +935,18 @@ export function ListingDetail() {
       </>
     );
   const message = `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} de "${p.name}" vers ${dest.name} en ${freight.modeLabel}. Référence ${p.id}. ${window.location.href}`;
+
+  if (isVehicleProduct(p)) {
+    return (
+      <DubizzleVehicleDetail
+        product={p}
+        destination={dest}
+        onDiscuss={discuss}
+        busy={busy}
+      />
+    );
+  }
+
   return (
     <>
       <div className="breadcrumb">
