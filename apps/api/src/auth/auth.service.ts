@@ -50,22 +50,34 @@ export class AuthService {
   }
 
   /**
-   * Connexion sans OTP pour n'importe quel numéro, le temps de brancher un
-   * vrai fournisseur SMS. Volontairement ouverte à tous les numéros pendant
-   * cette phase de test (pas de liste blanche) — reste gardée derrière
-   * ENABLE_DEV_LOGIN, qui doit être désactivé avant tout lancement public.
-   * À supprimer (cette méthode + l'écran de connexion correspondant côté
-   * PWA/admin) une fois un SmsProvider réel en place.
+   * Connexion rapide dev-login : strictement désactivée si ENABLE_DEV_LOGIN !== 'true'.
+   * Supporte une liste blanche DEV_LOGIN_WHITELIST pour sécuriser les tests.
    */
   async devLogin(phone: string) {
-    if (this.config.get('ENABLE_DEV_LOGIN') !== 'true') {
-      throw new ForbiddenException();
+    const isDevLoginEnabled = this.config.get('ENABLE_DEV_LOGIN') === 'true';
+    if (!isDevLoginEnabled) {
+      throw new ForbiddenException('Le mode dev-login est désactivé. Veuillez vous connecter via vérification OTP.');
+    }
+
+    const normalizedPhone = phone.trim().replace(/\s+/g, '');
+    if (!normalizedPhone) {
+      throw new BadRequestException('Numéro de téléphone requis');
+    }
+
+    const whitelistRaw = this.config.get<string>('DEV_LOGIN_WHITELIST') || '';
+    const whitelist = whitelistRaw
+      .split(',')
+      .map(p => p.trim().replace(/\s+/g, ''))
+      .filter(Boolean);
+
+    if (whitelist.length > 0 && !whitelist.includes(normalizedPhone)) {
+      throw new ForbiddenException('Ce numéro n\'est pas autorisé en mode dev-login.');
     }
 
     const user = await this.prisma.user.upsert({
-      where: { phone },
+      where: { phone: normalizedPhone },
       update: {},
-      create: { phone },
+      create: { phone: normalizedPhone },
     });
 
     return this.issueToken(user);

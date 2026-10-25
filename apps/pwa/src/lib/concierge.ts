@@ -1,6 +1,7 @@
 import { getToken } from "./api";
-export const money = (v: any) =>
-  `${Number(v || 0).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} FCFA`;
+import { formatPrice } from "./currency";
+
+export const money = (v: any) => formatPrice(v);
 export const date = (v: string) =>
   v
     ? new Date(v).toLocaleString("fr-FR", {

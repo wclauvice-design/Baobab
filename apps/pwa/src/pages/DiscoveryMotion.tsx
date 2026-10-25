@@ -28,10 +28,10 @@ export const CORE_GUARANTEES = [
   {
     icon: "🛡️",
     title: "Sécurité & Transparence 100%",
-    badge: "Séquestre garanti",
-    summary: "Fonds protégés jusqu'à conformité totale de votre commande.",
+    badge: "Paiement Protégé",
+    summary: "Fonds sécurisés jusqu'à validation et réception conforme.",
     detail:
-      "Vos paiements sont conservés sous compte séquestre sécurisé. Le fournisseur à Dubaï n'est crédité qu'une fois la marchandise contrôlée et conforme à votre devis.",
+      "Vos paiements restent protégés par Baobab. Le commerçant n'est crédité qu'une fois votre marchandise inspectée, vérifiée et validée conforme à votre commande.",
   },
   {
     icon: "📹",

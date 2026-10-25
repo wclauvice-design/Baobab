@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import { NotificationBell } from "./NotificationBell";
 import "../pages/operations.css";
 
 export function Layout() {
@@ -46,8 +47,9 @@ export function Layout() {
       )}
 
       <aside className="backoffice-nav">
-        <div className="backoffice-brand">
+        <div className="backoffice-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           baobab<small>ESPACE PROFESSIONNEL</small>
+          <NotificationBell />
         </div>
         <nav>
           {links.map(([to, label]) => (

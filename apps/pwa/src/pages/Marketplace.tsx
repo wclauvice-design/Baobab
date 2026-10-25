@@ -7,6 +7,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import { useCurrency } from "../lib/currency";
 import {
   call,
   date,
@@ -95,6 +96,12 @@ export function Icon({ name, size = 22 }: { name: string; size?: number }) {
       <>
         <path d="M12 14v8m0-5-5 5m5-5 5 5" />
         <path d="M7 14a4 4 0 0 1-2-7 5 5 0 0 1 10-3 5 5 0 0 1 3 10Z" />
+      </>
+    ),
+    link: (
+      <>
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
       </>
     ),
     close: <path d="M6 6l12 12M18 6 6 18" />,
@@ -194,6 +201,36 @@ function useFavorites() {
   return { ids, toggle };
 }
 
+
+export function CurrencySelector() {
+  const { currency, setCurrency } = useCurrency();
+  return (
+    <div className="currency-selector-badge" style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+      <select
+        value={currency}
+        onChange={(e) => setCurrency(e.target.value as any)}
+        aria-label="Choisir la devise"
+        style={{
+          background: "rgba(255, 255, 255, 0.18)",
+          color: "#fff",
+          border: "1px solid rgba(255, 255, 255, 0.35)",
+          borderRadius: "8px",
+          padding: "2px 8px",
+          fontSize: "0.76rem",
+          fontWeight: 700,
+          cursor: "pointer",
+          outline: "none",
+        }}
+      >
+        <option value="XOF" style={{ color: "#000" }}>🌍 FCFA (XOF)</option>
+        <option value="AED" style={{ color: "#000" }}>🇦🇪 AED (Dubaï)</option>
+        <option value="EUR" style={{ color: "#000" }}>🇪🇺 EUR (€)</option>
+        <option value="USD" style={{ color: "#000" }}>🇺🇸 USD ($)</option>
+      </select>
+    </div>
+  );
+}
+
 export function MarketShell({ children }: { children: React.ReactNode }) {
   const { ids: favoriteIds } = useFavorites();
   const { current: userDest } = useUserDestination();
@@ -205,6 +242,7 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
           Expédition vers : <strong>{userDest.flag} {userDest.name}</strong>
         </span>
         <span className="transit-quick-info">Express 3–6j · Cargo 14–16j · Maritime 45–50j</span>
+        <CurrencySelector />
       </div>
       <header className="market-header">
         <Link to="/" className="brand">
@@ -231,14 +269,22 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
       </header>
       <main className="market-main">{children}</main>
       <footer className="market-footer">
-        <Link to="/" className="brand">
-          <Icon name="tree" />
-          baobab
-        </Link>
-        <p>
-          Des découvertes à Dubaï. Un accompagnement jusqu’à votre destination.
-        </p>
-        <Link to="/messages">Contacter Baobab</Link>
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "16px", width: "100%", maxWidth: "1200px", margin: "0 auto" }}>
+          <div>
+            <Link to="/" className="brand">
+              <Icon name="tree" />
+              baobab
+            </Link>
+            <p style={{ margin: "4px 0 0", fontSize: "0.85rem", opacity: 0.85 }}>
+              Des découvertes à Dubaï. Un accompagnement de confiance jusqu’à votre destination.
+            </p>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", fontSize: "0.85rem", alignItems: "center" }}>
+            <Link to="/messages" style={{ color: "inherit", textDecoration: "underline" }}>Contacter Baobab</Link>
+            <Link to="/terms" style={{ color: "inherit", textDecoration: "underline" }}>Conditions Générales (CGUV)</Link>
+            <Link to="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>Politique de Confidentialité</Link>
+          </div>
+        </div>
       </footer>
       <nav className="mobile-nav">
         {[
@@ -1562,6 +1608,48 @@ export function Tracking({ account = false }: { account?: boolean }) {
                 >
                   <Icon name="box" size={17} /> Télécharger / Imprimer la Proforma (PDF)
                 </button>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(
+                      `Bonjour ! Voici le lien de suivi en temps réel de ma commande Baobab (${order.reference || id}) :\n${window.location.origin}/tracking/${id}${token ? '#' + token : ''}`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="market-button full"
+                    style={{
+                      background: "#25D366",
+                      color: "#fff",
+                      borderColor: "#25D366",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      textDecoration: "none",
+                      fontWeight: 600,
+                      fontSize: "0.85rem"
+                    }}
+                  >
+                    <Icon name="chat" size={17} /> Partager WhatsApp
+                  </a>
+                  <button
+                    type="button"
+                    className="market-button secondary full"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      fontSize: "0.85rem"
+                    }}
+                    onClick={() => {
+                      const shareLink = `${window.location.origin}/tracking/${id}${token ? '#' + token : ''}`;
+                      navigator.clipboard?.writeText(shareLink);
+                      alert("Lien de suivi copié dans le presse-papier !");
+                    }}
+                  >
+                    <Icon name="link" size={17} /> Copier le lien
+                  </button>
+                </div>
               </>
             ) : (
               <p>
@@ -1680,6 +1768,55 @@ export function Tracking({ account = false }: { account?: boolean }) {
             ) : (
               <p className="muted">Aucun paiement enregistré.</p>
             )}
+          </div>
+          <div className="tracking-card escrow-status-box" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", padding: "16px", marginTop: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#166534", fontWeight: 700 }}>
+              <Icon name="shield" size={20} />
+              <span>Garantie Paiement Protégé Baobab</span>
+            </div>
+            <p style={{ fontSize: "0.82rem", color: "#15803d", margin: "6px 0 0", lineHeight: 1.4 }}>
+              {Number(f.paid) > 0 ? (
+                Number(f.supplierPaid || 0) > 0 ? (
+                  <><strong>Fonds libérés au commerçant</strong> : l'inspection et la préparation de votre commande ont été validées à Dubaï.</>
+                ) : (
+                  <><strong>Fonds sécurisés par Baobab</strong> : vos paiements sont conservés sur notre compte protégé. Le commerçant n'est crédité qu'après vérification de votre marchandise.</>
+                )
+              ) : (
+                <>Vos règlements sont protégés et conservés par Baobab jusqu'à l'inspection de conformité de vos articles.</>
+              )}
+            </p>
+          </div>
+          <div className="tracking-card" style={{ marginTop: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              <Icon name="chat" size={18} />
+              <h3 style={{ margin: 0, fontSize: "0.95rem" }}>Besoin d'aide ou signaler un litige ?</h3>
+            </div>
+            <p className="muted" style={{ fontSize: "0.82rem" }}>
+              Une question sur la livraison ou un article non conforme ? Contactez l'équipe de conciergerie Baobab directement via votre messagerie ou WhatsApp.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "12px" }}>
+              <Link to={`/messages${order.conversationId ? '/' + order.conversationId : ''}`} className="market-button secondary full" style={{ fontSize: "0.85rem", textAlign: "center" }}>
+                Ouvrir la messagerie dédiée
+              </Link>
+              <a
+                href={`https://wa.me/22676950089?text=${encodeURIComponent(
+                  `Bonjour Baobab, j'ai une question/réclamation concernant ma commande réf: ${order.reference || id}`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="market-button full"
+                style={{
+                  background: "#25D366",
+                  color: "#fff",
+                  borderColor: "#25D366",
+                  fontSize: "0.85rem",
+                  textDecoration: "none",
+                  textAlign: "center"
+                }}
+              >
+                Assistance WhatsApp (+226 76 95 00 89)
+              </a>
+            </div>
           </div>
         </aside>
       </div>
