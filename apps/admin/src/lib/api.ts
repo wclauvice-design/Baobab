@@ -1,10 +1,23 @@
 import { compressImage } from './images';
 
 const TOKEN_KEY = 'baobab_admin_token';
+const DEFAULT_API_RENDER_URL = 'https://baobab-api-7w7h.onrender.com';
 const SUPABASE_STORAGE_URL = 'https://jptymtzrfahlhjcqpttg.supabase.co';
 const SUPABASE_SERVICE_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwdHltdHpyZmFobGhqY3FwdHRnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODA0MDQ0NCwiZXhwIjoyMTAzNjE2NDQ0fQ.Pt2xVt29tobsaqEjG6EKZ7sG6unZ9OpdoG3pd9wjBDs';
 const SUPABASE_BUCKET = 'product-images';
+
+/**
+ * Préchauffe silencieusement le backend Render en arrière-plan
+ * pour éviter les délais de démarrage à froid (spin-down Render).
+ */
+export function warmUpBackend(): void {
+  try {
+    fetch(`${DEFAULT_API_RENDER_URL}/health`, { method: 'GET', keepalive: true }).catch(() => {});
+  } catch {
+    // Échec silencieux
+  }
+}
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -30,16 +43,40 @@ export class ApiError extends Error {
 }
 
 function getBaseUrl(): string {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl) {
+  const envUrl = (import.meta.env.VITE_API_URL || '').trim();
+  // Ignorer tout résidu d'ancien domaine Railway ou localhost hors développement local
+  if (envUrl && !envUrl.includes('railway.app')) {
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && envUrl.includes('localhost')) {
+      return '/api';
+    }
     return envUrl.replace(/\/$/, '');
   }
   return '/api';
 }
 
 async function fetchApi(path: string, init: RequestInit = {}): Promise<Response> {
-  const url = `${getBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
-  return fetch(url, init);
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const base = getBaseUrl();
+  const primaryUrl = `${base}${cleanPath}`;
+  const directRenderUrl = `${DEFAULT_API_RENDER_URL}${cleanPath}`;
+
+  try {
+    const res = await fetch(primaryUrl, init);
+    // Si le proxy Vercel (/api) renvoie 502/504 à cause d'un délai de réveil de Render,
+    // on bascule directement sur l'URL Render ouverte en CORS
+    if ((res.status === 502 || res.status === 504) && base === '/api') {
+      console.warn(`[API] Proxy ${res.status} sur ${primaryUrl}, bascule directe Render...`);
+      return await fetch(directRenderUrl, init);
+    }
+    return res;
+  } catch (err) {
+    // Si la requête vers /api échoue au niveau réseau, basculer sur Render direct
+    if (base === '/api') {
+      console.warn(`[API] Erreur réseau proxy sur ${primaryUrl}, bascule directe Render:`, err);
+      return await fetch(directRenderUrl, init);
+    }
+    throw err;
+  }
 }
 
 async function readResponse<T>(res: Response): Promise<T> {

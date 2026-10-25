@@ -1,29 +1,48 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
-import { ApiError } from '../lib/api';
+import { ApiError, warmUpBackend } from '../lib/api';
 
 export function Login() {
   const [phone, setPhone] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const { devLogin } = useAuth();
   const navigate = useNavigate();
 
-  // Temporaire — voir AuthService.devLogin() côté API : tant qu'aucun vrai
-  // fournisseur SMS n'est branché, n'importe quel numéro se connecte
-  // directement, sans code. À retirer (ce formulaire + devLogin) une fois
-  // un SmsProvider réel en place.
+  // Préchauffer le serveur Render dès l'affichage de la page
+  useEffect(() => {
+    warmUpBackend();
+  }, []);
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setBusy(true);
+    setStatusMessage('Connexion en cours...');
+
+    // Si le backend Render était en veille, afficher un message explicatif après 3.5s
+    const wakeTimer = setTimeout(() => {
+      setStatusMessage('Le serveur sécurisé se réveille (~15-30s)... Merci de patienter');
+    }, 3500);
+
     try {
       await devLogin(phone);
+      clearTimeout(wakeTimer);
       navigate('/');
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Erreur réseau');
+    } catch (err: any) {
+      clearTimeout(wakeTimer);
+      setStatusMessage(null);
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else if (err?.message?.includes('Failed to fetch') || err?.name === 'TypeError') {
+        setError('Le serveur met du temps à répondre ou se réveille. Veuillez cliquer sur Réessayer.');
+      } else {
+        setError(err?.message || 'Erreur de connexion. Veuillez réessayer.');
+      }
     } finally {
+      clearTimeout(wakeTimer);
       setBusy(false);
     }
   }
@@ -41,16 +60,38 @@ export function Login() {
             required
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
+            placeholder="+226 76 95 00 89"
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-amber-500 focus:outline-none"
           />
         </label>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        {statusMessage && (
+          <div className="flex items-center gap-2 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
+            <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-amber-600 border-t-transparent" />
+            <span>{statusMessage}</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="rounded-lg bg-red-50 p-3 text-xs text-red-700">
+            <p className="font-semibold">{error}</p>
+          </div>
+        )}
+
         <button
           disabled={busy}
-          className="rounded-lg bg-amber-500 px-4 py-2 font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
+          className="flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
         >
-          Se connecter
+          {busy ? (
+            <>
+              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <span>Connexion...</span>
+            </>
+          ) : (
+            <span>{error ? 'Réessayer la connexion' : 'Se connecter'}</span>
+          )}
         </button>
+
         <p className="text-center text-xs text-emerald-700">
           Connexion instantanée pendant la phase de test — aucun code requis pour le moment.
         </p>
