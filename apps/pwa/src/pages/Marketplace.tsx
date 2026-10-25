@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   Link,
   NavLink,
@@ -832,6 +832,10 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
 
 export function ListingDetail() {
   const { id } = useParams();
+  useLayoutEffect(() => {
+    // A listing opens at its gallery even after scrolling through the feed.
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [id]);
   const navigate = useNavigate();
   const { current: dest, select: selectDest } = useUserDestination();
   const [p, setP] = useState<any>(null),
@@ -845,6 +849,9 @@ export function ListingDetail() {
     [sellerProducts, setSellerProducts] = useState<any[]>([]);
   useEffect(() => {
     setP(null);
+    setImage(0);
+    setShowFullDesc(false);
+    setError("");
     call(`/products/${id}`)
       .then((p) => {
         setP(p);
