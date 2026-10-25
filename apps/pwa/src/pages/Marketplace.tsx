@@ -837,6 +837,7 @@ export function ListingDetail() {
   const [p, setP] = useState<any>(null),
     [config, setConfig] = useState<any>(null),
     [image, setImage] = useState(0),
+    [showFullDesc, setShowFullDesc] = useState(false),
     [qty, setQty] = useState(1),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
@@ -947,242 +948,310 @@ export function ListingDetail() {
     );
   }
 
+  const rawDesc = p.description || "";
+  const isLongDesc = rawDesc.length > 220;
+  const displayedDesc = isLongDesc && !showFullDesc ? `${rawDesc.slice(0, 220)}…` : rawDesc;
+
   return (
     <>
-      <div className="breadcrumb">
-        <Link to="/">Explorer</Link>
-        <span>/</span>
-        <Link to={`/?universe=${p.category?.universe}`}>
-          {p.category?.name}
-        </Link>
-        <span>/</span>
-        {p.name}
+      <div className="mx-auto max-w-4xl pb-16 text-slate-100">
+      {/* Navigation retour rapide */}
+      <div className="mb-3 flex items-center justify-between text-xs text-slate-400">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1 text-slate-300 hover:text-amber-400 font-semibold transition-colors"
+        >
+          <span>←</span>
+          <span>Retour aux annonces</span>
+        </button>
+        <span>
+          {p.category?.name} {p.subcategory && p.subcategory !== "Autres" ? `· ${p.subcategory}` : ""}
+        </span>
       </div>
-      <div className="detail-grid">
-        <section>
-          <div className="detail-photo">
-            <img
-              src={
-                p.images?.[image] ||
-                fallbackPhoto(p.subcategory, p.category?.name, p.category?.universe, p.name)
-              }
-              alt={p.name}
-              decoding="async"
-              className={p.images?.[image] ? "" : "is-sample"}
-            />
-            {!p.images?.length && (
-              <span className="sample-note">Photo d’illustration</span>
-            )}
+
+      {/* 1. VISUEL HERO SUPÉRIEUR (Image en partie supérieure de l'écran - Les gens achètent par la vue) */}
+      <div className="detail-hero-top">
+        <div className="relative aspect-square sm:aspect-[4/3] w-full max-h-[460px] overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-black border border-slate-800 shadow-2xl flex items-center justify-center">
+          <img
+            src={
+              p.images?.[image] ||
+              fallbackPhoto(p.subcategory, p.category?.name, p.category?.universe, p.name)
+            }
+            alt={p.name}
+            decoding="async"
+            className="h-full w-full object-contain p-3"
+          />
+
+          {p.images && p.images.length > 1 && (
+            <div className="absolute top-3.5 left-3.5 flex items-center gap-1.5 rounded-lg bg-black/75 px-3 py-1 text-xs font-bold text-white backdrop-blur-md border border-white/10 shadow-lg">
+              <span>📷</span>
+              <span>{image + 1} / {p.images.length}</span>
+            </div>
+          )}
+
+          <div className="absolute bottom-3.5 left-3.5 flex flex-wrap gap-2">
+            <span className="rounded-md border border-emerald-500/50 bg-emerald-950/85 px-2.5 py-1 text-xs font-black text-emerald-300 shadow-md backdrop-blur-md">
+              {p.condition === "NEW" ? "Neuf" : p.condition === "REFURBISHED" ? "Reconditionné" : "Occasion"}
+            </span>
+            <span className="rounded-md border border-slate-700 bg-slate-900/90 px-2.5 py-1 text-xs font-semibold text-slate-200 shadow-md backdrop-blur-md">
+              🇦🇪 Dubaï Export
+            </span>
           </div>
-          <div className="thumbnails">
-            {p.images?.map((url: string, i: number) => (
+        </div>
+
+        {/* Galerie de miniatures immédiatement sous l'image principale */}
+        {p.images && p.images.length > 1 && (
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            {p.images.map((url: string, i: number) => (
               <button
                 key={url}
+                type="button"
                 onClick={() => setImage(i)}
-                aria-label={`Photo ${i + 1}`}
+                className={`relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all ${
+                  image === i
+                    ? "border-amber-400 ring-2 ring-amber-400/30 scale-102"
+                    : "border-slate-800 opacity-60 hover:opacity-100"
+                }`}
               >
-                <img src={url} alt="" />
+                <img src={url} alt="" className="h-full w-full object-cover" />
               </button>
             ))}
           </div>
-          <div className="detail-description">
-            <h2>À propos de cette annonce</h2>
-            <p>{p.description}</p>
-            <div className="specs">
-              {Object.entries({
-                Vendeur: p.seller?.shopName || "Baobab Dubaï Officiel",
-                État:
-                  p.condition === "NEW"
-                    ? "Neuf"
-                    : p.condition === "USED"
-                      ? "Occasion"
-                      : "Reconditionné",
-                Localisation: p.location,
-                Conditionnement: `${p.packSize} ${p.unit}`,
-                ...(p.weightKg ? { "Poids (kg)": p.weightKg } : {}),
-                ...(p.dimensions ? { Dimensions: p.dimensions } : {}),
-                ...p.attributes,
-              }).map(([k, v]) => (
-                <div key={k}>
-                  <span>{k}</span>
-                  <strong>{String(v)}</strong>
-                </div>
-              ))}
+        )}
+      </div>
+
+      {/* 2. NOM & PRIX (Immédiatement après les images) */}
+      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl backdrop-blur-sm">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <div className="font-heading text-3xl sm:text-4xl font-black text-amber-400 tracking-tight">
+              {money(p.price)}
+              <small className="text-xs font-normal text-slate-400 ml-2">par {p.unit || "pièce"}</small>
             </div>
+            {p.compareAtPrice && Number(p.compareAtPrice) > Number(p.price) && (
+              <p className="text-sm text-slate-500 line-through">
+                Prix catalogue : {money(p.compareAtPrice)}
+              </p>
+            )}
           </div>
-        </section>
-        <aside className="detail-panel">
-          <p className="eyebrow">{p.subcategory}</p>
-          <h1>{p.name}</h1>
-          <div className="detail-price">
-            {money(p.price)}
-            <small>par {p.unit}</small>
+
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-right">
+            <span className="block text-[11px] font-bold text-emerald-400 uppercase tracking-wide">
+              ✓ Sourcing Direct Dubaï
+            </span>
+            <span className="text-xs text-slate-300">
+              Marge Baobab (+15%) incluse
+            </span>
           </div>
-          <div className="seller-trust-badge">
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span className="seller-badge-icon">👑</span>
-              <span className="seller-badge-text">
-                Vendu par <strong>{p.seller?.shopName || "Baobab Dubaï Officiel"}</strong>
-                <em className="seller-verified-tag">✓ Vérifié</em>
-              </span>
+        </div>
+
+        <p className="mt-3 text-xs font-bold uppercase tracking-wider text-emerald-400">
+          {p.subcategory && p.subcategory !== "Autres" ? p.subcategory : p.category?.name}
+        </p>
+        <h1 className="mt-1 text-xl sm:text-2xl font-black text-slate-100 leading-snug">
+          {p.name}
+        </h1>
+
+        {/* Vendeur & Localisation */}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800 pt-3 text-xs text-slate-300">
+          <div className="flex items-center gap-2">
+            <span className="text-base">👑</span>
+            <span>Vendu par <strong>{p.seller?.shopName || "Baobab Dubaï Officiel"}</strong></span>
+            <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">✓ Vérifié</span>
+          </div>
+          <div className="flex items-center gap-1 text-slate-400">
+            <Icon name="pin" size={14} />
+            <span>Disponible à {p.location || "Dubaï"}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. DESCRIPTION AVEC OPTION « VOIR PLUS... » (Ensuite, directement après nom et prix) */}
+      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
+        <h2 className="text-base sm:text-lg font-black text-slate-100 mb-2 flex items-center gap-2">
+          <span>📝</span> Description du produit
+        </h2>
+
+        <div className="prose prose-invert max-w-none text-sm text-slate-300 leading-relaxed whitespace-pre-line">
+          {displayedDesc}
+        </div>
+
+        {isLongDesc && (
+          <button
+            type="button"
+            onClick={() => setShowFullDesc(!showFullDesc)}
+            className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+          >
+            <span>{showFullDesc ? "▲ Voir moins" : "▼ Voir plus de description..."}</span>
+          </button>
+        )}
+      </div>
+
+      {/* 4. CARACTÉRISTIQUES & SPÉCIFICATIONS TECHNIQUES */}
+      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
+        <h2 className="text-base sm:text-lg font-black text-slate-100 mb-3 flex items-center gap-2">
+          <span>📋</span> Caractéristiques & Spécifications
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5 text-xs sm:text-sm">
+          {Object.entries({
+            État: p.condition === "NEW" ? "Neuf" : p.condition === "USED" ? "Occasion" : "Reconditionné",
+            Localisation: p.location || "Dubaï",
+            Conditionnement: `${p.packSize || 1} ${p.unit || "pièce"}`,
+            ...(p.weightKg ? { "Poids unitaire": `${p.weightKg} kg` } : {}),
+            ...(p.dimensions ? { "Dimensions": p.dimensions } : {}),
+            ...p.attributes,
+          }).map(([k, v]) => (
+            <div key={k} className="flex justify-between items-baseline border-b border-slate-800/60 pb-2">
+              <span className="text-slate-400">{k}</span>
+              <strong className="font-semibold text-slate-100">{String(v)}</strong>
             </div>
-            <Link
-              to={`/shop/${p.sellerId || p.seller?.id || "seller-baobab-official"}`}
-              className="seller-visit-shop-link"
-            >
-              Visiter la boutique →
-            </Link>
-          </div>
-          <p className="delivery-label">
-            {p.shippingIncluded
-              ? `Livraison incluse à ${p.shippingDestination}`
-              : "Hors transport et frais d’importation — devis sur demande"}
-          </p>
-          <div className="market-divider" />
-          <p>
-            <Icon name="pin" size={17} /> Disponible à {p.location}
-          </p>
-          <label>
-            Quantité souhaitée
+          ))}
+        </div>
+      </div>
+
+      {/* 5. COMMANDE, FRET & ACTIONS RAPIDES */}
+      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/90 p-5 sm:p-6 shadow-xl">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <label className="text-sm font-bold text-slate-200 flex items-center gap-2">
+            <span>Quantité souhaitée :</span>
             <input
               type="number"
               min={p.packSize || 1}
               step={p.packSize || 1}
               value={qty}
               onChange={(e) => setQty(Math.max(1, Number(e.target.value)))}
+              className="w-24 rounded-xl border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm font-bold text-amber-400 text-center"
             />
           </label>
-          <p className="muted">
-            Minimum : {Math.ceil((p.minimumOrder || 1) / (p.packSize || 1)) * (p.packSize || 1)} {p.unit}. Commande par multiples de{" "}
-            {p.packSize}. Une exception peut être discutée avec Baobab.
-          </p>
-          <p className="muted">
-            Minimum produits : {money(Math.round(Number(p.price) * 100) * Math.ceil((p.minimumOrder || 1) / (p.packSize || 1)) * (p.packSize || 1) / 100)}.
-            {" "}{p.shippingIncluded ? "Frais d’importation éventuels à confirmer au devis." : "Hors transport et frais d’importation."}
-          </p>
-          <div className="freight-calculator">
-            <div className="freight-header">
-              <Icon name="shield" size={17} />
-              <strong>Simulateur Fret & Transit Dubaï ➔ Afrique</strong>
-            </div>
-            <label>
-              Destination d’arrivée
-              <select
-                value={dest.id}
-                onChange={(e) => selectDest(e.target.value)}
+          <span className="text-xs text-slate-400">
+            Total marchandise : <strong className="text-slate-100 font-bold text-sm">{money(Math.round(Number(p.price) * qty))}</strong>
+          </span>
+        </div>
+
+        {/* Simulateur Fret & Transit */}
+        <div className="freight-calculator">
+          <div className="freight-header">
+            <Icon name="shield" size={17} />
+            <strong>Simulateur Fret & Transit Dubaï ➔ Afrique</strong>
+          </div>
+          <label>
+            Destination d’arrivée
+            <select
+              value={dest.id}
+              onChange={(e) => selectDest(e.target.value)}
+            >
+              {DESTINATIONS.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="shipping-mode-selector">
+            {freight.availableModes.includes("EXPRESS") && (
+              <button
+                type="button"
+                className={`mode-btn ${freight.mode === "EXPRESS" ? "active" : ""}`}
+                onClick={() => setShippingMode("EXPRESS")}
               >
-                {DESTINATIONS.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div className="shipping-mode-selector">
-              {freight.availableModes.includes("EXPRESS") && (
-                <button
-                  type="button"
-                  className={`mode-btn ${freight.mode === "EXPRESS" ? "active" : ""}`}
-                  onClick={() => setShippingMode("EXPRESS")}
-                >
-                  <span className="mode-btn-title">✈️ Express (3–6 j)</span>
-                  <small>12 500 F/kg</small>
-                </button>
-              )}
-              {freight.availableModes.includes("CARGO") && (
-                <button
-                  type="button"
-                  className={`mode-btn ${freight.mode === "CARGO" ? "active" : ""}`}
-                  onClick={() => setShippingMode("CARGO")}
-                >
-                  <span className="mode-btn-title">✈️ Cargo (14–16 j)</span>
-                  <small>8 600 F/kg</small>
-                </button>
-              )}
-              {freight.availableModes.includes("SEA") && (
-                <button
-                  type="button"
-                  className={`mode-btn ${freight.mode === "SEA" ? "active" : ""}`}
-                  onClick={() => setShippingMode("SEA")}
-                >
-                  <span className="mode-btn-title">🚢 Maritime (45–50 j)</span>
-                  <small>{money(dest.cbmRate)}/m³</small>
-                </button>
-              )}
-            </div>
-            {freight.restrictionNote && (
-              <div className="shipping-restriction-badge">
-                <Icon name="shield" size={13} />
-                <span>{freight.restrictionNote}</span>
-              </div>
+                <span className="mode-btn-title">✈️ Express (3–6 j)</span>
+                <small>12 500 F/kg</small>
+              </button>
             )}
-            <div className="freight-breakdown">
-              <div>
-                <span>Marchandise ({qty} {p.unit || "pcs"})</span>
-                <b>{money(productSubtotal)}</b>
-              </div>
-              <div>
-                <span>
-                  {freight.modeLabel}
-                  <br />
-                  <small style={{ color: "#94a3b8" }}>
-                    Poids total : ~{totalWeight.toFixed(1)} kg
-                    {freight.mode === "SEA" ? ` · Volume : ${freight.volumeCbm.toFixed(2)} m³` : ""}
-                    {freight.basis === "volumetric" ? " (poids volumétrique)" : ""}
-                  </small>
-                </span>
-                <b>{p.shippingIncluded ? "Inclus" : money(estimatedFreight)}</b>
-              </div>
-              <div className="freight-total">
-                <span>Total estimé rendu {dest.name.split(" ")[0]}</span>
-                <strong>{money(estimatedGrandTotal)}</strong>
-              </div>
+            {freight.availableModes.includes("CARGO") && (
+              <button
+                type="button"
+                className={`mode-btn ${freight.mode === "CARGO" ? "active" : ""}`}
+                onClick={() => setShippingMode("CARGO")}
+              >
+                <span className="mode-btn-title">✈️ Cargo (14–16 j)</span>
+                <small>8 600 F/kg</small>
+              </button>
+            )}
+            {freight.availableModes.includes("SEA") && (
+              <button
+                type="button"
+                className={`mode-btn ${freight.mode === "SEA" ? "active" : ""}`}
+                onClick={() => setShippingMode("SEA")}
+              >
+                <span className="mode-btn-title">🚢 Maritime (45–50 j)</span>
+                <small>{money(dest.cbmRate)}/m³</small>
+              </button>
+            )}
+          </div>
+          {freight.restrictionNote && (
+            <div className="shipping-restriction-badge">
+              <Icon name="shield" size={13} />
+              <span>{freight.restrictionNote}</span>
+            </div>
+          )}
+          <div className="freight-breakdown">
+            <div>
+              <span>Marchandise ({qty} {p.unit || "pcs"})</span>
+              <b>{money(productSubtotal)}</b>
+            </div>
+            <div>
+              <span>
+                {freight.modeLabel}
+                <br />
+                <small style={{ color: "#94a3b8" }}>
+                  Poids total : ~{totalWeight.toFixed(1)} kg
+                  {freight.mode === "SEA" ? ` · Volume : ${freight.volumeCbm.toFixed(2)} m³` : ""}
+                  {freight.basis === "volumetric" ? " (poids volumétrique)" : ""}
+                </small>
+              </span>
+              <b>{p.shippingIncluded ? "Inclus" : money(estimatedFreight)}</b>
+            </div>
+            <div className="freight-total">
+              <span>Total estimé rendu {dest.name.split(" ")[0]}</span>
+              <strong>{money(estimatedGrandTotal)}</strong>
             </div>
           </div>
-          <Notice>{error}</Notice>
+        </div>
+
+        <Notice>{error}</Notice>
+
+        {/* Boutons d'action rapides */}
+        <div className="mt-5 flex flex-col sm:flex-row gap-3">
           <button
-            className="market-button full"
+            type="button"
+            className="flex-1 rounded-xl bg-amber-500 py-3.5 px-4 text-center text-sm font-black text-slate-950 hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
             onClick={discuss}
             disabled={busy}
           >
-            <Icon name="chat" />
-            {busy ? "Ouverture…" : "Discuter avec Baobab"}
+            {busy ? "Ouverture…" : "Discuter & Demander un devis"}
           </button>
+
           {config?.whatsapp && (
             <a
-              className="market-button secondary full"
+              className="flex-1 rounded-xl bg-emerald-600 py-3.5 px-4 text-center text-sm font-bold text-white hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"
               href={`https://wa.me/${config.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`}
               target="_blank"
               rel="noreferrer"
             >
-              Contacter Baobab sur WhatsApp
+              <span>💬</span>
+              <span>WhatsApp direct</span>
             </a>
           )}
-          <div className="sponsor-share-banner">
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(window.location.href);
-                alert("Lien direct copié ! Vous pouvez le coller dans votre publicité Facebook Ads ou TikTok Ads.");
-              }}
-              className="sponsor-share-btn"
-            >
-              <span>📱</span>
-              <span>Copier le lien pour pub TikTok / Facebook</span>
-            </button>
-          </div>
-          <div className="reassurance">
-            <Icon name="shield" />
-            <div>
-              <strong>Un interlocuteur unique</strong>
-              <p>
-                Baobab confirme la disponibilité, prépare votre devis et
-                organise votre livraison. Aucun paiement avant accord sur le
-                montant définitif.
-              </p>
-            </div>
-          </div>
-        </aside>
+        </div>
+
+        <div className="sponsor-share-banner mt-3">
+          <button
+            type="button"
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+              alert("Lien direct copié ! Vous pouvez le coller dans votre publicité Facebook Ads ou TikTok Ads.");
+            }}
+            className="sponsor-share-btn"
+          >
+            <span>📱</span>
+            <span>Copier le lien pour pub TikTok / Facebook</span>
+          </button>
+        </div>
       </div>
+    </div>
       {sellerProducts.length > 0 && (
         <div className="seller-showcase-section">
           <div className="seller-showcase-header">

@@ -1018,11 +1018,10 @@
   }
   .detail-panel {
     position: static;
-    grid-row: 1;
     padding: 22px;
   }
   .detail-grid > section {
-    grid-row: 2;
+    /* Always keep photo on top */
   }
   .detail-panel h1 {
     font-size: 27px;

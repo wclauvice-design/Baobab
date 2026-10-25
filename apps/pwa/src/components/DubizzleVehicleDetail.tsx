@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { formatXof } from '../lib/format';
 import { parseVehicleData, VehicleSpecs } from '../lib/vehicles';
-import { IconHeart } from './icons';
+import { IconHeart, IconLocation } from './icons';
 
 interface DubizzleVehicleDetailProps {
   product: any;
@@ -17,8 +17,10 @@ export function DubizzleVehicleDetail({
   onDiscuss,
   busy = false,
 }: DubizzleVehicleDetailProps) {
+  const navigate = useNavigate();
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showFullDesc, setShowFullDesc] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     entertainment: true,
     comfort: true,
@@ -39,20 +41,29 @@ export function DubizzleVehicleDetail({
     `Bonjour Baobab,\nJe suis très intéressé par le véhicule :\n*${product.name}*\nPrix : *${formatXof(price)}*\nAnnée : ${specs.year} | Kilométrage : ${specs.mileage} | Carburant : ${specs.fuelType}\nDestination souhaitée : ${destination?.name || 'Burkina Faso'}.\nPouvez-vous me transmettre la facture proforma et les modalités de transport ?`
   );
 
+  const rawDescription = product.description || '';
+  const isLongDesc = rawDescription.length > 240;
+  const displayedDesc = isLongDesc && !showFullDesc ? `${rawDescription.slice(0, 240)}…` : rawDescription;
+
   return (
     <div className="mx-auto max-w-4xl pb-28 text-slate-100">
-      {/* Breadcrumb Dubizzle style */}
-      <nav className="mb-3 flex items-center gap-1.5 text-xs text-slate-400">
-        <Link to="/" className="hover:text-amber-400">Accueil</Link>
-        <span>/</span>
-        <span className="text-slate-300">Motors</span>
-        <span>/</span>
-        <span className="text-slate-300">{specs.bodyType}</span>
-        <span>/</span>
-        <span className="text-amber-400 font-semibold">{specs.brand}</span>
-      </nav>
+      {/* Top back navigation bar */}
+      <div className="mb-3 flex items-center justify-between text-xs text-slate-400">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1 text-slate-300 hover:text-amber-400 font-semibold transition-colors"
+        >
+          <span>←</span>
+          <span>Retour aux annonces</span>
+        </button>
 
-      {/* 1. HERO CAROUSEL (Dubizzle style - Image 1) */}
+        <span className="text-slate-400">
+          Motors / {specs.brand} / {specs.model}
+        </span>
+      </div>
+
+      {/* 1. VISUEL HERO SUPÉRIEUR (Image en partie supérieure de l'écran - Acheter par la vue) */}
       <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-2xl bg-black border border-slate-800 shadow-2xl">
         <img
           src={images[activePhotoIdx]}
@@ -60,14 +71,14 @@ export function DubizzleVehicleDetail({
           className="h-full w-full object-cover transition-opacity duration-300"
         />
 
-        {/* Top left photo counter: 📷 1/15 (Dubizzle style) */}
-        <div className="absolute top-4 left-4 flex items-center gap-1.5 rounded-lg bg-black/75 px-3 py-1 text-xs font-bold text-white backdrop-blur-md border border-white/10 shadow-lg">
+        {/* Compteur photo Dubizzle en haut à gauche : 📷 1 / 15 */}
+        <div className="absolute top-3.5 left-3.5 flex items-center gap-1.5 rounded-lg bg-black/75 px-3 py-1 text-xs font-bold text-white backdrop-blur-md border border-white/10 shadow-lg">
           <span>📷</span>
           <span>{activePhotoIdx + 1} / {images.length}</span>
         </div>
 
-        {/* Top right Favorite & Share actions */}
-        <div className="absolute top-4 right-4 flex items-center gap-2">
+        {/* Actions Favoris & Partage en haut à droite */}
+        <div className="absolute top-3.5 right-3.5 flex items-center gap-2">
           <button
             type="button"
             onClick={() => setIsFavorite(!isFavorite)}
@@ -98,13 +109,14 @@ export function DubizzleVehicleDetail({
           </button>
         </div>
 
-        {/* Carousel Previous / Next arrow overlays for fast browsing */}
+        {/* Flèches de défilement rapide sur la photo */}
         {images.length > 1 && (
           <>
             <button
               type="button"
               onClick={() => setActivePhotoIdx((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
               className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md hover:bg-black/90 shadow-lg"
+              aria-label="Photo précédente"
             >
               ‹
             </button>
@@ -112,24 +124,30 @@ export function DubizzleVehicleDetail({
               type="button"
               onClick={() => setActivePhotoIdx((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
               className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md hover:bg-black/90 shadow-lg"
+              aria-label="Photo suivante"
             >
               ›
             </button>
           </>
         )}
 
-        {/* Condition & Origin Tag (Bottom Left) */}
-        <div className="absolute bottom-4 left-4 flex flex-wrap gap-2">
+        {/* Badges d'état et d'origine en bas à gauche de la photo */}
+        <div className="absolute bottom-3.5 left-3.5 flex flex-wrap gap-2">
           <span className={`rounded-md border px-2.5 py-1 text-xs font-black shadow-lg backdrop-blur-md ${specs.conditionBadgeClass}`}>
             {specs.conditionLabel}
           </span>
           <span className="rounded-md border border-slate-700 bg-slate-900/90 px-2.5 py-1 text-xs font-semibold text-slate-200 shadow-lg backdrop-blur-md">
             🇦🇪 Dubaï Export
           </span>
+          {discount && (
+            <span className="rounded-md bg-rose-600 px-2 py-1 text-xs font-bold text-white shadow-lg">
+              -{discount}%
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Thumbnails strip */}
+      {/* Galerie de miniatures immédiatement sous la photo principale */}
       {images.length > 1 && (
         <div className="mt-3 flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
           {images.map((img, i) => (
@@ -149,8 +167,9 @@ export function DubizzleVehicleDetail({
         </div>
       )}
 
-      {/* 2. PRICE & MAIN TITLE (Dubizzle style - Image 1) */}
-      <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl backdrop-blur-sm">
+      {/* 2. NOM & PRIX (Immédiatement après les images) */}
+      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl backdrop-blur-sm">
+        {/* Prix mis en avant en grand */}
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -159,13 +178,13 @@ export function DubizzleVehicleDetail({
               </span>
               {discount && (
                 <span className="rounded-md bg-rose-600 px-2 py-0.5 text-xs font-bold text-white">
-                  -{discount}%
+                  Économie de {discount}%
                 </span>
               )}
             </div>
             {compareAt && compareAt > price && (
               <p className="text-sm text-slate-500 line-through">
-                Prix initial : {formatXof(compareAt)}
+                Prix catalogue : {formatXof(compareAt)}
               </p>
             )}
           </div>
@@ -180,11 +199,12 @@ export function DubizzleVehicleDetail({
           </div>
         </div>
 
+        {/* Nom du véhicule (Titre) */}
         <h1 className="mt-3 text-xl sm:text-2xl font-black text-slate-100 leading-snug">
           {product.name}
         </h1>
 
-        {/* Quick specs icon bar (Image 1: 📅 2026 | ⏱ 0 km | 🌐 GCC Specs | ⛽ Petrol | 🛡 LHD) */}
+        {/* Barre d'icônes & spécifications clés Dubizzle */}
         <div className="mt-4 flex flex-wrap items-center gap-3 sm:gap-6 border-t border-slate-800 pt-4 text-sm font-semibold text-slate-300">
           <div className="flex items-center gap-2">
             <span className="text-base text-amber-400">📅</span>
@@ -213,10 +233,36 @@ export function DubizzleVehicleDetail({
         </div>
       </div>
 
-      {/* 3. CAR OVERVIEW (Fiche technique 2 colonnes - Images 1 & 2) */}
-      <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
+      {/* 3. DESCRIPTION AVEC OPTION « VOIR PLUS... » (Ensuite, directement après nom et prix) */}
+      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
+        <h2 className="text-base sm:text-lg font-black text-slate-100 mb-2 flex items-center gap-2">
+          <span>📝</span> Description du Véhicule
+        </h2>
+
+        <div className="prose prose-invert max-w-none text-sm text-slate-300 leading-relaxed whitespace-pre-line">
+          {displayedDesc}
+        </div>
+
+        {/* Bouton interactif Voir plus... / Voir moins */}
+        {isLongDesc && (
+          <button
+            type="button"
+            onClick={() => setShowFullDesc(!showFullDesc)}
+            className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors"
+          >
+            <span>{showFullDesc ? '▲ Voir moins' : '▼ Voir plus de détails...'}</span>
+          </button>
+        )}
+
+        <div className="mt-3 pt-3 border-t border-slate-800 text-[11px] text-slate-500">
+          Source vérifiée Temu / Dubizzle UAE · Inspection technique concessionnaire Dubaï
+        </div>
+      </div>
+
+      {/* 4. CAR OVERVIEW (Fiche technique 2 colonnes Dubizzle Motors) */}
+      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between border-b border-slate-800 pb-3">
-          <h2 className="text-lg sm:text-xl font-black text-slate-100 flex items-center gap-2">
+          <h2 className="text-base sm:text-lg font-black text-slate-100 flex items-center gap-2">
             <span className="text-amber-400">📋</span> Car Overview (Fiche Technique Complète)
           </h2>
           <span className="text-xs text-slate-400">Format Dubizzle Motors UAE</span>
@@ -310,26 +356,13 @@ export function DubizzleVehicleDetail({
         </div>
       </div>
 
-      {/* 4. DESCRIPTION (Dubizzle style - Image 3) */}
-      <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
-        <h2 className="text-lg font-black text-slate-100 mb-3 flex items-center gap-2">
-          <span>📝</span> Description du Véhicule
-        </h2>
-        <div className="prose prose-invert max-w-none text-sm text-slate-300 leading-relaxed whitespace-pre-line">
-          {product.description}
-        </div>
-        <div className="mt-4 pt-3 border-t border-slate-800 text-xs text-slate-500">
-          Publié sur Baobab Concierge · Origine vérifiée Temu / Dubizzle Export Dubaï
-        </div>
-      </div>
-
-      {/* 5. FEATURES / ÉQUIPEMENTS & OPTIONS (Dubizzle Accordions - Image 3) */}
-      <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
+      {/* 5. FEATURES / ÉQUIPEMENTS & OPTIONS (Dubizzle Accordions) */}
+      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between border-b border-slate-800 pb-3">
-          <h2 className="text-lg sm:text-xl font-black text-slate-100 flex items-center gap-2">
+          <h2 className="text-base sm:text-lg font-black text-slate-100 flex items-center gap-2">
             <span className="text-amber-400">⭐</span> Équipements & Options (Features)
           </h2>
-          <span className="text-xs text-slate-400">Inclus dans la finition</span>
+          <span className="text-xs text-slate-400">Inclus d'origine</span>
         </div>
 
         <div className="space-y-3">
@@ -429,7 +462,7 @@ export function DubizzleVehicleDetail({
       </div>
 
       {/* 6. EXPÉDITION & TRANSIT BAOBAB DUBAÏ ➔ AFRIQUE */}
-      <div className="mt-6 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-slate-900 to-amber-500/5 p-5 sm:p-6 shadow-xl">
+      <div className="mt-5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-slate-900 to-amber-500/5 p-5 sm:p-6 shadow-xl">
         <div className="flex items-start gap-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-2xl text-slate-950 font-black shadow-lg shadow-amber-500/30">
             🚢
@@ -457,7 +490,7 @@ export function DubizzleVehicleDetail({
       </div>
 
       {/* 7. Vendeur / Concessionnaire */}
-      <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 flex items-center justify-between">
+      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-500 text-slate-950 font-black text-lg">
             👑
@@ -479,10 +512,9 @@ export function DubizzleVehicleDetail({
         </Link>
       </div>
 
-      {/* 8. STICKY BOTTOM ACTION BAR (Images 1, 3, 5 - Call, WhatsApp, SMS/Quote) */}
+      {/* 8. BARRE FIXE EN BAS D'ÉCRAN (Call, WhatsApp, Devis) */}
       <div className="fixed bottom-0 inset-x-0 z-40 bg-slate-950/95 border-t border-slate-800 p-3 backdrop-blur-lg shadow-2xl">
         <div className="mx-auto max-w-4xl flex items-center justify-between gap-2.5">
-          {/* Call button */}
           <a
             href="tel:+22676950089"
             className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-xs font-bold text-slate-100 hover:bg-slate-800 transition-colors"
@@ -491,7 +523,6 @@ export function DubizzleVehicleDetail({
             <span>Appeler</span>
           </a>
 
-          {/* WhatsApp button (green, prominent) */}
           <a
             href={`https://wa.me/22676950089?text=${whatsappMessage}`}
             target="_blank"
@@ -502,7 +533,6 @@ export function DubizzleVehicleDetail({
             <span>WhatsApp</span>
           </a>
 
-          {/* Devis / Bon de commande officiel */}
           <button
             type="button"
             onClick={onDiscuss}
