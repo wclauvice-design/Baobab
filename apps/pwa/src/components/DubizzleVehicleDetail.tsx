@@ -28,7 +28,8 @@ export function DubizzleVehicleDetail({
   });
 
   const specs = parseVehicleData(product);
-  const images: string[] = product.images && product.images.length > 0 ? product.images : ['/photos/placeholder.svg'];
+  const photos: string[] = (product.images || []).filter((url: string) => !/https:\/\/(?:images\.)?unsplash\.com\//i.test(url));
+  const images = photos.length ? photos : ['/photos/placeholder.svg'];
   const price = Number(product.price || 0);
   const compareAt = product.compareAtPrice ? Number(product.compareAtPrice) : null;
   const discount = compareAt && compareAt > price ? Math.round((1 - price / compareAt) * 100) : null;
@@ -74,7 +75,7 @@ export function DubizzleVehicleDetail({
         {/* Compteur photo Dubizzle en haut à gauche : 📷 1 / 15 */}
         <div className="absolute top-3.5 left-3.5 flex items-center gap-1.5 rounded-lg bg-black/75 px-3 py-1 text-xs font-bold text-white backdrop-blur-md border border-white/10 shadow-lg">
           <span>📷</span>
-          <span>{activePhotoIdx + 1} / {images.length}</span>
+          <span>{photos.length ? `${activePhotoIdx + 1} / ${photos.length}` : 'Photo à venir'}</span>
         </div>
 
         {/* Actions Favoris & Partage en haut à droite */}
@@ -189,14 +190,7 @@ export function DubizzleVehicleDetail({
             )}
           </div>
 
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-right">
-            <span className="block text-[11px] font-bold text-emerald-400 uppercase tracking-wide">
-              ✓ Prix Concierge Garanti
-            </span>
-            <span className="text-xs text-slate-300">
-              Marge Baobab (+15%) & sourcing Dubaï inclus
-            </span>
-          </div>
+
         </div>
 
         {/* Nom du véhicule (Titre) */}

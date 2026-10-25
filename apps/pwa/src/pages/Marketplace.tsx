@@ -420,49 +420,15 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
         >
           <Icon name="heart" size={19} />
         </button>
-        <div className="picture-badges">
-          <span className="picture-tag">
-            {p.condition === "NEW"
-              ? "Neuf"
-              : p.condition === "REFURBISHED"
-                ? "Reconditionné"
-                : "Occasion"}
-          </span>
-          {isRealPhoto && !imageFailed && (
-            <span className="picture-tag is-real">
-              <Icon name="check" size={10} /> Photo réelle
-            </span>
-          )}
-          {!isRealPhoto && !imageFailed && <span className="picture-tag is-sample-label">Illustration</span>}
-        </div>
+        {!isRealPhoto && !imageFailed && <span className="picture-tag is-sample-label">Illustration</span>}
       </div>
       <div className="listing-copy">
-        <div className="listing-header-line">
-          <p className="eyebrow">{p.subcategory && p.subcategory !== "Autres" ? p.subcategory : p.category?.name}</p>
-          <span className="origin-tag">🇦🇪 Dubaï</span>
-        </div>
         <Link to={`/products/${p.id}`}>
           <h3 title={p.name}>{p.name}</h3>
         </Link>
         <strong>
           {money(p.price)} <small>/ {p.unit || "pièce"}</small>
         </strong>
-        <p className="listing-meta">
-          <span className="meta-moq">
-            {p.minimumOrder > 1
-              ? `Min. ${p.minimumOrder} ${p.unit || "pièces"}`
-              : "À l’unité"}
-          </span>
-          <span className="meta-place">
-            <Icon name="pin" size={12} />
-            {p.location || "Dubaï"}
-          </span>
-        </p>
-        {p.shippingIncluded && (
-          <p className="shipping-note">
-            Livraison incluse{p.shippingDestination ? ` · ${p.shippingDestination}` : ""}
-          </p>
-        )}
       </div>
     </article>
   );
@@ -1044,14 +1010,7 @@ export function ListingDetail() {
             )}
           </div>
 
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-right">
-            <span className="block text-[11px] font-bold text-emerald-400 uppercase tracking-wide">
-              ✓ Sourcing Direct Dubaï
-            </span>
-            <span className="text-xs text-slate-300">
-              Marge Baobab (+15%) incluse
-            </span>
-          </div>
+
         </div>
 
         <p className="mt-3 text-xs font-bold uppercase tracking-wider text-emerald-400">
