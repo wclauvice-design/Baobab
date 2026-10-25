@@ -745,13 +745,28 @@ export function ListingDetail() {
     [qty, setQty] = useState(1),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
-    [shippingMode, setShippingMode] = useState<ShippingMode>("EXPRESS");
+    [shippingMode, setShippingMode] = useState<ShippingMode>("EXPRESS"),
+    [sellerProducts, setSellerProducts] = useState<any[]>([]);
   useEffect(() => {
     setP(null);
     call(`/products/${id}`)
       .then((p) => {
         setP(p);
         setQty(Math.ceil((p.minimumOrder || 1) / (p.packSize || 1)) * (p.packSize || 1));
+        const sellerId = p.sellerId || p.seller?.id;
+        if (sellerId) {
+          call("/products").then((all: any[]) => {
+            setSellerProducts(
+              all
+                .filter(
+                  (item: any) =>
+                    (item.sellerId === sellerId || item.seller?.id === sellerId) &&
+                    item.id !== p.id
+                )
+                .slice(0, 4)
+            );
+          }).catch(() => {});
+        }
       })
       .catch((e) => setError(e.message));
     call("/concierge/config")
@@ -897,11 +912,19 @@ export function ListingDetail() {
             <small>par {p.unit}</small>
           </div>
           <div className="seller-trust-badge">
-            <span className="seller-badge-icon">👑</span>
-            <span className="seller-badge-text">
-              Vendu par <strong>{p.seller?.shopName || "Baobab Dubaï Officiel"}</strong>
-              <em className="seller-verified-tag">✓ Vérifié</em>
-            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span className="seller-badge-icon">👑</span>
+              <span className="seller-badge-text">
+                Vendu par <strong>{p.seller?.shopName || "Baobab Dubaï Officiel"}</strong>
+                <em className="seller-verified-tag">✓ Vérifié</em>
+              </span>
+            </div>
+            <Link
+              to={`/shop/${p.sellerId || p.seller?.id || "seller-baobab-official"}`}
+              className="seller-visit-shop-link"
+            >
+              Visiter la boutique →
+            </Link>
           </div>
           <p className="delivery-label">
             {p.shippingIncluded
@@ -1028,6 +1051,18 @@ export function ListingDetail() {
               Contacter Baobab sur WhatsApp
             </a>
           )}
+          <div className="sponsor-share-banner">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                alert("Lien direct copié ! Vous pouvez le coller dans votre publicité Facebook Ads ou TikTok Ads.");
+              }}
+              className="sponsor-share-btn"
+            >
+              <span>📱</span>
+              <span>Copier le lien pour pub TikTok / Facebook</span>
+            </button>
+          </div>
           <div className="reassurance">
             <Icon name="shield" />
             <div>
@@ -1041,6 +1076,32 @@ export function ListingDetail() {
           </div>
         </aside>
       </div>
+      {sellerProducts.length > 0 && (
+        <div className="seller-showcase-section">
+          <div className="seller-showcase-header">
+            <h3>Autres articles de {p.seller?.shopName || "cette boutique"}</h3>
+            <Link to={`/shop/${p.sellerId || p.seller?.id || "seller-baobab-official"}`}>
+              Voir toute la boutique ({sellerProducts.length + 1}) →
+            </Link>
+          </div>
+          <div className="seller-showcase-grid">
+            {sellerProducts.map((rel: any) => (
+              <Link key={rel.id} to={`/products/${rel.id}`} className="seller-showcase-card">
+                <div className="seller-showcase-img">
+                  <img
+                    src={rel.images?.[0] || fallbackPhoto(rel.subcategory, rel.category?.name, rel.category?.universe, rel.name)}
+                    alt={rel.name}
+                  />
+                </div>
+                <div className="seller-showcase-info">
+                  <h4>{rel.name}</h4>
+                  <p className="seller-showcase-price">{money(rel.price)}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -1789,5 +1850,191 @@ export function MarketAccount() {
         ) : null}
       </div>
     </section>
+  );
+}
+
+
+export function Storefront() {
+  const { id } = useParams<{ id: string }>();
+  const [products, setProducts] = useState<any[]>([]);
+  const [seller, setSeller] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [selectedCat, setSelectedCat] = useState("ALL");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    call("/products")
+      .then((allProducts) => {
+        const matching = allProducts.filter(
+          (p: any) =>
+            p.sellerId === id ||
+            p.seller?.id === id ||
+            (id && p.seller?.shopName && p.seller.shopName.toLowerCase() === id.toLowerCase())
+        );
+        setProducts(matching);
+        if (matching.length > 0 && matching[0].seller) {
+          setSeller(matching[0].seller);
+        } else if (id === "seller-baobab-official" || !id) {
+          setSeller({
+            id: "seller-baobab-official",
+            shopName: "Baobab Dubaï Officiel",
+            city: "Dubaï",
+          });
+        } else {
+          setSeller({
+            id,
+            shopName: id.replace(/-/g, " ").toUpperCase(),
+            city: "Dubaï",
+          });
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  function handleShare() {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 3000);
+  }
+
+  const shopName = seller?.shopName || "Boutique Partenaire";
+  const categories = Array.from(
+    new Set(products.map((p) => p.category?.name).filter(Boolean))
+  );
+
+  const filtered = products.filter((p) => {
+    const matchesCat = selectedCat === "ALL" || p.category?.name === selectedCat;
+    const matchesSearch =
+      !search ||
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.description?.toLowerCase().includes(search.toLowerCase());
+    return matchesCat && matchesSearch;
+  });
+
+  return (
+    <div className="storefront-container">
+      {/* 1. Header Hero */}
+      <div className="storefront-hero">
+        <div className="storefront-avatar">
+          {shopName.charAt(0)}
+        </div>
+        <div className="storefront-hero-content">
+          <div className="storefront-title-row">
+            <h1>{shopName}</h1>
+            <span className="storefront-badge">✓ Boutique Officielle Partenaire</span>
+          </div>
+          <p className="storefront-meta">
+            📍 {seller?.city || "Dubaï"} · 📦 {products.length} article{products.length > 1 ? "s" : ""} disponible{products.length > 1 ? "s" : ""} · 🛡️ Vente certifiée Baobab
+          </p>
+          <div className="storefront-actions">
+            <button onClick={handleShare} className="storefront-btn-share">
+              {copied ? "✓ Lien copié !" : "🔗 Partager / Copier le lien"}
+            </button>
+            <a
+              href={`https://wa.me/971568934905?text=${encodeURIComponent(
+                `Bonjour, je visite la vitrine de la boutique ${shopName} sur Baobab et je souhaite commander un article.`
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="storefront-btn-whatsapp"
+            >
+              💬 Discuter sur WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Reassurance banner */}
+      <div className="storefront-reassurance">
+        <div className="reassurance-pill">
+          <span>✓</span> Photos réelles & conformité garantie
+        </div>
+        <div className="reassurance-pill">
+          <span>🛡️</span> Paiement sécurisé via Baobab (à la livraison possible)
+        </div>
+        <div className="reassurance-pill">
+          <span>✈️</span> Expédition express Dubaï ➔ Afrique de l'Ouest
+        </div>
+      </div>
+
+      {/* 3. Search & Category Filters */}
+      <div className="storefront-filter-bar">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={`Rechercher parmi les ${products.length} articles de ${shopName}...`}
+          className="storefront-search-input"
+        />
+        {categories.length > 1 && (
+          <div className="storefront-category-tabs">
+            <button
+              onClick={() => setSelectedCat("ALL")}
+              className={`cat-tab ${selectedCat === "ALL" ? "active" : ""}`}
+            >
+              Tous ({products.length})
+            </button>
+            {categories.map((c: any) => (
+              <button
+                key={c}
+                onClick={() => setSelectedCat(c)}
+                className={`cat-tab ${selectedCat === c ? "active" : ""}`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 4. Products Grid */}
+      {loading ? (
+        <div className="storefront-loading" style={{ textAlign: "center", padding: "40px", color: "#94a3b8" }}>
+          <p>Chargement des articles de {shopName}…</p>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="storefront-empty" style={{ textAlign: "center", padding: "40px", color: "#94a3b8" }}>
+          <p>Aucun article trouvé dans cette sélection.</p>
+        </div>
+      ) : (
+        <div className="storefront-grid">
+          {filtered.map((item) => (
+            <Link key={item.id} to={`/products/${item.id}`} className="storefront-card">
+              <div className="storefront-card-img">
+                <img
+                  src={
+                    item.images?.[0] ||
+                    fallbackPhoto(
+                      item.subcategory,
+                      item.category?.name,
+                      item.category?.universe,
+                      item.name
+                    )
+                  }
+                  alt={item.name}
+                  loading="lazy"
+                />
+                {item.location && (
+                  <span className="card-location-tag">📍 {item.location}</span>
+                )}
+              </div>
+              <div className="storefront-card-body">
+                <span className="card-cat">{item.category?.name}</span>
+                <h3>{item.name}</h3>
+                <div className="card-price-row">
+                  <div className="card-price">{money(item.price)}</div>
+                  <span className="card-unit">/ {item.unit || "pièce"}</span>
+                </div>
+                <div className="card-action-btn">
+                  Voir l'article & Commander →
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

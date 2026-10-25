@@ -19,6 +19,7 @@ export function SellerDetail() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<"adds" | "inquiries" | "commandes" | "ventes">("adds");
+  const [copyToast, setCopyToast] = useState("");
 
   // Per-row quick image upload state
   const [uploadingProductId, setUploadingProductId] = useState<string | null>(null);
@@ -445,6 +446,21 @@ export function SellerDetail() {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* BOUTON LIEN PUBLICITAIRE BOUTIQUE (TIKTOK / FB) */}
+          <button
+            onClick={() => {
+              const url = `https://baobab-kohl.vercel.app/shop/${seller.id}`;
+              navigator.clipboard.writeText(url);
+              setCopyToast("Lien public de la boutique copié ! Prêt pour Facebook Ads / TikTok.");
+              setTimeout(() => setCopyToast(""), 3500);
+            }}
+            className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3.5 py-2 text-xs font-bold text-amber-900 shadow-sm hover:bg-amber-100 transition-all active:scale-95"
+            title="Copier le lien direct de la boutique pour les campagnes Facebook Ads, TikTok Ads ou WhatsApp"
+          >
+            <span>📱</span>
+            <span>Lien Pub Boutique (TikTok / FB)</span>
+          </button>
+
           {/* BOUTON PRO : Se connecter à la boutique du commerçant (Impersonation) */}
           <button
             onClick={handleLoginAsMerchant}
@@ -738,12 +754,26 @@ export function SellerDetail() {
                     </td>
 
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <button
-                        onClick={() => openModifier(p)}
-                        className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-black transition-all"
-                      >
-                        Compléter & modérer →
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => openModifier(p)}
+                          className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-black transition-all"
+                        >
+                          Compléter & modérer →
+                        </button>
+                        <button
+                          onClick={() => {
+                            const url = `https://baobab-kohl.vercel.app/products/${p.id}`;
+                            navigator.clipboard.writeText(url);
+                            setCopyToast(`Lien pub copié pour "${p.name.slice(0, 22)}..." !`);
+                            setTimeout(() => setCopyToast(""), 3500);
+                          }}
+                          className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all active:scale-95"
+                          title="Copier le lien direct de cet article pour sponsoriser sur Facebook / TikTok"
+                        >
+                          🔗 Lien Pub
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -1401,6 +1431,13 @@ export function SellerDetail() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+      {/* Floating Toast Alert */}
+      {copyToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-2xl border border-emerald-500/40 animate-bounce">
+          <span className="text-emerald-400">✓</span>
+          <span>{copyToast}</span>
         </div>
       )}
     </div>
