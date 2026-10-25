@@ -1,3 +1,5 @@
+import { compressImage } from './images';
+
 // Production uses the Vercel proxy; local development may target a custom API.
 const API_BASE = import.meta.env.PROD
   ? '/api'
@@ -62,11 +64,28 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return readResponse<T>(res);
 }
 
+async function uploadRequest<T>(path: string, file: File): Promise<T> {
+  const token = getToken();
+  const optimizedFile = await compressImage(file);
+  const formData = new FormData();
+  formData.append('file', optimizedFile);
+
+  const res = await fetchApi(path, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    body: formData,
+  });
+
+  return readResponse<T>(res);
+}
+
 export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: 'POST', body: body ? JSON.stringify(body) : undefined }),
   patch: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: 'PATCH', body: body ? JSON.stringify(body) : undefined }),
-  delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
+  delete: <T>(path: string, body?: unknown) =>
+    request<T>(path, { method: 'DELETE', body: body ? JSON.stringify(body) : undefined }),
+  upload: <T>(path: string, file: File) => uploadRequest<T>(path, file),
 };
