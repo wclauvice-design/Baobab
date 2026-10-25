@@ -1,5 +1,6 @@
 import { CommerceModule } from './commerce/commerce.module';
 import { HealthController } from './health.controller';
+import { AdminCountsController } from './admin-counts.controller';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -16,7 +17,7 @@ import { AddressesModule } from './addresses/addresses.module';
 import { CouponsModule } from './coupons/coupons.module';
 
 @Module({
-  controllers: [HealthController],
+  controllers: [HealthController, AdminCountsController],
   imports: [
     CommerceModule,
     ConfigModule.forRoot({ isGlobal: true }),
