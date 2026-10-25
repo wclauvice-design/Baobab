@@ -708,7 +708,20 @@ export function SellerDetail() {
                     {/* Article & Details */}
                     <td className="px-4 py-3 font-medium text-slate-900 max-w-sm">
                       <div className="font-semibold line-clamp-2">{p.name}</div>
-                      <div className="text-xs text-slate-400 font-mono mt-0.5">Réf : {p.id}</div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs text-slate-400 font-mono">Réf : {p.id}</span>
+                        {p.stock === 0 ? (
+                          <span className="rounded bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-800">
+                            ⚠️ Rupture
+                          </span>
+                        ) : p.stock !== undefined && p.stock !== null && p.stock <= 5 ? (
+                          <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                            ⚡ Stock bas ({p.stock})
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-400">Stock : {p.stock ?? "—"}</span>
+                        )}
+                      </div>
                     </td>
 
                     <td className="px-4 py-3 text-slate-600">{p.category?.name || "—"}</td>

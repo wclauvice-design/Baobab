@@ -1203,17 +1203,38 @@ export function TradeDetail() {
             {url ? (
               <>
                 <p className="op-pre">{url}</p>
-                <button
-                  className="op-button secondary"
-                  onClick={() =>
-                    navigator.clipboard
-                      .writeText(url)
-                      .then(() => setMessage("Lien copié."))
-                      .catch(() => setMessage("Copiez le lien affiché."))
-                  }
-                >
-                  Copier le lien privé
-                </button>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <button
+                    className="op-button secondary"
+                    onClick={() =>
+                      navigator.clipboard
+                        .writeText(url)
+                        .then(() => setMessage("Lien copié."))
+                        .catch(() => setMessage("Copiez le lien affiché."))
+                    }
+                  >
+                    Copier le lien privé
+                  </button>
+                  <a
+                    href={`https://wa.me/${o.customer.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                      `Bonjour ${o.customer.firstName}, voici votre lien de suivi en direct pour votre commande Baobab (réf. ${o.reference}) :\n${url}`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="op-button"
+                    style={{
+                      background: "#25D366",
+                      color: "#fff",
+                      textDecoration: "none",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    Envoyer au client sur WhatsApp
+                  </a>
+                </div>
               </>
             ) : (
               <p>

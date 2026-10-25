@@ -5,7 +5,7 @@ import { api, ApiError } from '../lib/api';
 import { formatXof } from '../lib/format';
 import { IconChat, IconHeart, IconHistory, IconLocation, IconOrders, IconSettings, IconStar } from '../components/icons';
 
-const SUPPORT_WHATSAPP_NUMBER = '2250700000000';
+const SUPPORT_WHATSAPP_NUMBER = '22676950089';
 
 interface Coupon {
   id: string;

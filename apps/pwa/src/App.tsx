@@ -4,6 +4,8 @@ import { PageLoader } from "./components/PageLoader";
 import { Login } from "./pages/Login";
 import { OrderHistory } from "./pages/OrderHistory";
 import { OrderDetail } from "./pages/OrderDetail";
+import { LegalTerms } from "./pages/LegalTerms";
+import { LegalPrivacy } from "./pages/LegalPrivacy";
 import {
   MarketShell,
   Marketplace,
@@ -67,6 +69,8 @@ export default function App() {
             </RequireAuth>
           }
         />
+        <Route path="/terms" element={<LegalTerms />} />
+        <Route path="/privacy" element={<LegalPrivacy />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </MarketShell>
