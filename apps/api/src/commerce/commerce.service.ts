@@ -31,6 +31,7 @@ import {
   STAGE_NAMES,
   UNIVERSES,
 } from "./rules";
+import { buildRuntimeTaxonomy } from "../catalog/taxonomy";
 
 const hash = (token: string) =>
   createHash("sha256").update(token).digest("hex");
@@ -51,11 +52,16 @@ export class CommerceService {
     private notifications: NotificationsService,
   ) {}
   async configPublic() {
-    const setting = await this.db.businessSetting.findUnique({
-      where: { key: "whatsapp" },
-    });
+    const [setting, categories] = await Promise.all([
+      this.db.businessSetting.findUnique({ where: { key: "whatsapp" } }),
+      this.db.category.findMany({
+        select: { id: true, name: true, slug: true, universe: true },
+        orderBy: [{ universe: "asc" }, { sortOrder: "asc" }, { name: "asc" }],
+      }),
+    ]);
     return {
       universes: UNIVERSES,
+      taxonomy: buildRuntimeTaxonomy(categories),
       stages: STAGE_NAMES,
       whatsapp: setting?.value || this.config.get("BAOBAB_WHATSAPP") || null,
     };

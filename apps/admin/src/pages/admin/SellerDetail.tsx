@@ -4,6 +4,14 @@ import { api, replaceProductImage, addProductImages, removeProductImage, setProd
 import { useAuth } from "../../lib/auth";
 import { MediaDropzone } from "../../components/MediaDropzone";
 import { CategoryMultiSelect } from "../../components/CategoryMultiSelect";
+import {
+  canonicalCategoryIds,
+  canonicalSubcategoryLabels,
+  subcategoryOptionsForCategory,
+  taxonomyCategoryOptions,
+  taxonomySubcategoryOptions,
+  withLegacyCategoryOptions,
+} from "../../lib/taxonomy";
 import { isVideoUrl, MEDIA_ACCEPT } from "../../lib/media";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -18,6 +26,7 @@ export function SellerDetail() {
   const { impersonate } = useAuth();
   const [data, setData] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
+  const [config, setConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -34,6 +43,7 @@ export function SellerDetail() {
   const [modalCategoryId, setModalCategoryId] = useState("");
   const [modalCategoryIds, setModalCategoryIds] = useState<string[]>([]);
   const [modalSubcategory, setModalSubcategory] = useState("");
+  const [modalSubcategories, setModalSubcategories] = useState<string[]>([]);
   const [modalWeight, setModalWeight] = useState("");
   const [modalPrice, setModalPrice] = useState("");
   const [modalPublicPrice, setModalPublicPrice] = useState("");
@@ -50,6 +60,7 @@ export function SellerDetail() {
   const [creatingProduct, setCreatingProduct] = useState(false);
   const [newProdName, setNewProdName] = useState("");
   const [newProdCategoryIds, setNewProdCategoryIds] = useState<string[]>([]);
+  const [newProdSubcategories, setNewProdSubcategories] = useState<string[]>([]);
   const [newProdPrice, setNewProdPrice] = useState("");
   const [newProdSupplierPrice, setNewProdSupplierPrice] = useState("");
   const [newProdWeight, setNewProdWeight] = useState("");
@@ -68,6 +79,9 @@ export function SellerDetail() {
     // Load categories if not loaded
     if (categories.length === 0) {
       api.get<any[]>("/categories").then(setCategories).catch(() => {});
+    }
+    if (!config) {
+      api.get<any>("/concierge/config").then(setConfig).catch(() => {});
     }
 
     // 1. First attempt: Dedicated admin seller endpoint
@@ -361,11 +375,22 @@ export function SellerDetail() {
     setModalDescription(product.description || "");
     setModalCategoryId(product.categoryId || "");
     setModalCategoryIds(
-      Array.isArray(product.categoryIds) && product.categoryIds.length
-        ? product.categoryIds
-        : [product.categoryId].filter(Boolean),
+      canonicalCategoryIds(
+        config?.taxonomy,
+        Array.isArray(product.categoryIds) && product.categoryIds.length
+          ? product.categoryIds
+          : [product.categoryId].filter(Boolean),
+      ),
     );
     setModalSubcategory(product.subcategory || "");
+    setModalSubcategories(
+      canonicalSubcategoryLabels(
+        config?.taxonomy,
+        Array.isArray(product.subcategories) && product.subcategories.length
+          ? product.subcategories
+          : [product.subcategory].filter(Boolean),
+      ),
+    );
     setModalWeight(product.weightKg ? String(product.weightKg) : "");
     setModalPrice(
       product.sellerPrice
@@ -412,7 +437,12 @@ export function SellerDetail() {
         description: modalDescription,
         categoryId: modalCategoryIds[0] || modalCategoryId || undefined,
         categoryIds: modalCategoryIds.length ? modalCategoryIds : undefined,
-        subcategory: modalSubcategory || undefined,
+        subcategory: modalSubcategories[0] || modalSubcategory || undefined,
+        subcategories: modalSubcategories.length
+          ? modalSubcategories
+          : modalSubcategory
+            ? [modalSubcategory]
+            : undefined,
         condition: modalCondition,
         location: modalLocation,
         stock: modalStock ? Number(modalStock) : undefined,
@@ -459,6 +489,10 @@ export function SellerDetail() {
         supplierPrice: supPrice,
         categoryId: newProdCategoryIds[0],
         categoryIds: newProdCategoryIds,
+        subcategory: newProdSubcategories[0] || "Autres",
+        subcategories: newProdSubcategories.length
+          ? newProdSubcategories
+          : ["Autres"],
         stock: newProdStock ? Number(newProdStock) : 1,
         weightKg: newProdWeight ? Number(newProdWeight) : undefined,
         condition: newProdCondition,
@@ -479,6 +513,7 @@ export function SellerDetail() {
       setNewProdDesc("");
       setNewProdFiles([]);
       setNewProdCategoryIds([]);
+      setNewProdSubcategories([]);
       await load();
     } catch (err: any) {
       alert("Erreur création article : " + (err?.message || err));
@@ -521,6 +556,23 @@ export function SellerDetail() {
   }
 
   const { seller, metrics, products = [], inquiries = [], commandes = [], ventes = [] } = data;
+
+  const categoryOptions = (() => {
+    const canonical = taxonomyCategoryOptions(config?.taxonomy);
+    if (canonical.length) return canonical;
+    return categories.map((c) => ({ value: c.id, label: c.name }));
+  })();
+  const allSubcategoryOptions = taxonomySubcategoryOptions(config?.taxonomy);
+  const scopedSubcategoryOptions = (ids: string[]) => {
+    if (config?.taxonomy) {
+      const scoped = ids.length
+        ? subcategoryOptionsForCategory(config.taxonomy, ids)
+        : [];
+      if (scoped.length) return scoped;
+      if (allSubcategoryOptions.length) return allSubcategoryOptions;
+    }
+    return allSubcategoryOptions;
+  };
 
   return (
     <div className="space-y-6">
@@ -1327,7 +1379,11 @@ export function SellerDetail() {
                   <CategoryMultiSelect
                     label="Catégories (une ou plusieurs)"
                     placeholder="Rechercher une catégorie…"
-                    options={categories.map((c) => ({ value: c.id, label: c.name }))}
+                    options={withLegacyCategoryOptions(
+                      categoryOptions,
+                      categories,
+                      modalCategoryIds,
+                    )}
                     values={modalCategoryIds}
                     onChange={(next) => {
                       setModalCategoryIds(next);
@@ -1339,15 +1395,17 @@ export function SellerDetail() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    Sous-catégorie
-                  </label>
-                  <input
-                    type="text"
-                    value={modalSubcategory}
-                    onChange={(e) => setModalSubcategory(e.target.value)}
-                    placeholder="Ex : Smartphones, SUV..."
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
+                  <CategoryMultiSelect
+                    label="Sous-catégories (une ou plusieurs)"
+                    placeholder="Rechercher une sous-catégorie…"
+                    options={scopedSubcategoryOptions(modalCategoryIds)}
+                    values={modalSubcategories}
+                    onChange={(next) => {
+                      setModalSubcategories(next);
+                      setModalSubcategory(next[0] || "");
+                    }}
+                    max={20}
+                    hint="Recherche insensible aux accents (ex. « ordinateur », « pc », « climatiseur »)."
                   />
                 </div>
               </div>
@@ -1537,7 +1595,11 @@ export function SellerDetail() {
                   <CategoryMultiSelect
                     label="Catégories (une ou plusieurs) *"
                     placeholder="Rechercher une catégorie…"
-                    options={categories.map((c) => ({ value: c.id, label: c.name }))}
+                    options={withLegacyCategoryOptions(
+                      categoryOptions,
+                      categories,
+                      newProdCategoryIds,
+                    )}
                     values={newProdCategoryIds}
                     onChange={(next) => {
                       setNewProdCategoryIds(next);
@@ -1560,6 +1622,18 @@ export function SellerDetail() {
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
                   />
                 </div>
+              </div>
+
+              <div>
+                <CategoryMultiSelect
+                  label="Sous-catégories (une ou plusieurs)"
+                  placeholder="Rechercher une sous-catégorie…"
+                  options={scopedSubcategoryOptions(newProdCategoryIds)}
+                  values={newProdSubcategories}
+                  onChange={setNewProdSubcategories}
+                  max={20}
+                  hint="Recherche insensible aux accents et aux synonymes."
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

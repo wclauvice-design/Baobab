@@ -1,53 +1,18 @@
 import { BadRequestException } from "@nestjs/common";
+import { TAXONOMY } from "@baobab/shared";
 
-export const UNIVERSES = [
-  {
-    id: "motors",
-    name: "Véhicules & Pièces Auto",
-    subtitle: "Motors",
-    icon: "car",
-    categories: [
-      "Voitures & SUV",
-      "Motos & tricycles",
-      "Utilitaires & Pick-up",
-      "Pièces détachées & Accessoires",
-    ],
-  },
-  {
-    id: "classifieds",
-    name: "Objets & équipements",
-    subtitle: "Classifieds",
-    icon: "phone",
-    categories: [
-      "Téléphones & tablettes",
-      "Électronique & informatique",
-      "Électroménager",
-      "Sport & fitness",
-      "Musculation & gym",
-      "Mode & accessoires",
-    ],
-  },
-  {
-    id: "home",
-    name: "Maison & jardin",
-    subtitle: "Furniture & Garden",
-    icon: "home",
-    categories: ["Meubles", "Décoration", "Literie", "Cuisine", "Jardin"],
-  },
-  {
-    id: "trade",
-    name: "Travaux & artisans",
-    subtitle: "Matériel & services",
-    icon: "tool",
-    categories: [
-      "Plomberie & sanitaire",
-      "Électricité & énergie",
-      "Construction & rénovation",
-      "Outillage",
-      "Services & artisans",
-    ],
-  },
-];
+/**
+ * Univers exposés aux interfaces. Ils sont générés depuis la taxonomie
+ * canonique partagée pour que les filtres, les formulaires et la base
+ * parlent toujours le même langage.
+ */
+export const UNIVERSES = TAXONOMY.map((universe) => ({
+  id: universe.id,
+  name: universe.name,
+  subtitle: universe.subtitle,
+  icon: universe.icon,
+  categories: universe.categories.map((category) => category.label),
+}));
 export const STAGES = [
   "CONFIRMED",
   "PREPARING",

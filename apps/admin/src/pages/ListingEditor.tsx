@@ -5,6 +5,15 @@ import { useAuth } from "../lib/auth";
 import { toXof, fromXof, formatXof, MERCHANT_DEFAULT_CURRENCY, PRICING_CURRENCIES } from "../lib/format";
 import { MediaDropzone } from "../components/MediaDropzone";
 import { CategoryMultiSelect } from "../components/CategoryMultiSelect";
+import {
+  canonicalCategoryIds,
+  canonicalSubcategoryLabels,
+  isVehicleSelection,
+  subcategoryOptionsForCategory,
+  taxonomyCategoryOptions,
+  taxonomySubcategoryOptions,
+  withLegacyCategoryOptions,
+} from "../lib/taxonomy";
 import { MEDIA_ACCEPT, isVideoUrl } from "../lib/media";
 import { Alert, money } from "./Operations";
 export function ListingEditor() {
@@ -81,8 +90,10 @@ export function ListingEditor() {
       Array.isArray(editing.subcategories) && editing.subcategories.length
         ? editing.subcategories
         : [editing.subcategory].filter(Boolean);
-    setFormCategoryIds(initialCategoryIds);
-    setFormSubcategories(initialSubcategories);
+    setFormCategoryIds(canonicalCategoryIds(config?.taxonomy, initialCategoryIds));
+    setFormSubcategories(
+      canonicalSubcategoryLabels(config?.taxonomy, initialSubcategories),
+    );
     setFormCondition(editing.condition || "NEW");
 
     const attrs = editing.attributes || {};
@@ -117,24 +128,28 @@ export function ListingEditor() {
   }, [editing]);
 
   const isVehCategory =
-    (formSubcategories.some((sub) =>
-      /voiture|utilitaire|moto|tricycle|suv|pick-up/i.test(sub),
-    ) ||
-      formCategoryIds.some((id) => {
-        const category = categories.find((c) => c.id === id);
-        return (
-          /véhicule|vehicule|motors/i.test(category?.name || "") ||
-          /motors/i.test(category?.slug || "")
-        );
-      })) &&
+    isVehicleSelection(config?.taxonomy, formCategoryIds, formSubcategories) &&
     !formSubcategories.some((sub) => /pièce|piece|accessoire/i.test(sub));
 
-  const categoryOptions = categories.map((c) => ({
-    value: c.id,
-    label: c.name,
-  }));
+  const categoryOptions = (() => {
+    const canonical = taxonomyCategoryOptions(config?.taxonomy);
+    if (canonical.length) return canonical;
+    return categories.map((c) => ({
+      value: c.id,
+      label: c.name,
+    }));
+  })();
+
+  const allSubcategoryOptions = taxonomySubcategoryOptions(config?.taxonomy);
 
   const subcategoryOptions = (() => {
+    if (config?.taxonomy) {
+      const scoped = formCategoryIds.length
+        ? subcategoryOptionsForCategory(config.taxonomy, formCategoryIds)
+        : [];
+      if (scoped.length) return scoped;
+      if (allSubcategoryOptions.length) return allSubcategoryOptions;
+    }
     const map = new Map<string, { value: string; label: string; group?: string }>();
     for (const universe of config?.universes || []) {
       for (const name of universe.categories || []) {
@@ -451,7 +466,11 @@ export function ListingEditor() {
                 dark
                 label="Catégories (une ou plusieurs)"
                 placeholder="Rechercher une catégorie…"
-                options={categoryOptions}
+                options={withLegacyCategoryOptions(
+                  categoryOptions,
+                  categories,
+                  formCategoryIds,
+                )}
                 values={formCategoryIds}
                 onChange={setFormCategoryIds}
                 max={12}

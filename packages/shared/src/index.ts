@@ -1,3 +1,5 @@
+export * from './taxonomy';
+
 export enum Role {
   BUYER = 'BUYER',
   SELLER = 'SELLER',

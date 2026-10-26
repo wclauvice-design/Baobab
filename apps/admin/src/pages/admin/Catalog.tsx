@@ -2,6 +2,12 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import { api, ApiError, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from '../../lib/api';
 import { formatXof } from '../../lib/format';
 import { CategoryMultiSelect } from '../../components/CategoryMultiSelect';
+import {
+  subcategoryOptionsForCategory,
+  taxonomyCategoryOptions,
+  taxonomySubcategoryOptions,
+  withLegacyCategoryOptions,
+} from '../../lib/taxonomy';
 
 interface Category {
   id: string;
@@ -51,21 +57,6 @@ export function Catalog() {
   function flashSuccess(msg: string) {
     setSuccessMsg(msg);
     setTimeout(() => setSuccessMsg(null), 3500);
-  }
-
-  async function createCategory(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const name = String(form.get('name'));
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    try {
-      await api.post('/categories', { name, slug });
-      (e.target as HTMLFormElement).reset();
-      flashSuccess('Catégorie ajoutée !');
-      load();
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Erreur réseau');
-    }
   }
 
   async function createProduct(e: FormEvent<HTMLFormElement>) {
@@ -218,8 +209,20 @@ export function Catalog() {
       (p.seller?.shopName && p.seller.shopName.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
+  const categoryOptions = (() => {
+    const canonical = taxonomyCategoryOptions(config?.taxonomy);
+    if (canonical.length) return canonical;
+    return categories.map((c) => ({ value: c.id, label: c.name }));
+  })();
+  const allSubcategoryOptions = taxonomySubcategoryOptions(config?.taxonomy);
   const subcategoryOptions = (() => {
+    if (config?.taxonomy) {
+      const scoped = categoryIds.length
+        ? subcategoryOptionsForCategory(config.taxonomy, categoryIds)
+        : [];
+      if (scoped.length) return scoped;
+      if (allSubcategoryOptions.length) return allSubcategoryOptions;
+    }
     const map = new Map<string, { value: string; label: string; group?: string }>();
     for (const universe of config?.universes || []) {
       for (const name of universe.categories || []) {
@@ -230,6 +233,10 @@ export function Catalog() {
     }
     return Array.from(map.values());
   })();
+  const canonicalCategoryCount = (config?.taxonomy?.universes || []).reduce(
+    (total: number, universe: any) => total + (universe.categories?.length || 0),
+    0,
+  );
 
   return (
     <div className="space-y-6">
@@ -279,20 +286,22 @@ export function Catalog() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <form onSubmit={createCategory} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="mb-3 text-sm font-semibold text-slate-900">Nouvelle catégorie</h2>
-          <div className="flex gap-2">
-            <input
-              name="name"
-              required
-              placeholder="Nom de la catégorie"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
-            <button className="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white shadow hover:bg-amber-600 shrink-0">
-              Ajouter
-            </button>
-          </div>
-        </form>
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 shadow-sm">
+          <h2 className="mb-2 text-sm font-semibold text-emerald-900">
+            Catégories gérées par la taxonomie Baobab
+          </h2>
+          <p className="text-xs leading-relaxed text-emerald-800">
+            Les {canonicalCategoryCount || '—'} catégories et leurs sous-catégories sont
+            désormais centralisées et rattachées automatiquement aux catégories
+            historiques des boutiques. Pour éviter les doublons et les incohérences de
+            filtres, la création libre de catégories est désactivée : sélectionnez
+            directement une catégorie existante dans les formulaires.
+          </p>
+          <p className="mt-2 text-[11px] font-medium text-emerald-700">
+            Besoin d’une nouvelle catégorie ? Faites-la ajouter à la taxonomie
+            partagée pour qu’elle soit disponible partout (frontend, commerçants, admin).
+          </p>
+        </div>
 
         <details className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <summary className="cursor-pointer text-sm font-semibold text-amber-700 hover:text-amber-800">
@@ -331,7 +340,11 @@ export function Catalog() {
             <CategoryMultiSelect
               label="Catégories (une ou plusieurs) *"
               placeholder="Rechercher une catégorie…"
-              options={categoryOptions}
+              options={withLegacyCategoryOptions(
+                categoryOptions,
+                categories,
+                categoryIds,
+              )}
               values={categoryIds}
               onChange={setCategoryIds}
               max={12}

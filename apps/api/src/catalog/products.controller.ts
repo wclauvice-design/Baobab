@@ -32,7 +32,7 @@ export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Get()
-  findAll(@Query() params: { search?: string; categoryId?: string; universe?: string; condition?: string; subcategory?: string; minPrice?: string; maxPrice?: string; sort?: string }) {
+  findAll(@Query() params: { search?: string; categoryId?: string; categoryKey?: string; universe?: string; condition?: string; subcategory?: string; subcategoryKey?: string; minPrice?: string; maxPrice?: string; sort?: string }) {
     return this.productsService.findAll(params);
   }
 

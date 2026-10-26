@@ -2,6 +2,12 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import { api, ApiError, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from '../../lib/api';
 import { MediaDropzone } from '../../components/MediaDropzone';
 import { CategoryMultiSelect } from '../../components/CategoryMultiSelect';
+import {
+  subcategoryOptionsForCategory,
+  taxonomyCategoryOptions,
+  taxonomySubcategoryOptions,
+  withLegacyCategoryOptions,
+} from '../../lib/taxonomy';
 import { MEDIA_ACCEPT, isVideoUrl } from '../../lib/media';
 import {
   formatXof,
@@ -234,8 +240,20 @@ export function Products() {
       p.category?.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
+  const categoryOptions = (() => {
+    const canonical = taxonomyCategoryOptions(config?.taxonomy);
+    if (canonical.length) return canonical;
+    return categories.map((c) => ({ value: c.id, label: c.name }));
+  })();
+  const allSubcategoryOptions = taxonomySubcategoryOptions(config?.taxonomy);
   const subcategoryOptions = (() => {
+    if (config?.taxonomy) {
+      const scoped = categoryIds.length
+        ? subcategoryOptionsForCategory(config.taxonomy, categoryIds)
+        : [];
+      if (scoped.length) return scoped;
+      if (allSubcategoryOptions.length) return allSubcategoryOptions;
+    }
     const map = new Map<string, { value: string; label: string; group?: string }>();
     for (const universe of config?.universes || []) {
       for (const name of universe.categories || []) {
@@ -370,7 +388,11 @@ export function Products() {
           <CategoryMultiSelect
             label="Catégories (une ou plusieurs)"
             placeholder="Rechercher une catégorie…"
-            options={categoryOptions}
+            options={withLegacyCategoryOptions(
+              categoryOptions,
+              categories,
+              categoryIds,
+            )}
             values={categoryIds}
             onChange={setCategoryIds}
             max={12}

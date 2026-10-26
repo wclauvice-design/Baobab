@@ -4,6 +4,8 @@ export interface CategoryOption {
   value: string;
   label: string;
   group?: string;
+  /** Synonymes utilisés par la recherche (pc, laptop, ordinateur…). */
+  keywords?: string[];
 }
 
 interface CategoryMultiSelectProps {
@@ -94,7 +96,9 @@ export function CategoryMultiSelect({
     const tokens = normalize(query).split(/\s+/).filter(Boolean);
     if (!tokens.length) return options;
     return options.filter((option) => {
-      const haystack = normalize(`${option.label} ${option.group || ''}`);
+      const haystack = normalize(
+        `${option.label} ${option.group || ''} ${(option.keywords || []).join(' ')}`,
+      );
       return tokens.every((token) => haystack.includes(token));
     });
   }, [options, query]);

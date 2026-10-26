@@ -13,6 +13,33 @@ import { FX_TO_XOF, isPricingCurrency, toXof } from "../common/currency";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
 import { SupabaseStorageService } from "./supabase-storage.service";
+import {
+  canonicalSubcategoryLabel,
+  categorySubcategoryValues,
+  matchCategory,
+  normalizeText,
+  productCanonicalTaxonomy,
+  resolveTopic,
+  subcategoryValues,
+} from "@baobab/shared";
+
+/** Variantes de casse/accents pour retrouver les valeurs historiques en base. */
+function caseVariants(values: string[]): string[] {
+  const result = new Set<string>();
+  for (const raw of values) {
+    const value = String(raw ?? "").trim();
+    if (!value) continue;
+    result.add(value);
+    result.add(value.toLowerCase());
+    result.add(value.toUpperCase());
+    const noAccent = value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    result.add(noAccent);
+    result.add(noAccent.toLowerCase());
+  }
+  return Array.from(result);
+}
 
 @Injectable()
 export class ProductsService {
@@ -74,60 +101,110 @@ export class ProductsService {
   async findAll(params: {
     search?: string;
     categoryId?: string;
+    categoryKey?: string;
     universe?: string;
     condition?: string;
     subcategory?: string;
+    subcategoryKey?: string;
     minPrice?: string;
     maxPrice?: string;
     sort?: string;
   }) {
     const isFeatured = !params.sort || params.sort === "featured";
-    const universeCategoryIds = params.universe
-      ? (
-          await this.prisma.category.findMany({
-            where: { universe: params.universe },
-            select: { id: true },
-          })
-        ).map((category) => category.id)
+
+    // Index des catégories historiques -> catégories canoniques.
+    const categories = await this.prisma.category.findMany({
+      select: { id: true, name: true, slug: true, universe: true },
+    });
+    const topic = resolveTopic(
+      params.subcategoryKey || params.categoryKey || params.subcategory,
+    );
+    const topicCategoryIds = topic
+      ? categories
+          .filter(
+            (category) =>
+              matchCategory(category)?.category.slug === topic.category.slug,
+          )
+          .map((category) => category.id)
       : [];
+    const topicSubcategoryValues = topic
+      ? topic.subcategory
+        ? subcategoryValues(topic.subcategory)
+        : categorySubcategoryValues(topic.category)
+      : [];
+    const legacySubcategoryValues =
+      !topic && params.subcategory
+        ? caseVariants([params.subcategory])
+        : [];
+    const universeCategoryIds = params.universe
+      ? categories
+          .filter(
+            (category) =>
+              category.universe === params.universe ||
+              matchCategory(category)?.universeId === params.universe,
+          )
+          .map((category) => category.id)
+      : [];
+
+    const conditions: any[] = [
+      { OR: [{ sellerId: null }, { seller: { status: "APPROVED" } }] },
+    ];
+
+    if (params.categoryId) {
+      conditions.push({
+        OR: [
+          { categoryId: params.categoryId },
+          { categoryIds: { has: params.categoryId } },
+        ],
+      });
+    }
+
+    if (topic) {
+      const or: any[] = [];
+      if (topic.level === "subcategory") {
+        // Filtre précis : la sous-catégorie demandée uniquement, pour éviter
+        // qu'un filtre « Climatiseurs » n'affiche tout l'électroménager.
+        if (topicSubcategoryValues.length) {
+          or.push({ subcategory: { in: topicSubcategoryValues } });
+          or.push({ subcategories: { hasSome: topicSubcategoryValues } });
+        }
+      } else {
+        if (topicCategoryIds.length) {
+          or.push({ categoryId: { in: topicCategoryIds } });
+          or.push({ categoryIds: { hasSome: topicCategoryIds } });
+        }
+        if (topicSubcategoryValues.length) {
+          or.push({ subcategory: { in: topicSubcategoryValues } });
+          or.push({ subcategories: { hasSome: topicSubcategoryValues } });
+        }
+      }
+      if (or.length) conditions.push({ OR: or });
+    } else if (legacySubcategoryValues.length) {
+      conditions.push({
+        OR: [
+          { subcategory: { in: legacySubcategoryValues } },
+          { subcategories: { hasSome: legacySubcategoryValues } },
+        ],
+      });
+    }
+
+    if (params.universe) {
+      if (universeCategoryIds.length) {
+        conditions.push({
+          OR: [
+            { categoryId: { in: universeCategoryIds } },
+            { categoryIds: { hasSome: universeCategoryIds } },
+          ],
+        });
+      } else {
+        conditions.push({ category: { universe: params.universe } });
+      }
+    }
+
     const products = await this.prisma.product.findMany({
       where: {
         moderation: "PUBLISHED",
-        AND: [
-          { OR: [{ sellerId: null }, { seller: { status: "APPROVED" } }] },
-          ...(params.categoryId
-            ? [
-                {
-                  OR: [
-                    { categoryId: params.categoryId },
-                    { categoryIds: { has: params.categoryId } },
-                  ],
-                },
-              ]
-            : []),
-          ...(params.subcategory
-            ? [
-                {
-                  OR: [
-                    { subcategory: params.subcategory },
-                    { subcategories: { has: params.subcategory } },
-                  ],
-                },
-              ]
-            : []),
-          ...(params.universe
-            ? [
-                {
-                  OR: [
-                    { category: { universe: params.universe } },
-                    ...(universeCategoryIds.length
-                      ? [{ categoryIds: { hasSome: universeCategoryIds } }]
-                      : []),
-                  ],
-                },
-              ]
-            : []),
-        ],
+        AND: conditions,
         ...(params.condition ? { condition: params.condition } : {}),
         ...(params.minPrice || params.maxPrice
           ? {
@@ -141,9 +218,6 @@ export class ProductsService {
               },
             }
           : {}),
-        ...(params.search
-          ? { name: { contains: params.search, mode: "insensitive" as const } }
-          : {}),
       },
       include: { category: true, seller: true },
       orderBy:
@@ -152,10 +226,20 @@ export class ProductsService {
           : params.sort === "price-desc"
             ? { price: "desc" }
             : { createdAt: "desc" },
-      take: 250,
+      // La recherche est faite en mémoire pour être insensible aux accents
+      // et couvrir plusieurs champs (nom, description, catégories, vendeur).
+      take: params.search ? 1000 : 250,
     });
 
-    const attached = await this.attachStats(products);
+    const searched = params.search
+      ? (() => {
+          const topic = resolveTopic(params.search as string);
+          return products.filter((product) =>
+            this.matchesSearch(product, params.search as string, topic),
+          );
+        })()
+      : products;
+    const attached = await this.attachStats(searched);
     const publicList = attached.map((p) => this.publicProduct(p));
 
     if (isFeatured) {
@@ -164,6 +248,78 @@ export class ProductsService {
 
     return publicList;
   }
+
+  /** Recherche multi-champs, insensible aux accents et à la casse. */
+  private matchesSearch(
+    product: any,
+    query: string,
+    topic = resolveTopic(query),
+  ): boolean {
+    const tokens = normalizeText(query)
+      .split(" ")
+      .filter((token) => token.length > 1 || /^\d+$/.test(token));
+    if (!tokens.length) return true;
+    const canonical = productCanonicalTaxonomy(product);
+
+    // 1. Recherche intelligente : si la requête désigne une catégorie ou une
+    // sous-catégorie canonique (même par synonyme), on vérifie l'appartenance.
+    if (topic) {
+      if (
+        topic.level === "category" &&
+        canonical.category?.slug === topic.category.slug
+      ) {
+        return true;
+      }
+      if (
+        topic.level === "subcategory" &&
+        topic.subcategory &&
+        canonical.subcategories.includes(topic.subcategory.label)
+      ) {
+        return true;
+      }
+    }
+
+    // 2. Recherche textuelle enrichie des synonymes des sous-catégories
+    // canoniques du produit (frigo, laptop, clim…).
+    const synonyms: string[] = [];
+    for (const label of canonical.subcategories) {
+      const resolved = resolveTopic(label);
+      if (resolved?.subcategory) synonyms.push(...resolved.subcategory.aliases);
+    }
+    if (canonical.category) {
+      synonyms.push(canonical.category.label, canonical.category.slug);
+      // Produit sans sous-catégorie canonique : ses synonymes de catégorie
+      // restent utiles (« laptop », « ordinateur », « pc »…).
+      if (!canonical.subcategories.length) {
+        const categoryTopic = resolveTopic(canonical.category.slug);
+        if (categoryTopic?.category) {
+          synonyms.push(...categoryTopic.category.aliases);
+        }
+      }
+    }
+
+    const haystack = normalizeText(
+      [
+        product.name,
+        product.description,
+        product.subcategory,
+        ...(Array.isArray(product.subcategories) ? product.subcategories : []),
+        product.category?.name,
+        product.category?.slug,
+        canonical.category?.label,
+        canonical.category?.slug,
+        ...canonical.subcategories,
+        ...synonyms,
+        product.seller?.shopName,
+        product.location,
+        ...Object.values(product.attributes || {}),
+      ]
+        .filter(Boolean)
+        .join(" "),
+    );
+    return tokens.every((token) => haystack.includes(token));
+  }
+
 
   async findOne(id: string) {
     const product = await this.prisma.product.findUnique({
@@ -263,13 +419,22 @@ export class ProductsService {
 
     if (typeof clean.subcategory === "string" || Array.isArray(clean.subcategories)) {
       const primary =
-        typeof clean.subcategory === "string" ? clean.subcategory.trim() : "";
+        typeof clean.subcategory === "string"
+          ? canonicalSubcategoryLabel(clean.subcategory)
+          : "";
       const extras = Array.isArray(clean.subcategories)
         ? clean.subcategories
             .filter((name: any) => typeof name === "string" && name.trim())
-            .map((name: string) => name.trim())
+            .map((name: string) => canonicalSubcategoryLabel(name))
         : [];
-      const all = Array.from(new Set([...(primary ? [primary] : []), ...extras]));
+      const all: string[] = [];
+      const seen = new Set<string>();
+      for (const name of [primary, ...extras]) {
+        const key = normalizeText(name);
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        all.push(name);
+      }
       if (all.length) {
         clean.subcategories = all;
         if (!primary) clean.subcategory = all[0];
@@ -412,8 +577,11 @@ export class ProductsService {
       reviews,
       ...safe
     } = product;
+    const canonical = productCanonicalTaxonomy(product);
     return {
       ...safe,
+      canonicalCategory: canonical.category,
+      canonicalSubcategories: canonical.subcategories,
       seller: seller ? { id: seller.id, shopName: seller.shopName } : null,
       ...(reviews
         ? {

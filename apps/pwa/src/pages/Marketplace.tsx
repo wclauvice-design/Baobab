@@ -171,15 +171,45 @@ export function useUserDestination() {
 }
 
 export const STORY_CATEGORIES = [
-  { id: "all", label: "Tout voir", emoji: "✨", universe: "", subcategory: "" },
-  { id: "motors", label: "Véhicules", emoji: "🚗", universe: "motors", subcategory: "" },
-  { id: "solar", label: "Solaire", emoji: "⚡", universe: "classifieds", subcategory: "Énergie Solaire & Batteries" },
-  { id: "ac", label: "Climatiseurs", emoji: "❄️", universe: "classifieds", subcategory: "Électroménager" },
-  { id: "phones", label: "Smartphones", emoji: "📱", universe: "classifieds", subcategory: "Téléphones & Tablettes" },
-  { id: "laptops", label: "Ordinateurs", emoji: "💻", universe: "classifieds", subcategory: "Informatique & PC" },
-  { id: "trade", label: "Outillage", emoji: "🛠️", universe: "trade", subcategory: "" },
-  { id: "home", label: "Mobilier", emoji: "🛋️", universe: "home", subcategory: "" },
+  { id: "all", label: "Tout voir", emoji: "✨", universe: "", categoryKey: "", subcategoryKey: "", fallbackSubcategory: "" },
+  { id: "motors", label: "Véhicules", emoji: "🚗", universe: "motors", categoryKey: "", subcategoryKey: "", fallbackSubcategory: "" },
+  { id: "solar", label: "Solaire", emoji: "⚡", universe: "classifieds", categoryKey: "energie-solaire", subcategoryKey: "", fallbackSubcategory: "Énergie Solaire & Batteries" },
+  { id: "ac", label: "Climatiseurs", emoji: "❄️", universe: "classifieds", categoryKey: "electromenager", subcategoryKey: "climatisation-chauffage", fallbackSubcategory: "Électroménager" },
+  { id: "phones", label: "Smartphones", emoji: "📱", universe: "classifieds", categoryKey: "telephones-tablettes", subcategoryKey: "", fallbackSubcategory: "Téléphones & Tablettes" },
+  { id: "laptops", label: "Ordinateurs", emoji: "💻", universe: "classifieds", categoryKey: "informatique-pc", subcategoryKey: "", fallbackSubcategory: "Informatique & PC" },
+  { id: "trade", label: "Outillage", emoji: "🛠️", universe: "trade", categoryKey: "outillage", subcategoryKey: "", fallbackSubcategory: "" },
+  { id: "home", label: "Mobilier", emoji: "🛋️", universe: "home", categoryKey: "salons-mobilier", subcategoryKey: "", fallbackSubcategory: "" },
 ];
+
+interface TaxonomyView {
+  universe: any;
+  category: any;
+}
+
+/** Toutes les catégories canoniques exposées par `/concierge/config`. */
+function taxonomyViews(config: any): TaxonomyView[] {
+  return (config?.taxonomy?.universes || []).flatMap((universe: any) =>
+    (universe.categories || []).map((category: any) => ({ universe, category })),
+  );
+}
+
+function findTaxonomyCategory(config: any, key: string): TaxonomyView | null {
+  if (!key) return null;
+  return (
+    taxonomyViews(config).find(({ category }) => category.slug === key) || null
+  );
+}
+
+function findTaxonomySubcategory(config: any, key: string) {
+  if (!key) return null;
+  for (const view of taxonomyViews(config)) {
+    const subcategory = (view.category.subcategories || []).find(
+      (item: any) => item.slug === key,
+    );
+    if (subcategory) return { ...view, subcategory };
+  }
+  return null;
+}
 
 const FAVORITES_KEY = "baobab_favorites";
 const FAVORITES_EVENT = "baobab:favorites";
@@ -418,10 +448,19 @@ export function Empty({
     </div>
   );
 }
+function productCategoryLabel(product: any): string {
+  return product?.canonicalCategory?.label || product?.category?.name || "";
+}
+
 function subcategoryLabel(product: any): string {
-  const list: string[] = Array.isArray(product?.subcategories)
-    ? product.subcategories.filter(Boolean)
+  const canonical: string[] = Array.isArray(product?.canonicalSubcategories)
+    ? product.canonicalSubcategories.filter(Boolean)
     : [];
+  const list: string[] = canonical.length
+    ? canonical
+    : Array.isArray(product?.subcategories)
+      ? product.subcategories.filter(Boolean)
+      : [];
   if (list.length) return list.join(' · ');
   return product?.subcategory && product.subcategory !== 'Autres'
     ? product.subcategory
@@ -469,7 +508,7 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
             <img
               src={
                 imageFailed ? "/photos/placeholder.svg" : p.images?.[0] ||
-                fallbackPhoto(p.subcategory, p.category?.name, p.category?.universe, p.name)
+                fallbackPhoto(p.subcategory, productCategoryLabel(p), p.category?.universe, p.name)
               }
               alt={p.name}
               onError={() => setImageFailed(true)}
@@ -511,7 +550,9 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
   const { ids: favoriteIds } = useFavorites();
   const { current: currentDest, select: selectDest, all: allDests } = useUserDestination();
   const universe = params.get("universe") || "",
-    search = params.get("search") || "";
+    search = params.get("search") || "",
+    categoryKey = params.get("categoryKey") || "",
+    subcategoryKey = params.get("subcategoryKey") || "";
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -536,7 +577,47 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
   function filter(key: string, value: string) {
     const next = new URLSearchParams(params);
     value ? next.set(key, value) : next.delete(key);
-    if (key === "universe") next.delete("subcategory");
+    if (key === "universe") {
+      next.delete("categoryKey");
+      next.delete("subcategoryKey");
+    }
+    setParams(next);
+  }
+  function filterCategory(value: string) {
+    const next = new URLSearchParams(params);
+    if (value) {
+      next.set("categoryKey", value);
+      const view = findTaxonomyCategory(config, value);
+      if (view) next.set("universe", view.universe.id);
+    } else {
+      next.delete("categoryKey");
+      next.delete("universe");
+    }
+    next.delete("subcategoryKey");
+    setParams(next);
+  }
+  function filterSubcategory(value: string) {
+    const next = new URLSearchParams(params);
+    if (value) {
+      next.set("subcategoryKey", value);
+      const view = findTaxonomySubcategory(config, value);
+      if (view) {
+        next.set("categoryKey", view.category.slug);
+        next.set("universe", view.universe.id);
+      }
+    } else {
+      next.delete("subcategoryKey");
+    }
+    setParams(next);
+  }
+  function clearFilter(key: string) {
+    const next = new URLSearchParams(params);
+    next.delete(key);
+    if (key === "categoryKey") next.delete("subcategoryKey");
+    if (key === "universe") {
+      next.delete("categoryKey");
+      next.delete("subcategoryKey");
+    }
     setParams(next);
   }
   const shown = favorites
@@ -551,10 +632,20 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
     "price-asc": "Prix croissant",
     "price-desc": "Prix décroissant",
   };
+  const selectedCategoryView = findTaxonomyCategory(config, categoryKey);
+  const selectedSubcategoryView = findTaxonomySubcategory(config, subcategoryKey);
   const activeFilters: { key: string; label: string }[] = [
     universe && {
       key: "universe",
       label: universes.find((u) => u.id === universe)?.name || universe,
+    },
+    selectedCategoryView && {
+      key: "categoryKey",
+      label: selectedCategoryView.category.label,
+    },
+    selectedSubcategoryView && {
+      key: "subcategoryKey",
+      label: selectedSubcategoryView.subcategory.label,
     },
     params.get("subcategory") && {
       key: "subcategory",
@@ -578,8 +669,17 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
     },
     search && { key: "search", label: `« ${search} »` },
   ].filter(Boolean) as { key: string; label: string }[];
-  const subs =
-    config?.universes?.find((u: any) => u.id === universe)?.categories || [];
+  const subcategoryGroups = selectedCategoryView
+    ? [
+        {
+          label: selectedCategoryView.category.label,
+          items: selectedCategoryView.category.subcategories || [],
+        },
+      ]
+    : taxonomyViews(config).map(({ universe: parent, category }) => ({
+        label: `${parent.name} · ${category.label}`,
+        items: category.subcategories || [],
+      }));
   return (
     <>
       {/* 1. Header Compact & Sticky : Recherche, Destination & Catégories (Style Temu / Farfetch Premium) */}
@@ -619,11 +719,13 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
         <nav className="app-category-strip" aria-label="Catégories">
           {STORY_CATEGORIES.map((cat) => {
             const isSelected =
-              cat.universe === "" && cat.subcategory === ""
-                ? !universe && !params.get("subcategory")
-                : cat.subcategory
-                  ? params.get("subcategory") === cat.subcategory
-                  : universe === cat.universe;
+              !cat.universe && !cat.categoryKey && !cat.subcategoryKey
+                ? !universe && !categoryKey && !subcategoryKey
+                : cat.subcategoryKey
+                  ? subcategoryKey === cat.subcategoryKey
+                  : cat.categoryKey
+                    ? categoryKey === cat.categoryKey && !subcategoryKey
+                    : universe === cat.universe && !categoryKey;
             return (
               <button
                 key={cat.id}
@@ -634,8 +736,20 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
                   const next = new URLSearchParams(params);
                   if (cat.universe) next.set("universe", cat.universe);
                   else next.delete("universe");
-                  if (cat.subcategory) next.set("subcategory", cat.subcategory);
-                  else next.delete("subcategory");
+                  if (config?.taxonomy) {
+                    if (cat.categoryKey) next.set("categoryKey", cat.categoryKey);
+                    else next.delete("categoryKey");
+                    if (cat.subcategoryKey)
+                      next.set("subcategoryKey", cat.subcategoryKey);
+                    else next.delete("subcategoryKey");
+                    next.delete("subcategory");
+                  } else {
+                    next.delete("categoryKey");
+                    next.delete("subcategoryKey");
+                    if (cat.fallbackSubcategory)
+                      next.set("subcategory", cat.fallbackSubcategory);
+                    else next.delete("subcategory");
+                  }
                   setParams(next);
                 }}
               >
@@ -695,7 +809,15 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
             onClick={() => {
               const next = new URLSearchParams(params);
               next.set("universe", "classifieds");
-              next.set("subcategory", "Énergie Solaire & Batteries");
+              if (config?.taxonomy) {
+                next.set("categoryKey", "energie-solaire");
+                next.delete("subcategoryKey");
+                next.delete("subcategory");
+              } else {
+                next.delete("categoryKey");
+                next.delete("subcategoryKey");
+                next.set("subcategory", "Énergie Solaire & Batteries");
+              }
               setParams(next);
             }}
           >
@@ -744,15 +866,58 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
         <details className="feed-filters">
         <summary>Affiner la sélection <span>État, budget, catégorie</span></summary>
         <div className="filter-bar">
-          {subs.length > 0 && (
+          {config?.taxonomy ? (
+            <>
+              <select
+                aria-label="Catégorie"
+                value={categoryKey}
+                onChange={(e) => filterCategory(e.target.value)}
+              >
+                <option value="">Toutes les catégories</option>
+                {(config?.taxonomy?.universes || []).map((u: any) => (
+                  <optgroup key={u.id} label={u.name}>
+                    {(u.categories || []).map((c: any) => (
+                      <option key={c.slug} value={c.slug}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              <select
+                aria-label="Sous-catégorie"
+                value={subcategoryKey}
+                onChange={(e) => filterSubcategory(e.target.value)}
+              >
+                <option value="">Toutes les sous-catégories</option>
+                {subcategoryGroups
+                  .filter((group: any) => (group.items || []).length > 0)
+                  .map((group: any) => (
+                    <optgroup key={group.label} label={group.label}>
+                      {(group.items || []).map((s: any) => (
+                        <option key={s.slug} value={s.slug}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+              </select>
+            </>
+          ) : (
             <select
               aria-label="Sous-catégorie"
               value={params.get("subcategory") || ""}
               onChange={(e) => filter("subcategory", e.target.value)}
             >
               <option value="">Toutes les sous-catégories</option>
-              {subs.map((s: string) => (
-                <option key={s}>{s}</option>
+              {(config?.universes || []).map((u: any) => (
+                <optgroup key={u.id} label={u.name}>
+                  {(u.categories || []).map((name: string) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           )}
@@ -811,7 +976,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
                 className="filter-chip"
                 data-testid="filter-chip"
                 aria-label={`Retirer le filtre ${f.label}`}
-                onClick={() => filter(f.key, "")}
+                onClick={() => clearFilter(f.key)}
               >
                 {f.label} <Icon name="close" size={13} />
               </button>
@@ -1008,7 +1173,7 @@ export function ListingDetail() {
           <span>Retour aux annonces</span>
         </button>
         <span>
-          {p.category?.name} {subcategoryLabel(p) ? `· ${subcategoryLabel(p)}` : ""}
+          {productCategoryLabel(p)} {subcategoryLabel(p) ? `· ${subcategoryLabel(p)}` : ""}
         </span>
       </div>
 
@@ -1030,7 +1195,7 @@ export function ListingDetail() {
             <img
               src={
                 p.images?.[image] ||
-                fallbackPhoto(p.subcategory, p.category?.name, p.category?.universe, p.name)
+                fallbackPhoto(p.subcategory, productCategoryLabel(p), p.category?.universe, p.name)
               }
               alt={p.name}
               decoding="async"
@@ -1109,7 +1274,7 @@ export function ListingDetail() {
         </div>
 
         <p className="mt-3 text-xs font-bold uppercase tracking-wider text-emerald-400">
-          {subcategoryLabel(p) || p.category?.name}
+          {subcategoryLabel(p) || productCategoryLabel(p)}
         </p>
         <h1 className="mt-1 text-xl sm:text-2xl font-black text-slate-100 leading-snug">
           {p.name}
@@ -2241,11 +2406,11 @@ export function Storefront() {
 
   const shopName = seller?.shopName || "Boutique Partenaire";
   const categories = Array.from(
-    new Set(products.map((p) => p.category?.name).filter(Boolean))
+    new Set(products.map((p) => productCategoryLabel(p)).filter(Boolean))
   );
 
   const filtered = products.filter((p) => {
-    const matchesCat = selectedCat === "ALL" || p.category?.name === selectedCat;
+    const matchesCat = selectedCat === "ALL" || productCategoryLabel(p) === selectedCat;
     const matchesSearch =
       !search ||
       p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -2348,7 +2513,7 @@ export function Storefront() {
                     item.images?.[0] ||
                     fallbackPhoto(
                       item.subcategory,
-                      item.category?.name,
+                      productCategoryLabel(item),
                       item.category?.universe,
                       item.name
                     )
@@ -2361,7 +2526,7 @@ export function Storefront() {
                 )}
               </div>
               <div className="storefront-card-body">
-                <span className="card-cat">{item.category?.name}</span>
+                <span className="card-cat">{productCategoryLabel(item)}</span>
                 <h3>{item.name}</h3>
                 <div className="card-price-row">
                   <div className="card-price">{money(item.price)}</div>
