@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { api, ApiError, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from '../../lib/api';
 import { MediaDropzone } from '../../components/MediaDropzone';
+import { CategoryMultiSelect } from '../../components/CategoryMultiSelect';
 import { MEDIA_ACCEPT, isVideoUrl } from '../../lib/media';
 import {
   formatXof,
@@ -12,6 +13,7 @@ import {
 interface Category {
   id: string;
   name: string;
+  universe?: string;
 }
 
 interface ProductRow {
@@ -22,6 +24,9 @@ interface ProductRow {
   stock: number;
   images: string[];
   category: { name: string };
+  categoryIds?: string[];
+  subcategory?: string;
+  subcategories?: string[];
   attributes?: Record<string, string>;
 }
 
@@ -36,6 +41,9 @@ export function Products() {
   const [priceCurrency, setPriceCurrency] = useState<string>(MERCHANT_DEFAULT_CURRENCY);
   const [priceInput, setPriceInput] = useState<string>('');
   const [formFiles, setFormFiles] = useState<File[]>([]);
+  const [config, setConfig] = useState<any>(null);
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const [subcategories, setSubcategories] = useState<string[]>([]);
 
   // Target for replacing a specific photo: { productId, oldUrl }
   const [replaceTarget, setReplaceTarget] = useState<{ productId: string; oldUrl: string } | null>(null);
@@ -48,6 +56,7 @@ export function Products() {
   function load() {
     api.get<ProductRow[]>('/products/mine').then(setProducts).catch(() => {});
     api.get<Category[]>('/categories').then(setCategories).catch(() => {});
+    api.get('/concierge/config').then(setConfig).catch(() => {});
   }
 
   useEffect(load, []);
@@ -60,6 +69,10 @@ export function Products() {
   async function createProduct(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
+    if (!categoryIds.length) {
+      setError('Sélectionnez au moins une catégorie.');
+      return;
+    }
     try {
       const compareAtPrice = form.get('compareAtPrice');
       const amount = Number(form.get('sourcePrice') || form.get('price') || 0);
@@ -71,13 +84,18 @@ export function Products() {
         sourceCurrency: priceCurrency,
         compareAtPrice: compareAtPrice ? Number(compareAtPrice) : undefined,
         stock: Number(form.get('stock')),
-        categoryId: form.get('categoryId'),
+        categoryId: categoryIds[0],
+        categoryIds,
+        subcategory: subcategories[0] || 'Autres',
+        subcategories: subcategories.length ? subcategories : ['Autres'],
       });
       if (created?.id && formFiles.length > 0) {
         await addProductImages(created.id, formFiles).catch(() => {});
       }
       (e.target as HTMLFormElement).reset();
       setFormFiles([]);
+      setCategoryIds([]);
+      setSubcategories([]);
       setPriceInput('');
       flashSuccess('Produit créé avec succès !');
       load();
@@ -216,6 +234,19 @@ export function Products() {
       p.category?.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
+  const subcategoryOptions = (() => {
+    const map = new Map<string, { value: string; label: string; group?: string }>();
+    for (const universe of config?.universes || []) {
+      for (const name of universe.categories || []) {
+        if (!map.has(name)) {
+          map.set(name, { value: name, label: name, group: universe.name });
+        }
+      }
+    }
+    return Array.from(map.values());
+  })();
+
   return (
     <div className="space-y-6">
       {/* Hidden file inputs for replace and add operations */}
@@ -336,18 +367,24 @@ export function Products() {
               className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
             />
           </div>
-          <select
-            name="categoryId"
-            required
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          >
-            <option value="">Sélectionner une catégorie…</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          <CategoryMultiSelect
+            label="Catégories (une ou plusieurs)"
+            placeholder="Rechercher une catégorie…"
+            options={categoryOptions}
+            values={categoryIds}
+            onChange={setCategoryIds}
+            max={12}
+            hint="Tapez quelques lettres pour filtrer instantanément la liste, sans défiler."
+          />
+          <CategoryMultiSelect
+            label="Sous-catégories (une ou plusieurs)"
+            placeholder="Rechercher une sous-catégorie…"
+            options={subcategoryOptions}
+            values={subcategories}
+            onChange={setSubcategories}
+            max={20}
+            hint="Recherche insensible aux accents. Sélectionnez plusieurs sous-catégories si besoin."
+          />
           <MediaDropzone
             files={formFiles}
             onChangeFiles={setFormFiles}
@@ -494,7 +531,14 @@ export function Products() {
                     </div>
                   </td>
 
-                  <td className="px-4 py-3 text-slate-600">{p.category?.name || '—'}</td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {p.category?.name || '—'}
+                    {Array.isArray(p.subcategories) && p.subcategories.length > 0 && (
+                      <span className="mt-0.5 block text-[10px] font-medium text-slate-400">
+                        {p.subcategories.join(' · ')}
+                      </span>
+                    )}
+                  </td>
 
                   <td className="px-4 py-3 font-semibold text-slate-900 whitespace-nowrap">
                     {formatXof(Number(p.price))}

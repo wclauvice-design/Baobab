@@ -4,6 +4,7 @@ import { api, replaceProductImage, addProductImages, removeProductImage, setProd
 import { useAuth } from "../lib/auth";
 import { toXof, fromXof, formatXof, MERCHANT_DEFAULT_CURRENCY, PRICING_CURRENCIES } from "../lib/format";
 import { MediaDropzone } from "../components/MediaDropzone";
+import { CategoryMultiSelect } from "../components/CategoryMultiSelect";
 import { MEDIA_ACCEPT, isVideoUrl } from "../lib/media";
 import { Alert, money } from "./Operations";
 export function ListingEditor() {
@@ -41,8 +42,8 @@ export function ListingEditor() {
   }
 
   // Smart Automotive Form State
-  const [formCategory, setFormCategory] = useState<string>("");
-  const [formSubcategory, setFormSubcategory] = useState<string>("Voitures & SUV");
+  const [formCategoryIds, setFormCategoryIds] = useState<string[]>([]);
+  const [formSubcategories, setFormSubcategories] = useState<string[]>([]);
   const [formCondition, setFormCondition] = useState<string>("NEW");
 
   const [vehBrand, setVehBrand] = useState("");
@@ -68,10 +69,20 @@ export function ListingEditor() {
       setPriceCurrency(admin ? "XOF" : MERCHANT_DEFAULT_CURRENCY);
       setSupplierAmount("");
       setPublicAmount("");
+      setFormCategoryIds([]);
+      setFormSubcategories([]);
       return;
     }
-    setFormCategory(editing.categoryId || "");
-    setFormSubcategory(editing.subcategory || "Voitures & SUV");
+    const initialCategoryIds =
+      Array.isArray(editing.categoryIds) && editing.categoryIds.length
+        ? editing.categoryIds
+        : [editing.categoryId].filter(Boolean);
+    const initialSubcategories =
+      Array.isArray(editing.subcategories) && editing.subcategories.length
+        ? editing.subcategories
+        : [editing.subcategory].filter(Boolean);
+    setFormCategoryIds(initialCategoryIds);
+    setFormSubcategories(initialSubcategories);
     setFormCondition(editing.condition || "NEW");
 
     const attrs = editing.attributes || {};
@@ -106,13 +117,34 @@ export function ListingEditor() {
   }, [editing]);
 
   const isVehCategory =
-    (formSubcategory.toLowerCase().includes("voiture") ||
-      formSubcategory.toLowerCase().includes("utilitaire") ||
-      formSubcategory.toLowerCase().includes("moto") ||
-      categories.find((c) => c.id === formCategory)?.name?.toLowerCase().includes("véhicule") ||
-      categories.find((c) => c.id === formCategory)?.slug?.includes("motors")) &&
-    !formSubcategory.toLowerCase().includes("pièce") &&
-    !formSubcategory.toLowerCase().includes("accessoire");
+    (formSubcategories.some((sub) =>
+      /voiture|utilitaire|moto|tricycle|suv|pick-up/i.test(sub),
+    ) ||
+      formCategoryIds.some((id) => {
+        const category = categories.find((c) => c.id === id);
+        return (
+          /véhicule|vehicule|motors/i.test(category?.name || "") ||
+          /motors/i.test(category?.slug || "")
+        );
+      })) &&
+    !formSubcategories.some((sub) => /pièce|piece|accessoire/i.test(sub));
+
+  const categoryOptions = categories.map((c) => ({
+    value: c.id,
+    label: c.name,
+  }));
+
+  const subcategoryOptions = (() => {
+    const map = new Map<string, { value: string; label: string; group?: string }>();
+    for (const universe of config?.universes || []) {
+      for (const name of universe.categories || []) {
+        if (!map.has(name)) {
+          map.set(name, { value: name, label: name, group: universe.name });
+        }
+      }
+    }
+    return Array.from(map.values());
+  })();
 
   function handleAutoFillVehicleDetails() {
     const brand = vehBrand || "Toyota";
@@ -243,8 +275,6 @@ export function ListingEditor() {
       for (const name of [
         "name",
         "description",
-        "categoryId",
-        "subcategory",
         "condition",
         "location",
         "unit",
@@ -252,6 +282,15 @@ export function ListingEditor() {
         "dimensions",
       ])
         body[name] = fd.get(name) || "";
+      if (!formCategoryIds.length) {
+        throw new Error("Sélectionnez au moins une catégorie.");
+      }
+      body.categoryId = formCategoryIds[0];
+      body.categoryIds = formCategoryIds;
+      body.subcategory = formSubcategories[0] || "Autres";
+      body.subcategories = formSubcategories.length
+        ? formSubcategories
+        : ["Autres"];
       for (const name of ["stock", "minimumOrder", "packSize"])
         body[name] = Number(fd.get(name) || (name === "minimumOrder" || name === "packSize" ? 1 : 0));
       // Prix saisis dans la devise du commerçant (AED par défaut), convertis en XOF côté serveur
@@ -407,36 +446,30 @@ export function ListingEditor() {
                 defaultValue={editing.name}
               />
             </label>
-            <label>
-              Univers
-              <select
-                name="categoryId"
-                required
-                defaultValue={editing.categoryId || ""}
-              >
-                <option value="">Choisir un univers…</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Sous-catégorie
-              <select
-                name="subcategory"
-                value={formSubcategory}
-                onChange={(e) => setFormSubcategory(e.target.value)}
-              >
-                <option>Autres</option>
-                {config?.universes
-                  .flatMap((u: any) => u.categories)
-                  .map((c: string) => (
-                    <option key={c}>{c}</option>
-                  ))}
-              </select>
-            </label>
+            <div className="op-span">
+              <CategoryMultiSelect
+                dark
+                label="Catégories (une ou plusieurs)"
+                placeholder="Rechercher une catégorie…"
+                options={categoryOptions}
+                values={formCategoryIds}
+                onChange={setFormCategoryIds}
+                max={12}
+                hint="Tapez quelques lettres (ex. « vehic », « tele ») : la liste se filtre instantanément. Un article peut apparaître dans plusieurs catégories."
+              />
+            </div>
+            <div className="op-span">
+              <CategoryMultiSelect
+                dark
+                label="Sous-catégories (une ou plusieurs)"
+                placeholder="Rechercher une sous-catégorie…"
+                options={subcategoryOptions}
+                values={formSubcategories}
+                onChange={setFormSubcategories}
+                max={20}
+                hint="Recherche insensible aux accents et à la casse. Sélectionnez plusieurs sous-catégories si l'article en couvre plusieurs."
+              />
+            </div>
 
             {/* Sélecteur d'État Visuel (Neuf, Occasion, Reconditionné) */}
             <div className="op-span" style={{ margin: "4px 0 10px 0" }}>
@@ -465,7 +498,7 @@ export function ListingEditor() {
                   }}
                 >
                   <span>🟢</span>
-                  <span>Neuf (Brand New / 0 km)</span>
+                  <span>{isVehCategory ? "Neuf (Brand New / 0 km)" : "Neuf (Brand New)"}</span>
                 </button>
 
                 <button

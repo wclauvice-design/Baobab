@@ -418,6 +418,16 @@ export function Empty({
     </div>
   );
 }
+function subcategoryLabel(product: any): string {
+  const list: string[] = Array.isArray(product?.subcategories)
+    ? product.subcategories.filter(Boolean)
+    : [];
+  if (list.length) return list.join(' · ');
+  return product?.subcategory && product.subcategory !== 'Autres'
+    ? product.subcategory
+    : '';
+}
+
 function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
   const [imageFailed, setImageFailed] = useState(false);
   const { ids, toggle } = useFavorites();
@@ -998,7 +1008,7 @@ export function ListingDetail() {
           <span>Retour aux annonces</span>
         </button>
         <span>
-          {p.category?.name} {p.subcategory && p.subcategory !== "Autres" ? `· ${p.subcategory}` : ""}
+          {p.category?.name} {subcategoryLabel(p) ? `· ${subcategoryLabel(p)}` : ""}
         </span>
       </div>
 
@@ -1099,7 +1109,7 @@ export function ListingDetail() {
         </div>
 
         <p className="mt-3 text-xs font-bold uppercase tracking-wider text-emerald-400">
-          {p.subcategory && p.subcategory !== "Autres" ? p.subcategory : p.category?.name}
+          {subcategoryLabel(p) || p.category?.name}
         </p>
         <h1 className="mt-1 text-xl sm:text-2xl font-black text-slate-100 leading-snug">
           {p.name}

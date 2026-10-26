@@ -158,6 +158,8 @@ model Product {
   seller      Seller?  @relation(fields: [sellerId], references: [id])
   categoryId  String
   category    Category @relation(fields: [categoryId], references: [id])
+  /// Catégories supplémentaires (l'article reste rattaché à `categoryId` comme catégorie principale).
+  categoryIds String[] @default([])
   name           String
   description    String
   price          Decimal  @db.Decimal(12, 2)
@@ -171,6 +173,8 @@ model Product {
   moderation String @default("PUBLISHED")
   moderationNote String?
   subcategory String @default("Autres")
+  /// Sous-catégories supplémentaires (la principale reste `subcategory`).
+  subcategories String[] @default([])
   condition String @default("NEW")
   location String @default("Dubaï")
   minimumOrder Int @default(1)

@@ -82,13 +82,53 @@ export class ProductsService {
     sort?: string;
   }) {
     const isFeatured = !params.sort || params.sort === "featured";
+    const universeCategoryIds = params.universe
+      ? (
+          await this.prisma.category.findMany({
+            where: { universe: params.universe },
+            select: { id: true },
+          })
+        ).map((category) => category.id)
+      : [];
     const products = await this.prisma.product.findMany({
       where: {
         moderation: "PUBLISHED",
-        OR: [{ sellerId: null }, { seller: { status: "APPROVED" } }],
-        ...(params.universe ? { category: { universe: params.universe } } : {}),
+        AND: [
+          { OR: [{ sellerId: null }, { seller: { status: "APPROVED" } }] },
+          ...(params.categoryId
+            ? [
+                {
+                  OR: [
+                    { categoryId: params.categoryId },
+                    { categoryIds: { has: params.categoryId } },
+                  ],
+                },
+              ]
+            : []),
+          ...(params.subcategory
+            ? [
+                {
+                  OR: [
+                    { subcategory: params.subcategory },
+                    { subcategories: { has: params.subcategory } },
+                  ],
+                },
+              ]
+            : []),
+          ...(params.universe
+            ? [
+                {
+                  OR: [
+                    { category: { universe: params.universe } },
+                    ...(universeCategoryIds.length
+                      ? [{ categoryIds: { hasSome: universeCategoryIds } }]
+                      : []),
+                  ],
+                },
+              ]
+            : []),
+        ],
         ...(params.condition ? { condition: params.condition } : {}),
-        ...(params.subcategory ? { subcategory: params.subcategory } : {}),
         ...(params.minPrice || params.maxPrice
           ? {
               price: {
@@ -101,7 +141,6 @@ export class ProductsService {
               },
             }
           : {}),
-        ...(params.categoryId ? { categoryId: params.categoryId } : {}),
         ...(params.search
           ? { name: { contains: params.search, mode: "insensitive" as const } }
           : {}),
@@ -153,7 +192,7 @@ export class ProductsService {
 
   async create(userId: string, role: Role, dto: CreateProductDto) {
     const sellerId = (role === Role.ADMIN && dto.sellerId) ? dto.sellerId : await this.resolveSellerId(userId, role);
-    const normalized = this.normalizePricing(dto);
+    const normalized = this.normalizeCategories(this.normalizePricing(dto));
     this.validateListing(normalized);
     return this.prisma.product.create({
       data: {
@@ -173,9 +212,13 @@ export class ProductsService {
     dto: UpdateProductDto,
   ) {
     const product = await this.assertOwnership(userId, role, productId);
-    const merged = this.normalizePricing({ ...product, ...dto });
+    const merged = this.normalizeCategories(
+      this.normalizePricing({ ...product, ...dto }),
+    );
     this.validateListing(merged);
-    const patch = this.normalizePricing({ ...(dto as Record<string, any>) });
+    const patch = this.normalizeCategories(
+      this.normalizePricing({ ...(dto as Record<string, any>) }),
+    );
     return this.prisma.product.update({
       where: { id: productId },
       data: {
@@ -192,6 +235,48 @@ export class ProductsService {
           : {}),
       },
     });
+  }
+
+  /**
+   * Normalise les catégories multiples :
+   * - `categoryId` (principale) est toujours présent dans `categoryIds` ;
+   * - `subcategory` (principale) est toujours présent dans `subcategories`.
+   * Les doublons et valeurs vides sont supprimés.
+   */
+  private normalizeCategories<T extends Record<string, any>>(input: T): T {
+    const clean: any = { ...input };
+
+    if (typeof clean.categoryId === "string" || Array.isArray(clean.categoryIds)) {
+      const primary =
+        typeof clean.categoryId === "string" ? clean.categoryId.trim() : "";
+      const extras = Array.isArray(clean.categoryIds)
+        ? clean.categoryIds
+            .filter((id: any) => typeof id === "string" && id.trim())
+            .map((id: string) => id.trim())
+        : [];
+      const all = Array.from(new Set([...(primary ? [primary] : []), ...extras]));
+      if (all.length) {
+        clean.categoryIds = all;
+        if (!primary) clean.categoryId = all[0];
+      }
+    }
+
+    if (typeof clean.subcategory === "string" || Array.isArray(clean.subcategories)) {
+      const primary =
+        typeof clean.subcategory === "string" ? clean.subcategory.trim() : "";
+      const extras = Array.isArray(clean.subcategories)
+        ? clean.subcategories
+            .filter((name: any) => typeof name === "string" && name.trim())
+            .map((name: string) => name.trim())
+        : [];
+      const all = Array.from(new Set([...(primary ? [primary] : []), ...extras]));
+      if (all.length) {
+        clean.subcategories = all;
+        if (!primary) clean.subcategory = all[0];
+      }
+    }
+
+    return clean as T;
   }
 
   /**
@@ -301,6 +386,14 @@ export class ProductsService {
     if (dto.images && dto.images.length > 20)
       throw new BadRequestException(
         "Un produit peut contenir au maximum 20 photos",
+      );
+    if (dto.categoryIds && dto.categoryIds.length > 12)
+      throw new BadRequestException(
+        "Un produit peut être associé à 12 catégories au maximum",
+      );
+    if (dto.subcategories && dto.subcategories.length > 20)
+      throw new BadRequestException(
+        "Un produit peut être associé à 20 sous-catégories au maximum",
       );
     if (
       dto.attributes &&

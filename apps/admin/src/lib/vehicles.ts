@@ -71,7 +71,13 @@ export function isVehicleProduct(p: any): boolean {
   }
 
   const attrs = p.attributes || {};
-  if (attrs['Année'] || attrs['Boîte'] || attrs['Cylindrée'] || attrs['Moteur'] || attrs['Carburant'] || attrs['Kilométrage']) {
+  const strongSignal = ['Kilométrage', 'Boîte', 'Cylindrée', 'Motricité'].some(
+    (key) => attrs[key],
+  );
+  const supportingSignal = ['Marque', 'Modèle', 'Carburant', 'Année'].some(
+    (key) => attrs[key],
+  );
+  if (strongSignal && supportingSignal) {
     return true;
   }
 
@@ -87,7 +93,7 @@ export function parseVehicleData(p: any): VehicleSpecs {
 
   const rawCondition = (p?.condition || 'NEW').toUpperCase();
   let conditionKey: 'NEW' | 'USED' | 'REFURBISHED' = 'NEW';
-  let conditionLabel = 'Neuf (0 km)';
+  let conditionLabel = isVeh ? 'Neuf (0 km)' : 'Neuf';
   let conditionBadgeClass = 'bg-emerald-600 text-white';
 
   if (rawCondition === 'USED' || name.toLowerCase().includes('occasion')) {
@@ -107,8 +113,10 @@ export function parseVehicleData(p: any): VehicleSpecs {
   }
   const cleanYear = year.match(/\b(201\d|202\d)\b/)?.[1] || year;
 
-  let mileage = attrs['Kilométrage'] || (conditionKey === 'NEW' ? '0 km' : '25 000 km');
-  if (conditionKey === 'NEW' && !attrs['Kilométrage']) {
+  let mileage =
+    attrs['Kilométrage'] ||
+    (isVeh ? (conditionKey === 'NEW' ? '0 km' : '25 000 km') : '');
+  if (isVeh && conditionKey === 'NEW' && !attrs['Kilométrage']) {
     mileage = '0 km';
   }
 

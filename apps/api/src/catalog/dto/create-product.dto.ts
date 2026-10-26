@@ -25,6 +25,15 @@ export class CreateProductDto {
   @IsString()
   categoryId: string;
 
+  /**
+   * Catégories supplémentaires (en plus de `categoryId`).
+   * Permet à un article d'apparaître dans plusieurs univers à la fois.
+   */
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  categoryIds?: string[];
+
   @IsOptional()
   @IsArray()
   @IsUrl({ protocols: ['https'], require_protocol: true }, { each: true })
@@ -39,6 +48,7 @@ export class CreateProductDto {
   @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) sourcePrice?: number;
   @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) sourcePublicPrice?: number;
   @IsOptional() @IsString() @MaxLength(100) subcategory?: string;
+  @IsOptional() @IsArray() @IsString({ each: true }) subcategories?: string[];
   @IsOptional() @IsIn(['NEW', 'USED', 'REFURBISHED']) condition?: string;
   @IsOptional() @IsString() @MaxLength(100) location?: string;
   @IsOptional() @IsInt() @Min(1) @Max(1000000) minimumOrder?: number;

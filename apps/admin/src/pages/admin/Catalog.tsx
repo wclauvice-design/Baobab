@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { api, ApiError, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from '../../lib/api';
 import { formatXof } from '../../lib/format';
+import { CategoryMultiSelect } from '../../components/CategoryMultiSelect';
 
 interface Category {
   id: string;
@@ -27,6 +28,9 @@ export function Catalog() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [busyProductId, setBusyProductId] = useState<string | null>(null);
   const [busyMessage, setBusyMessage] = useState<string>('');
+  const [config, setConfig] = useState<any>(null);
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const [subcategories, setSubcategories] = useState<string[]>([]);
 
   // Target for replacing a specific photo
   const [replaceTarget, setReplaceTarget] = useState<{ productId: string; oldUrl: string } | null>(null);
@@ -39,6 +43,7 @@ export function Catalog() {
   function load() {
     api.get<ProductRow[]>('/products/mine').then(setProducts).catch(() => {});
     api.get<Category[]>('/categories').then(setCategories).catch(() => {});
+    api.get('/concierge/config').then(setConfig).catch(() => {});
   }
 
   useEffect(load, []);
@@ -66,6 +71,10 @@ export function Catalog() {
   async function createProduct(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
+    if (!categoryIds.length) {
+      setError('Sélectionnez au moins une catégorie.');
+      return;
+    }
     try {
       const compareAtPrice = form.get('compareAtPrice');
       await api.post('/products', {
@@ -74,9 +83,14 @@ export function Catalog() {
         price: Number(form.get('price')),
         compareAtPrice: compareAtPrice ? Number(compareAtPrice) : undefined,
         stock: Number(form.get('stock')),
-        categoryId: form.get('categoryId'),
+        categoryId: categoryIds[0],
+        categoryIds,
+        subcategory: subcategories[0] || 'Autres',
+        subcategories: subcategories.length ? subcategories : ['Autres'],
       });
       (e.target as HTMLFormElement).reset();
+      setCategoryIds([]);
+      setSubcategories([]);
       flashSuccess('Article ajouté au catalogue !');
       load();
     } catch (err) {
@@ -204,6 +218,19 @@ export function Catalog() {
       (p.seller?.shopName && p.seller.shopName.toLowerCase().includes(search.toLowerCase()))
   );
 
+  const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
+  const subcategoryOptions = (() => {
+    const map = new Map<string, { value: string; label: string; group?: string }>();
+    for (const universe of config?.universes || []) {
+      for (const name of universe.categories || []) {
+        if (!map.has(name)) {
+          map.set(name, { value: name, label: name, group: universe.name });
+        }
+      }
+    }
+    return Array.from(map.values());
+  })();
+
   return (
     <div className="space-y-6">
       <input
@@ -301,18 +328,24 @@ export function Catalog() {
                 className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
               />
             </div>
-            <select
-              name="categoryId"
-              required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            >
-              <option value="">Sélectionner une catégorie…</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <CategoryMultiSelect
+              label="Catégories (une ou plusieurs) *"
+              placeholder="Rechercher une catégorie…"
+              options={categoryOptions}
+              values={categoryIds}
+              onChange={setCategoryIds}
+              max={12}
+              hint="Tapez quelques lettres pour filtrer la liste sans défiler."
+            />
+            <CategoryMultiSelect
+              label="Sous-catégories (une ou plusieurs)"
+              placeholder="Rechercher une sous-catégorie…"
+              options={subcategoryOptions}
+              values={subcategories}
+              onChange={setSubcategories}
+              max={20}
+              hint="Recherche insensible aux accents. Sélectionnez plusieurs sous-catégories si besoin."
+            />
             <button className="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white shadow hover:bg-amber-600">
               Créer l'article
             </button>

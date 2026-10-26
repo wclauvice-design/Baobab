@@ -25,6 +25,8 @@ interface ProductDetailData {
   stock: number;
   images: string[];
   category: { name: string };
+  subcategory?: string;
+  subcategories?: string[];
   seller: { id: string; shopName: string; city: string } | null;
   reviews: Review[];
   avgRating: number | null;
@@ -175,6 +177,28 @@ export function ProductDetail() {
         <span className="text-[11px] uppercase tracking-wide text-emerald-400">
           {product.category.name}
         </span>
+        {(() => {
+          const subs = (
+            Array.isArray(product.subcategories) && product.subcategories.length
+              ? product.subcategories
+              : product.subcategory
+                ? [product.subcategory]
+                : []
+          ).filter((sub) => sub && sub !== 'Autres');
+          if (!subs.length) return null;
+          return (
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              {subs.map((sub) => (
+                <span
+                  key={sub}
+                  className="rounded-full border border-base-700 px-2 py-0.5 text-[10px] text-slate-400"
+                >
+                  {sub}
+                </span>
+              ))}
+            </div>
+          );
+        })()}
         <h1 className="mt-1 text-xl font-bold">{product.name}</h1>
         {product.seller && (
           <div className="mt-1 flex items-center justify-between">

@@ -82,9 +82,18 @@ export function isVehicleProduct(p: any): boolean {
     return true;
   }
 
-  // Détection par attributs automobiles ou mots-clés de véhicules connus
+  // Détection par attributs réellement automobiles. On exige un signal fort
+  // (kilométrage, boîte, cylindrée, motricité) ET un signal de description :
+  // un groupe électrogène ou un appareil avec un simple champ « Moteur » ou
+  // « Année » ne doit jamais être affiché comme un véhicule (« Neuf 0 km »).
   const attrs = p.attributes || {};
-  if (attrs['Année'] || attrs['Boîte'] || attrs['Cylindrée'] || attrs['Moteur'] || attrs['Carburant'] || attrs['Kilométrage']) {
+  const strongSignal = ['Kilométrage', 'Boîte', 'Cylindrée', 'Motricité'].some(
+    (key) => attrs[key],
+  );
+  const supportingSignal = ['Marque', 'Modèle', 'Carburant', 'Année'].some(
+    (key) => attrs[key],
+  );
+  if (strongSignal && supportingSignal) {
     return true;
   }
 
@@ -101,7 +110,7 @@ export function parseVehicleData(p: any): VehicleSpecs {
   // 1. Condition (Neuf / Occasion / Reconditionné)
   const rawCondition = (p?.condition || 'NEW').toUpperCase();
   let conditionKey: 'NEW' | 'USED' | 'REFURBISHED' = 'NEW';
-  let conditionLabel = 'Neuf (0 km)';
+  let conditionLabel = isVeh ? 'Neuf (0 km)' : 'Neuf';
   let conditionBadgeClass = 'bg-emerald-500/90 text-white border-emerald-400';
 
   if (rawCondition === 'USED' || name.toLowerCase().includes('occasion')) {
@@ -124,8 +133,10 @@ export function parseVehicleData(p: any): VehicleSpecs {
   const cleanYear = year.match(/\b(201\d|202\d)\b/)?.[1] || year;
 
   // 3. Kilométrage
-  let mileage = attrs['Kilométrage'] || (conditionKey === 'NEW' ? '0 km' : '25 000 km');
-  if (conditionKey === 'NEW' && !attrs['Kilométrage']) {
+  let mileage =
+    attrs['Kilométrage'] ||
+    (isVeh ? (conditionKey === 'NEW' ? '0 km' : '25 000 km') : '');
+  if (isVeh && conditionKey === 'NEW' && !attrs['Kilométrage']) {
     mileage = '0 km';
   }
 

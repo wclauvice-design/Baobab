@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 import { MediaDropzone } from "../../components/MediaDropzone";
+import { CategoryMultiSelect } from "../../components/CategoryMultiSelect";
 import { isVideoUrl, MEDIA_ACCEPT } from "../../lib/media";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -31,6 +32,7 @@ export function SellerDetail() {
   const [modalName, setModalName] = useState("");
   const [modalDescription, setModalDescription] = useState("");
   const [modalCategoryId, setModalCategoryId] = useState("");
+  const [modalCategoryIds, setModalCategoryIds] = useState<string[]>([]);
   const [modalSubcategory, setModalSubcategory] = useState("");
   const [modalWeight, setModalWeight] = useState("");
   const [modalPrice, setModalPrice] = useState("");
@@ -47,7 +49,7 @@ export function SellerDetail() {
   // New product modal
   const [creatingProduct, setCreatingProduct] = useState(false);
   const [newProdName, setNewProdName] = useState("");
-  const [newProdCategoryId, setNewProdCategoryId] = useState("");
+  const [newProdCategoryIds, setNewProdCategoryIds] = useState<string[]>([]);
   const [newProdPrice, setNewProdPrice] = useState("");
   const [newProdSupplierPrice, setNewProdSupplierPrice] = useState("");
   const [newProdWeight, setNewProdWeight] = useState("");
@@ -358,6 +360,11 @@ export function SellerDetail() {
     setModalName(product.name || "");
     setModalDescription(product.description || "");
     setModalCategoryId(product.categoryId || "");
+    setModalCategoryIds(
+      Array.isArray(product.categoryIds) && product.categoryIds.length
+        ? product.categoryIds
+        : [product.categoryId].filter(Boolean),
+    );
     setModalSubcategory(product.subcategory || "");
     setModalWeight(product.weightKg ? String(product.weightKg) : "");
     setModalPrice(
@@ -403,7 +410,8 @@ export function SellerDetail() {
       const updatePayload: any = {
         name: modalName,
         description: modalDescription,
-        categoryId: modalCategoryId || undefined,
+        categoryId: modalCategoryIds[0] || modalCategoryId || undefined,
+        categoryIds: modalCategoryIds.length ? modalCategoryIds : undefined,
         subcategory: modalSubcategory || undefined,
         condition: modalCondition,
         location: modalLocation,
@@ -435,7 +443,7 @@ export function SellerDetail() {
 
   async function handleCreateProduct(e: React.FormEvent) {
     e.preventDefault();
-    if (!newProdName || !newProdCategoryId || !newProdPrice) {
+    if (!newProdName || !newProdCategoryIds.length || !newProdPrice) {
       alert("Veuillez renseigner au minimum le nom, la catégorie et le prix public.");
       return;
     }
@@ -449,7 +457,8 @@ export function SellerDetail() {
         description: newProdDesc || newProdName,
         price: pubPrice,
         supplierPrice: supPrice,
-        categoryId: newProdCategoryId,
+        categoryId: newProdCategoryIds[0],
+        categoryIds: newProdCategoryIds,
         stock: newProdStock ? Number(newProdStock) : 1,
         weightKg: newProdWeight ? Number(newProdWeight) : undefined,
         condition: newProdCondition,
@@ -469,6 +478,7 @@ export function SellerDetail() {
       setNewProdWeight("");
       setNewProdDesc("");
       setNewProdFiles([]);
+      setNewProdCategoryIds([]);
       await load();
     } catch (err: any) {
       alert("Erreur création article : " + (err?.message || err));
@@ -1314,21 +1324,18 @@ export function SellerDetail() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    Catégorie
-                  </label>
-                  <select
-                    value={modalCategoryId}
-                    onChange={(e) => setModalCategoryId(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
-                  >
-                    <option value="">Sélectionner une catégorie...</option>
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
+                  <CategoryMultiSelect
+                    label="Catégories (une ou plusieurs)"
+                    placeholder="Rechercher une catégorie…"
+                    options={categories.map((c) => ({ value: c.id, label: c.name }))}
+                    values={modalCategoryIds}
+                    onChange={(next) => {
+                      setModalCategoryIds(next);
+                      setModalCategoryId(next[0] || "");
+                    }}
+                    max={12}
+                    hint="Tapez quelques lettres pour filtrer la liste sans défiler."
+                  />
                 </div>
 
                 <div>
@@ -1527,22 +1534,17 @@ export function SellerDetail() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    Catégorie *
-                  </label>
-                  <select
-                    required
-                    value={newProdCategoryId}
-                    onChange={(e) => setNewProdCategoryId(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none"
-                  >
-                    <option value="">Sélectionner une catégorie...</option>
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
+                  <CategoryMultiSelect
+                    label="Catégories (une ou plusieurs) *"
+                    placeholder="Rechercher une catégorie…"
+                    options={categories.map((c) => ({ value: c.id, label: c.name }))}
+                    values={newProdCategoryIds}
+                    onChange={(next) => {
+                      setNewProdCategoryIds(next);
+                    }}
+                    max={12}
+                    hint="Tapez quelques lettres pour filtrer la liste sans défiler."
+                  />
                 </div>
 
                 <div>
