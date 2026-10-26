@@ -1,4 +1,5 @@
 import { compressImage } from './images';
+import { isVideoFile } from './media';
 
 const TOKEN_KEY = 'baobab_admin_token';
 const DEFAULT_API_RENDER_URL = 'https://baobab-api-7w7h.onrender.com';
@@ -237,6 +238,12 @@ async function uploadRequest<T>(path: string, file: File): Promise<T> {
   const token = getToken();
   const optimizedFile = await compressImage(file);
   const matchProduct = path.match(/\/products\/([^/]+)\/images/);
+
+  // Les vidéos ne passent pas par l'API (limitée aux images) :
+  // envoi direct vers le stockage Supabase puis mise à jour de l'annonce.
+  if (isVideoFile(file) && matchProduct) {
+    return await fallbackDirectSupabaseUpload<T>(matchProduct[1], file);
+  }
 
   try {
     const formData = new FormData();

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
+import { MediaDropzone } from "../../components/MediaDropzone";
+import { isVideoUrl, MEDIA_ACCEPT } from "../../lib/media";
 
 const STATUS_STYLES: Record<string, string> = {
   PENDING: "bg-amber-100 text-amber-700 border-amber-300",
@@ -455,11 +457,9 @@ export function SellerDetail() {
         sellerId: id,
       });
 
-      // Upload selected photos for the newly created product
+      // Upload selected photos/videos for the newly created product
       if (created?.id && newProdFiles.length > 0) {
-        for (const file of newProdFiles) {
-          await api.upload(`/products/${created.id}/images`, file).catch(() => {});
-        }
+        await addProductImages(created.id, newProdFiles).catch(() => {});
       }
 
       setCreatingProduct(false);
@@ -762,11 +762,23 @@ export function SellerDetail() {
                         {p.images && p.images.length > 0 ? (
                           p.images.map((imgUrl: string, idx: number) => (
                             <div key={idx} className="group relative h-11 w-11 shrink-0 rounded-md overflow-hidden border border-slate-200 shadow-xs bg-slate-100">
-                              <img
-                                src={imgUrl}
-                                alt=""
-                                className="h-full w-full object-cover"
-                              />
+                              {isVideoUrl(imgUrl) ? (
+                                <video
+                                  src={imgUrl}
+                                  muted
+                                  playsInline
+                                  loop
+                                  autoPlay
+                                  preload="metadata"
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <img
+                                  src={imgUrl}
+                                  alt=""
+                                  className="h-full w-full object-cover"
+                                />
+                              )}
 
                               {idx === 0 && (
                                 <span className="absolute bottom-0 inset-x-0 bg-slate-900/80 text-[7px] text-amber-300 font-bold text-center py-0.2">
@@ -784,7 +796,7 @@ export function SellerDetail() {
                                     🔄
                                     <input
                                       type="file"
-                                      accept="image/jpeg,image/png,image/webp"
+                                      accept={MEDIA_ACCEPT}
                                       className="hidden"
                                       disabled={uploadingProductId === p.id}
                                       onChange={(e) => {
@@ -834,7 +846,7 @@ export function SellerDetail() {
                             <input
                               type="file"
                               multiple
-                              accept="image/jpeg,image/png,image/webp"
+                              accept={MEDIA_ACCEPT}
                               className="hidden"
                               disabled={uploadingProductId === p.id}
                               onChange={(e) => {
@@ -1186,11 +1198,23 @@ export function SellerDetail() {
                 <div className="flex flex-wrap gap-2.5 mb-3">
                   {modalImages.map((imgUrl, idx) => (
                     <div key={idx} className="group relative h-20 w-20 rounded-lg overflow-hidden border border-slate-300 shadow-xs bg-slate-100">
-                      <img
-                        src={imgUrl}
-                        alt={`Photo ${idx + 1}`}
-                        className="h-full w-full object-cover"
-                      />
+                      {isVideoUrl(imgUrl) ? (
+                        <video
+                          src={imgUrl}
+                          muted
+                          playsInline
+                          loop
+                          autoPlay
+                          preload="metadata"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <img
+                          src={imgUrl}
+                          alt={`Photo ${idx + 1}`}
+                          className="h-full w-full object-cover"
+                        />
+                      )}
 
                       {idx === 0 && (
                         <span className="absolute bottom-0 inset-x-0 bg-slate-900/85 text-[8px] text-amber-300 font-bold text-center py-0.5">
@@ -1207,7 +1231,7 @@ export function SellerDetail() {
                             🔄
                             <input
                               type="file"
-                              accept="image/jpeg,image/png,image/webp"
+                              accept={MEDIA_ACCEPT}
                               className="hidden"
                               disabled={modalUploadingPhotos}
                               onChange={(e) => {
@@ -1253,7 +1277,7 @@ export function SellerDetail() {
                     <input
                       type="file"
                       multiple
-                      accept="image/jpeg,image/png,image/webp"
+                      accept={MEDIA_ACCEPT}
                       className="hidden"
                       disabled={modalUploadingPhotos}
                       onChange={(e) => handleModalUploadPhotos(e.target.files)}
@@ -1608,24 +1632,16 @@ export function SellerDetail() {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Photos réelles (Sélectionner 1 ou plusieurs images)
+                  Photos & vidéos réelles du produit
                 </label>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={(e) => {
-                    if (e.target.files) {
-                      setNewProdFiles(Array.from(e.target.files));
-                    }
-                  }}
-                  className="mt-1 w-full rounded-lg border border-slate-300 p-2 text-xs focus:border-emerald-600 focus:outline-none"
-                />
-                {newProdFiles.length > 0 && (
-                  <p className="mt-1 text-xs text-emerald-700 font-semibold">
-                    ✓ {newProdFiles.length} photo{newProdFiles.length > 1 ? "s" : ""} sélectionnée{newProdFiles.length > 1 ? "s" : ""}
-                  </p>
-                )}
+                <div className="mt-1">
+                  <MediaDropzone
+                    files={newProdFiles}
+                    onChangeFiles={setNewProdFiles}
+                    label="Photos & vidéos réelles du produit"
+                    hint="Sélectionnez, glissez-déposez ou collez (Ctrl+V) une image ou une vidéo copiée depuis un site, WhatsApp ou Dubizzle."
+                  />
+                </div>
               </div>
 
               <div>

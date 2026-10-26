@@ -23,7 +23,9 @@ import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
+const ALLOWED_MEDIA_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES];
 
 @Controller('products')
 export class ProductsController {
@@ -77,10 +79,10 @@ export class ProductsController {
   @Roles(Role.SELLER, Role.ADMIN)
   @UseInterceptors(
     FileInterceptor('file', {
-      limits: { fileSize: 5 * 1024 * 1024 },
+      limits: { fileSize: 50 * 1024 * 1024 },
       fileFilter: (_req, file, cb) => {
-        if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
-          return cb(new BadRequestException('Format non supporté (jpg, png, webp uniquement)'), false);
+        if (!ALLOWED_MEDIA_TYPES.includes(file.mimetype)) {
+          return cb(new BadRequestException('Format non supporté (images JPG/PNG/WebP ou vidéos MP4/WebM/MOV)'), false);
         }
         cb(null, true);
       },

@@ -1,5 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { api, ApiError, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from '../../lib/api';
+import { MediaDropzone } from '../../components/MediaDropzone';
+import { MEDIA_ACCEPT, isVideoUrl } from '../../lib/media';
 import {
   formatXof,
   toXof,
@@ -33,6 +35,7 @@ export function Products() {
   const [busyMessage, setBusyMessage] = useState<string>('');
   const [priceCurrency, setPriceCurrency] = useState<string>(MERCHANT_DEFAULT_CURRENCY);
   const [priceInput, setPriceInput] = useState<string>('');
+  const [formFiles, setFormFiles] = useState<File[]>([]);
 
   // Target for replacing a specific photo: { productId, oldUrl }
   const [replaceTarget, setReplaceTarget] = useState<{ productId: string; oldUrl: string } | null>(null);
@@ -60,7 +63,7 @@ export function Products() {
     try {
       const compareAtPrice = form.get('compareAtPrice');
       const amount = Number(form.get('sourcePrice') || form.get('price') || 0);
-      await api.post('/products', {
+      const created = await api.post<any>('/products', {
         name: form.get('name'),
         description: form.get('description'),
         price: toXof(amount, priceCurrency),
@@ -70,7 +73,11 @@ export function Products() {
         stock: Number(form.get('stock')),
         categoryId: form.get('categoryId'),
       });
+      if (created?.id && formFiles.length > 0) {
+        await addProductImages(created.id, formFiles).catch(() => {});
+      }
       (e.target as HTMLFormElement).reset();
+      setFormFiles([]);
       setPriceInput('');
       flashSuccess('Produit créé avec succès !');
       load();
@@ -215,7 +222,7 @@ export function Products() {
       <input
         ref={replaceFileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept={MEDIA_ACCEPT}
         className="hidden"
         onChange={handleReplaceFileSelected}
       />
@@ -223,7 +230,7 @@ export function Products() {
         ref={addFileInputRef}
         type="file"
         multiple
-        accept="image/jpeg,image/png,image/webp"
+        accept={MEDIA_ACCEPT}
         className="hidden"
         onChange={handleAddFilesSelected}
       />
@@ -341,6 +348,12 @@ export function Products() {
               </option>
             ))}
           </select>
+          <MediaDropzone
+            files={formFiles}
+            onChangeFiles={setFormFiles}
+            label="Photos & vidéos de l'article"
+            hint="Cliquez, glissez-déposez ou collez (Ctrl+V) une image ou une vidéo copiée depuis un site, WhatsApp ou Dubizzle."
+          />
           <button className="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white shadow hover:bg-amber-600">
             Enregistrer et publier l'article
           </button>
@@ -384,14 +397,26 @@ export function Products() {
                           key={url + idx}
                           className="group relative h-16 w-16 shrink-0 rounded-lg overflow-hidden border border-slate-200 bg-slate-50 shadow-xs"
                         >
-                          <img
-                            src={url}
-                            alt=""
-                            className="h-full w-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLElement).style.opacity = '0.4';
-                            }}
-                          />
+                          {isVideoUrl(url) ? (
+                            <video
+                              src={url}
+                              muted
+                              playsInline
+                              loop
+                              autoPlay
+                              preload="metadata"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <img
+                              src={url}
+                              alt=""
+                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.opacity = '0.4';
+                              }}
+                            />
+                          )}
 
                           {/* Badge Photo Principale */}
                           {idx === 0 && (

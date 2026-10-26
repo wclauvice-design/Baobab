@@ -367,7 +367,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 }
 .market h1, .market h2, .market h3 { word-spacing: 0.04em; }
 
-.listing-picture img, .detail-photo img {
+.listing-picture img, .listing-picture video, .detail-photo img, .detail-photo video {
   width: 100%;
   height: 100%;
   object-fit: cover;

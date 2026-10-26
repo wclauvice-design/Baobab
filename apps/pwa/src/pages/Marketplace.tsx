@@ -33,6 +33,7 @@ import {
   requestNotificationPermission,
 } from "../lib/notifications";
 import { isVehicleProduct } from "../lib/vehicles";
+import { isVideoUrl } from "../lib/media";
 import { VehicleCard } from "../components/VehicleCard";
 import { DubizzleVehicleDetail } from "../components/DubizzleVehicleDetail";
 import "./marketplace.css";
@@ -443,17 +444,30 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
     >
       <div className="listing-picture">
         <Link to={`/products/${p.id}`}>
-          <img
-            src={
-              imageFailed ? "/photos/placeholder.svg" : p.images?.[0] ||
-              fallbackPhoto(p.subcategory, p.category?.name, p.category?.universe, p.name)
-            }
-            alt={p.name}
-            onError={() => setImageFailed(true)}
-            loading="lazy"
-            decoding="async"
-            className={isRealPhoto ? "is-real" : "is-sample"}
-          />
+          {!imageFailed && isVideoUrl(p.images?.[0]) ? (
+            <video
+              src={p.images[0]}
+              muted
+              playsInline
+              loop
+              autoPlay
+              preload="metadata"
+              aria-label={p.name}
+              className="is-real"
+            />
+          ) : (
+            <img
+              src={
+                imageFailed ? "/photos/placeholder.svg" : p.images?.[0] ||
+                fallbackPhoto(p.subcategory, p.category?.name, p.category?.universe, p.name)
+              }
+              alt={p.name}
+              onError={() => setImageFailed(true)}
+              loading="lazy"
+              decoding="async"
+              className={isRealPhoto ? "is-real" : "is-sample"}
+            />
+          )}
         </Link>
         <button
           className={`favorite ${favorite ? "selected" : ""}`}
@@ -991,15 +1005,28 @@ export function ListingDetail() {
       {/* 1. VISUEL HERO SUPÉRIEUR (Image en partie supérieure de l'écran - Les gens achètent par la vue) */}
       <div className="detail-hero-top">
         <div className="product-detail-hero relative aspect-square sm:aspect-[4/3] w-full max-h-[460px] overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-black border border-slate-800 shadow-2xl flex items-center justify-center">
-          <img
-            src={
-              p.images?.[image] ||
-              fallbackPhoto(p.subcategory, p.category?.name, p.category?.universe, p.name)
-            }
-            alt={p.name}
-            decoding="async"
-            className="h-full w-full object-contain p-3"
-          />
+          {isVideoUrl(p.images?.[image]) ? (
+            <video
+              src={p.images[image]}
+              muted
+              playsInline
+              loop
+              autoPlay
+              preload="metadata"
+              aria-label={p.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <img
+              src={
+                p.images?.[image] ||
+                fallbackPhoto(p.subcategory, p.category?.name, p.category?.universe, p.name)
+              }
+              alt={p.name}
+              decoding="async"
+              className="h-full w-full object-contain p-3"
+            />
+          )}
 
           {p.images && p.images.length > 1 && (
             <div className="absolute top-3.5 left-3.5 flex items-center gap-1.5 rounded-lg bg-black/75 px-3 py-1 text-xs font-bold text-white backdrop-blur-md border border-white/10 shadow-lg">
@@ -1034,7 +1061,19 @@ export function ListingDetail() {
                     : "border-slate-800 opacity-60 hover:opacity-100"
                 }`}
               >
-                <img src={url} alt="" className="h-full w-full object-cover" />
+                {isVideoUrl(url) ? (
+                  <video
+                    src={url}
+                    muted
+                    playsInline
+                    loop
+                    autoPlay
+                    preload="metadata"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <img src={url} alt="" className="h-full w-full object-cover" />
+                )}
               </button>
             ))}
           </div>
@@ -1276,10 +1315,22 @@ export function ListingDetail() {
             {sellerProducts.map((rel: any) => (
               <Link key={rel.id} to={`/products/${rel.id}`} className="seller-showcase-card">
                 <div className="seller-showcase-img">
-                  <img
-                    src={rel.images?.[0] || fallbackPhoto(rel.subcategory, rel.category?.name, rel.category?.universe, rel.name)}
-                    alt={rel.name}
-                  />
+                  {isVideoUrl(rel.images?.[0]) ? (
+                    <video
+                      src={rel.images[0]}
+                      muted
+                      playsInline
+                      loop
+                      autoPlay
+                      preload="metadata"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={rel.images?.[0] || fallbackPhoto(rel.subcategory, rel.category?.name, rel.category?.universe, rel.name)}
+                      alt={rel.name}
+                    />
+                  )}
                 </div>
                 <div className="seller-showcase-info">
                   <h4>{rel.name}</h4>

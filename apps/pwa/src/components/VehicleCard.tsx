@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCurrency } from '../lib/currency';
+import { isVideoUrl } from '../lib/media';
 import { IconHeart } from './icons';
 
 export interface VehicleProduct {
@@ -30,7 +31,20 @@ export function VehicleCard({ product, isFavorite = false, onToggleFavorite }: {
     <article className="visual-product-card">
       <Link to={`/products/${product.id}`} className="visual-product-photo" aria-label={product.name}>
         {image && !failed ? (
-          <img src={image} alt={product.name} loading="lazy" decoding="async" onError={() => setFailed(true)} />
+          isVideoUrl(image) ? (
+            <video
+              src={image}
+              muted
+              playsInline
+              loop
+              autoPlay
+              preload="metadata"
+              aria-label={product.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <img src={image} alt={product.name} loading="lazy" decoding="async" onError={() => setFailed(true)} />
+          )
         ) : <span className="visual-photo-missing">Photo à venir</span>}
       </Link>
       {onToggleFavorite && <button type="button" className="visual-product-favorite"

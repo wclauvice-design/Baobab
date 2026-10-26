@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { formatXof } from '../lib/format';
 import { useCurrency } from '../lib/currency';
 import { parseVehicleData, VehicleSpecs } from '../lib/vehicles';
+import { isVideoUrl } from '../lib/media';
 import { IconHeart, IconLocation } from './icons';
 
 interface DubizzleVehicleDetailProps {
@@ -68,11 +69,25 @@ export function DubizzleVehicleDetail({
 
       {/* 1. VISUEL HERO SUPÉRIEUR (Image en partie supérieure de l'écran - Acheter par la vue) */}
       <div className="product-detail-hero relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-2xl bg-black border border-slate-800 shadow-2xl">
-        <img
-          src={images[activePhotoIdx]}
-          alt={product.name}
-          className="h-full w-full object-contain transition-opacity duration-300"
-        />
+        {isVideoUrl(images[activePhotoIdx]) ? (
+          <video
+            key={images[activePhotoIdx]}
+            src={images[activePhotoIdx]}
+            muted
+            playsInline
+            loop
+            autoPlay
+            preload="metadata"
+            aria-label={product.name}
+            className="h-full w-full object-cover transition-opacity duration-300"
+          />
+        ) : (
+          <img
+            src={images[activePhotoIdx]}
+            alt={product.name}
+            className="h-full w-full object-cover transition-opacity duration-300"
+          />
+        )}
 
         {/* Compteur photo Dubizzle en haut à gauche : 📷 1 / 15 */}
         <div className="absolute top-3.5 left-3.5 flex items-center gap-1.5 rounded-lg bg-black/75 px-3 py-1 text-xs font-bold text-white backdrop-blur-md border border-white/10 shadow-lg">
@@ -166,7 +181,19 @@ export function DubizzleVehicleDetail({
                   : 'border-slate-800 opacity-60 hover:opacity-100'
               }`}
             >
-              <img src={img} alt="" className="h-full w-full object-cover" />
+              {isVideoUrl(img) ? (
+                <video
+                  src={img}
+                  muted
+                  playsInline
+                  loop
+                  autoPlay
+                  preload="metadata"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <img src={img} alt="" className="h-full w-full object-cover" />
+              )}
             </button>
           ))}
         </div>

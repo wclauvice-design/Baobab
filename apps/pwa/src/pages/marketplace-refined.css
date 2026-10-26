@@ -42,10 +42,11 @@
   background: #f3f4f1;
   overflow: hidden;
 }
-.market .visual-product-photo img {
+.market .visual-product-photo img,
+.market .visual-product-photo video {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   transition: transform 240ms ease;
 }
 .market .visual-photo-missing {
@@ -74,7 +75,9 @@
   background: #fff; box-shadow: none;
 }
 .market .listing-grid .listing-picture { aspect-ratio: 1; height: auto; background: #f3f4f1; }
-.market .listing-grid .listing-picture img { object-fit: contain; padding: 0; }
+.market .listing-grid .listing-picture img,
+.market .listing-grid .listing-picture video { object-fit: contain; padding: 0; }
+.market .listing-grid .listing-picture video { object-fit: cover; }
 .market .listing-grid .listing-picture::after { display: none; }
 .market .listing-grid .listing-copy { padding: 10px 12px 12px; gap: 5px; }
 .market .listing-grid .listing-copy h3 {
@@ -86,7 +89,7 @@
   font-size: clamp(14px, 1.4vw, 18px); font-weight: 650; line-height: 1.35; color: #202720;
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .market .visual-product-photo:hover img { transform: scale(1.025); }
+  .market .visual-product-photo:hover img, .market .visual-product-photo:hover video { transform: scale(1.025); }
 }
 .market {
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;

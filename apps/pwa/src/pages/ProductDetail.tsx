@@ -5,6 +5,7 @@ import { useCurrency } from '../lib/currency';
 import { useCart } from '../lib/cart';
 import { useAuth } from '../lib/auth';
 import { recordView } from '../lib/history';
+import { isVideoUrl } from '../lib/media';
 import { PageLoader } from '../components/PageLoader';
 import { BaobabMark, IconHeart, IconStar } from '../components/icons';
 
@@ -56,12 +57,26 @@ function ImageGallery({ images, name }: { images: string[]; name: string }) {
         }}
       >
         {images.map((url, i) => (
-          <img
-            key={url}
-            src={url}
-            alt={`${name} ${i + 1}`}
-            className="h-full w-full shrink-0 snap-center object-cover"
-          />
+          isVideoUrl(url) ? (
+            <video
+              key={url}
+              src={url}
+              muted
+              playsInline
+              loop
+              autoPlay
+              preload="metadata"
+              aria-label={`${name} ${i + 1}`}
+              className="h-full w-full shrink-0 snap-center object-cover"
+            />
+          ) : (
+            <img
+              key={url}
+              src={url}
+              alt={`${name} ${i + 1}`}
+              className="h-full w-full shrink-0 snap-center object-cover"
+            />
+          )
         ))}
       </div>
       {images.length > 1 && (

@@ -3,6 +3,8 @@ import { isVehicleProduct } from "../lib/vehicles";
 import { api, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { toXof, fromXof, formatXof, MERCHANT_DEFAULT_CURRENCY, PRICING_CURRENCIES } from "../lib/format";
+import { MediaDropzone } from "../components/MediaDropzone";
+import { MEDIA_ACCEPT, isVideoUrl } from "../lib/media";
 import { Alert, money } from "./Operations";
 export function ListingEditor() {
   const { user } = useAuth(),
@@ -20,6 +22,7 @@ export function ListingEditor() {
   const [priceCurrency, setPriceCurrency] = useState<string>(admin ? "XOF" : MERCHANT_DEFAULT_CURRENCY);
   const [supplierAmount, setSupplierAmount] = useState<string>("");
   const [publicAmount, setPublicAmount] = useState<string>("");
+  const [formFiles, setFormFiles] = useState<File[]>([]);
 
   async function deleteListing(product: any) {
     if (!admin || deletingId) return;
@@ -60,6 +63,7 @@ export function ListingEditor() {
 
   // Update vehicle states when editing changes
   useEffect(() => {
+    setFormFiles([]);
     if (!editing) {
       setPriceCurrency(admin ? "XOF" : MERCHANT_DEFAULT_CURRENCY);
       setSupplierAmount("");
@@ -166,8 +170,10 @@ export function ListingEditor() {
     }
   }
 
-  async function handleRowAddByUrl(productId: string) {
-    const url = window.prompt("Collez l'URL de l'image (Temu, Dubizzle, WhatsApp ou web) :");
+  async function handleRowAddByUrl(productId: string, providedUrl?: string) {
+    const url =
+      providedUrl ??
+      window.prompt("Collez l'URL de l'image ou de la vidéo (Temu, Dubizzle, WhatsApp ou web) :");
     if (!url || !url.trim()) return;
     setBusyProductId(productId);
     setBusyMessage("Ajout par URL...");
@@ -309,11 +315,10 @@ export function ListingEditor() {
       const saved = editing?.id
         ? await api.patch<any>(`/products/${editing.id}`, body)
         : await api.post<any>("/products", body);
-      const files = fd
-        .getAll("photos")
-        .filter((f): f is File => f instanceof File && f.size > 0);
-      for (const file of files)
-        await api.upload(`/products/${saved.id}/images`, file);
+      if (saved?.id && formFiles.length > 0) {
+        await addProductImages(saved.id, formFiles);
+      }
+      setFormFiles([]);
       setEditing(null);
       setError(
         "Annonce enregistrée" +
@@ -896,7 +901,7 @@ export function ListingEditor() {
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                   <span style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                    Galerie photos ({editing.images?.length || 0} photo{editing.images?.length > 1 ? "s" : ""})
+                    Galerie photos & vidéos ({editing.images?.length || 0})
                   </span>
                   <span style={{ fontSize: "11px", color: "var(--admin-muted, #94a3b8)" }}>
                     Survolez une photo pour la <strong>Remplacer (🔄)</strong>, la <strong>Supprimer (✕)</strong> ou la mettre en <strong>1ère (★)</strong>
@@ -918,7 +923,19 @@ export function ListingEditor() {
                         backgroundColor: "rgba(0,0,0,0.3)",
                       }}
                     >
-                      <img src={imgUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      {isVideoUrl(imgUrl) ? (
+                        <video
+                          src={imgUrl}
+                          muted
+                          playsInline
+                          loop
+                          autoPlay
+                          preload="metadata"
+                          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                        />
+                      ) : (
+                        <img src={imgUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      )}
                       {idx === 0 && (
                         <span style={{
                           position: "absolute",
@@ -969,7 +986,7 @@ export function ListingEditor() {
                             🔄
                             <input
                               type="file"
-                              accept="image/jpeg,image/png,image/webp"
+                              accept={MEDIA_ACCEPT}
                               style={{ display: "none" }}
                               onChange={(e) => {
                                 const f = e.target.files?.[0];
@@ -1048,7 +1065,7 @@ export function ListingEditor() {
                     <input
                       type="file"
                       multiple
-                      accept="image/jpeg,image/png,image/webp"
+                      accept={MEDIA_ACCEPT}
                       style={{ display: "none" }}
                       onChange={(e) => {
                         handleRowAddMultiple(editing.id, e.target.files);
@@ -1084,22 +1101,32 @@ export function ListingEditor() {
               </div>
             )}
             <label>
-              URLs de photos HTTPS (une par ligne)
+              URLs de photos ou vidéos HTTPS (une par ligne)
               <textarea
                 name="images"
                 rows={4}
                 defaultValue={editing.images?.join("\n")}
               />
             </label>
-            <label>
-              Ajouter des photos (2 à 20 photos par produit, 5 Mo max par image)
-              <input
-                type="file"
-                name="photos"
-                accept="image/jpeg,image/png,image/webp"
-                multiple
+            <div>
+              <MediaDropzone
+                dark
+                files={formFiles}
+                onChangeFiles={setFormFiles}
+                onAddUrl={async (url) => {
+                  if (editing?.id) {
+                    await handleRowAddByUrl(editing.id, url);
+                  } else {
+                    const textarea = document.querySelector('textarea[name="images"]') as HTMLTextAreaElement | null;
+                    if (textarea) {
+                      textarea.value = [textarea.value, url].filter(Boolean).join("\n");
+                    }
+                  }
+                }}
+                label="Ajouter des photos ou vidéos"
+                hint="Cliquez, glissez-déposez ou collez (Ctrl+V) : les images et vidéos remplissent automatiquement toute la zone."
               />
-            </label>
+            </div>
             <button className="op-button" disabled={busy}>
               {busy
                 ? "Enregistrement…"
@@ -1170,7 +1197,7 @@ export function ListingEditor() {
               <div style={{ margin: "12px 0 8px 0" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
                   <span style={{ fontSize: "10.5px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--admin-muted, #94a3b8)" }}>
-                    Photos ({p.images?.length || 0})
+                    Photos & vidéos ({p.images?.length || 0})
                   </span>
                   {busyProductId === p.id && (
                     <span style={{ fontSize: "10.5px", fontWeight: 600, color: "#10b981" }}>
@@ -1196,11 +1223,23 @@ export function ListingEditor() {
                           flexShrink: 0,
                         }}
                       >
-                        <img
-                          src={imgUrl}
-                          alt=""
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        />
+                        {isVideoUrl(imgUrl) ? (
+                          <video
+                            src={imgUrl}
+                            muted
+                            playsInline
+                            loop
+                            autoPlay
+                            preload="metadata"
+                            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                          />
+                        ) : (
+                          <img
+                            src={imgUrl}
+                            alt=""
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        )}
 
                         {idx === 0 && (
                           <span
@@ -1254,7 +1293,7 @@ export function ListingEditor() {
                               🔄
                               <input
                                 type="file"
-                                accept="image/jpeg,image/png,image/webp"
+                                accept={MEDIA_ACCEPT}
                                 style={{ display: "none" }}
                                 disabled={busyProductId === p.id}
                                 onChange={(e) => {
@@ -1355,7 +1394,7 @@ export function ListingEditor() {
                     <input
                       type="file"
                       multiple
-                      accept="image/jpeg,image/png,image/webp"
+                      accept={MEDIA_ACCEPT}
                       style={{ display: "none" }}
                       disabled={busyProductId === p.id}
                       onChange={(e) => {

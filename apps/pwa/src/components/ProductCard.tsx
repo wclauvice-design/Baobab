@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useCurrency } from '../lib/currency';
 import { BaobabMark, IconStar } from './icons';
 import { isVehicleProduct } from '../lib/vehicles';
+import { isVideoUrl } from '../lib/media';
 import { VehicleCard } from './VehicleCard';
 
 export interface Product {
@@ -43,11 +44,24 @@ export function ProductCard({ product }: { product: Product }) {
     >
       <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-gradient-to-br from-base-700 to-base-800">
         {product.images[0] ? (
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-          />
+          isVideoUrl(product.images[0]) ? (
+            <video
+              src={product.images[0]}
+              muted
+              playsInline
+              loop
+              autoPlay
+              preload="metadata"
+              aria-label={product.name}
+              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+            />
+          ) : (
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+            />
+          )
         ) : (
           <BaobabMark className="h-10 w-10 opacity-30" />
         )}
