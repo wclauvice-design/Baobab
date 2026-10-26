@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -18,6 +19,27 @@ export class ProductsService {
     private prisma: PrismaService,
     private storage: SupabaseStorageService,
   ) {}
+
+  async deleteListing(id: string, role: Role) {
+    if (role !== Role.ADMIN) throw new ForbiddenException();
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        const product = await tx.product.findUnique({ where: { id }, select: { id: true } });
+        if (!product) throw new NotFoundException("Annonce introuvable");
+        if (await tx.orderItem.count({ where: { productId: id } })) {
+          throw new ConflictException("Cette annonce est liée à une commande. Sa suppression définitive est impossible sans altérer l’historique. Vous pouvez la retirer de la publication.");
+        }
+        await tx.review.deleteMany({ where: { productId: id } });
+        await tx.product.delete({ where: { id } });
+      });
+      return { deleted: true, id };
+    } catch (error) {
+      if ((error as { code?: string }).code === "P2003") {
+        throw new ConflictException("Cette annonce est liée à une commande et ne peut pas être supprimée définitivement.");
+      }
+      throw error;
+    }
+  }
 
   private computeProductScore(p: any): number {
     let score = 0;

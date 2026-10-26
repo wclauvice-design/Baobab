@@ -51,6 +51,13 @@ export class ProductsController {
     return this.productsService.findOne(id);
   }
 
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  deleteListing(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.productsService.deleteListing(id, user.role as Role);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SELLER, Role.ADMIN)

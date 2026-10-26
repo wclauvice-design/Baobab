@@ -15,6 +15,23 @@ export function ListingEditor() {
     [filter, setFilter] = useState("");
   const [busyProductId, setBusyProductId] = useState<string | null>(null);
   const [busyMessage, setBusyMessage] = useState<string>("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  async function deleteListing(product: any) {
+    if (!admin || deletingId) return;
+    if (!window.confirm(`Supprimer définitivement « ${product.name} » ?\n\nL’annonce et ses avis seront supprimés. Cette action est irréversible. Les annonces liées à une commande ne peuvent pas être supprimées.`)) return;
+    setDeletingId(product.id);
+    setError("");
+    try {
+      await api.delete(`/products/${product.id}`);
+      setProducts((items) => items.filter((item) => item.id !== product.id));
+      if (editing?.id === product.id) setEditing(null);
+    } catch (e: any) {
+      setError(e.message || "La suppression a échoué.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   // Smart Automotive Form State
   const [formCategory, setFormCategory] = useState<string>("");
@@ -1340,6 +1357,12 @@ export function ListingEditor() {
                 {p.stock}
               </p>
               {p.moderationNote && <Alert>{p.moderationNote}</Alert>}
+              {admin && <button type="button" className="op-button secondary"
+                style={{ color: "#fca5a5", borderColor: "#ef444466" }}
+                disabled={deletingId !== null || busyProductId === p.id}
+                onClick={() => deleteListing(p)}>
+                {deletingId === p.id ? "Suppression…" : "Supprimer l’annonce"}
+              </button>}
               <button
                 className="op-button secondary"
                 onClick={() => {
