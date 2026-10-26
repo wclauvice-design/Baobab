@@ -44,8 +44,8 @@ function ImageGallery({ images, name }: { images: string[]; name: string }) {
 
   if (images.length === 0) {
     return (
-      <div className="flex aspect-square items-center justify-center bg-gradient-to-br from-base-700 to-base-800">
-        <BaobabMark className="h-16 w-16 opacity-30" />
+      <div className="flex aspect-square items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+        <BaobabMark className="h-16 w-16 opacity-20" />
       </div>
     );
   }
@@ -68,7 +68,7 @@ function ImageGallery({ images, name }: { images: string[]; name: string }) {
   return (
     <div>
       <div
-        className="relative aspect-square overflow-hidden bg-gradient-to-br from-base-700 to-base-800"
+        className="relative aspect-square overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200"
         style={{ touchAction: 'pan-y' }}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
