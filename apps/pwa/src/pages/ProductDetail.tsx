@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useCurrency } from '../lib/currency';
@@ -40,6 +40,7 @@ interface FollowEntry {
 
 function ImageGallery({ images, name }: { images: string[]; name: string }) {
   const [active, setActive] = useState(0);
+  const touchStartX = useRef<number | null>(null);
 
   if (images.length === 0) {
     return (
@@ -49,47 +50,83 @@ function ImageGallery({ images, name }: { images: string[]; name: string }) {
     );
   }
 
+  const go = (i: number) => setActive((i + images.length) % images.length);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) > 40) {
+      if (dx < 0) go(active + 1);
+      else go(active - 1);
+    }
+    touchStartX.current = null;
+  };
+
   return (
     <div>
       <div
-        className="flex aspect-square snap-x snap-mandatory overflow-x-auto bg-gradient-to-br from-base-700 to-base-800"
-        onScroll={(e) => {
-          const el = e.currentTarget;
-          setActive(Math.round(el.scrollLeft / el.clientWidth));
-        }}
+        className="relative aspect-square overflow-hidden bg-gradient-to-br from-base-700 to-base-800"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
       >
-        {images.map((url, i) => (
-          isVideoUrl(url) ? (
-            <video
-              key={url}
-              src={url}
-              muted
-              playsInline
-              loop
-              autoPlay
-              preload="metadata"
-              aria-label={`${name} ${i + 1}`}
-              className="h-full w-full shrink-0 snap-center object-cover"
-            />
-          ) : (
-            <img
-              key={url}
-              src={url}
-              alt={`${name} ${i + 1}`}
-              className="h-full w-full shrink-0 snap-center object-cover"
-            />
-          )
-        ))}
+        {isVideoUrl(images[active]) ? (
+          <video
+            key={images[active]}
+            src={images[active]}
+            muted
+            playsInline
+            loop
+            autoPlay
+            preload="metadata"
+            aria-label={`${name} ${active + 1}`}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <img
+            key={images[active]}
+            src={images[active]}
+            alt={`${name} ${active + 1}`}
+            className="h-full w-full object-cover"
+            draggable={false}
+          />
+        )}
+        {images.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => go(active - 1)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/40 px-2 py-1 text-white"
+              aria-label="Précédent"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              onClick={() => go(active + 1)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/40 px-2 py-1 text-white"
+              aria-label="Suivant"
+            >
+              ›
+            </button>
+          </>
+        )}
       </div>
       {images.length > 1 && (
-        <div className="flex justify-center gap-1.5 py-2">
+        <div className="flex justify-center gap-2 py-2">
           {images.map((url, i) => (
-            <span
+            <button
               key={url}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === active ? 'w-4 bg-amber-400' : 'w-1.5 bg-base-700'
+              type="button"
+              onClick={() => setActive(i)}
+              className={`h-12 w-12 overflow-hidden rounded-lg border-2 transition-all ${
+                i === active ? 'border-amber-400' : 'border-transparent opacity-60'
               }`}
-            />
+            >
+              <img src={url} alt={`${name} ${i + 1}`} className="h-full w-full object-cover" />
+            </button>
           ))}
         </div>
       )}
