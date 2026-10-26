@@ -40,6 +40,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <Link
       to={`/products/${product.id}`}
+      state={{ product }}
       className="card-interactive group flex flex-col overflow-hidden"
     >
       <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-gradient-to-br from-base-700 to-base-800">

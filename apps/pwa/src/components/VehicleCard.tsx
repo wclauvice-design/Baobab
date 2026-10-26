@@ -29,7 +29,7 @@ export function VehicleCard({ product, isFavorite = false, onToggleFavorite }: {
   const image = product.images?.find(url => !/https:\/\/(?:images\.)?unsplash\.com\//i.test(url));
   return (
     <article className="visual-product-card">
-      <Link to={`/products/${product.id}`} className="visual-product-photo" aria-label={product.name}>
+      <Link to={`/products/${product.id}`} state={{ product }} className="visual-product-photo" aria-label={product.name}>
         {image && !failed ? (
           isVideoUrl(image) ? (
             <video
@@ -52,7 +52,7 @@ export function VehicleCard({ product, isFavorite = false, onToggleFavorite }: {
         onClick={() => onToggleFavorite(product.id)}>
         <IconHeart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
       </button>}
-      <Link to={`/products/${product.id}`} className="visual-product-caption">
+      <Link to={`/products/${product.id}`} state={{ product }} className="visual-product-caption">
         <h3 title={product.name}>{product.name}</h3>
         <strong>{format(Number(product.price || 0))}</strong>
       </Link>

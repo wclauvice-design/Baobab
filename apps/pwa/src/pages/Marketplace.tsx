@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   Link,
   NavLink,
+  useLocation,
   useNavigate,
   useParams,
   useSearchParams,
@@ -34,6 +35,11 @@ import {
 } from "../lib/notifications";
 import { isVehicleProduct } from "../lib/vehicles";
 import { isVideoUrl } from "../lib/media";
+import {
+  peekProduct,
+  rememberProduct,
+  rememberProducts,
+} from "../lib/productCache";
 import { VehicleCard } from "../components/VehicleCard";
 import { DubizzleVehicleDetail } from "../components/DubizzleVehicleDetail";
 import "./marketplace.css";
@@ -467,6 +473,12 @@ function subcategoryLabel(product: any): string {
     : '';
 }
 
+/** Quantité initiale respectant le minimum de commande et le conditionnement. */
+function defaultQuantity(product: any): number {
+  const pack = product?.packSize || 1;
+  return Math.ceil((product?.minimumOrder || 1) / pack) * pack;
+}
+
 function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
   const [imageFailed, setImageFailed] = useState(false);
   const { ids, toggle } = useFavorites();
@@ -492,7 +504,7 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
       style={{ animationDelay: `${Math.min(index, 11) * 45}ms` }}
     >
       <div className="listing-picture">
-        <Link to={`/products/${p.id}`}>
+        <Link to={`/products/${p.id}`} state={{ product: p }}>
           {!imageFailed && isVideoUrl(p.images?.[0]) ? (
             <video
               src={p.images[0]}
@@ -530,7 +542,7 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
         {!isRealPhoto && !imageFailed && <span className="picture-tag is-sample-label">Illustration</span>}
       </div>
       <div className="listing-copy">
-        <Link to={`/products/${p.id}`}>
+        <Link to={`/products/${p.id}`} state={{ product: p }}>
           <h3 title={p.name}>{p.name}</h3>
         </Link>
         <strong>
@@ -559,6 +571,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
     call(`/products?${params}`)
       .then((p) => {
         if (active) {
+          rememberProducts(p);
           setProducts(p);
           setError("");
         }
@@ -1030,51 +1043,122 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
   );
 }
 
+/**
+ * Squelette doux affiché uniquement en accès direct (lien partagé) quand
+ * aucune donnée n'est encore en cache. Il reprend la silhouette exacte de la
+ * fiche pour éviter tout saut visuel, sans texte « chargement ».
+ */
+function ListingSkeleton() {
+  return (
+    <div className="product-detail-page listing-skeleton mx-auto max-w-4xl pb-16 text-slate-100" aria-busy="true" aria-label="Ouverture de l’annonce">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="skeleton-line" style={{ width: 150, height: 12 }} />
+        <span className="skeleton-line" style={{ width: 110, height: 12 }} />
+      </div>
+
+      <div className="detail-hero-top">
+        <div className="skeleton-block aspect-square sm:aspect-[4/3] w-full max-h-[460px] rounded-2xl" />
+        <div className="mt-3 flex gap-2 overflow-hidden">
+          {[0, 1, 2, 3].map((i) => (
+            <span key={i} className="skeleton-block h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-xl" />
+          ))}
+        </div>
+      </div>
+
+      <div className="product-detail-summary mt-5 rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl">
+        <span className="skeleton-line" style={{ width: 170, height: 32 }} />
+        <span className="skeleton-line mt-4" style={{ width: 120, height: 10 }} />
+        <span className="skeleton-line mt-3" style={{ width: '85%', height: 20 }} />
+        <span className="skeleton-line mt-2" style={{ width: '55%', height: 20 }} />
+        <div className="mt-5 flex items-center justify-between border-t border-slate-800 pt-3">
+          <span className="skeleton-line" style={{ width: 190, height: 12 }} />
+          <span className="skeleton-line" style={{ width: 100, height: 12 }} />
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6">
+        <span className="skeleton-line" style={{ width: 150, height: 16 }} />
+        <span className="skeleton-line mt-4" style={{ width: '100%', height: 12 }} />
+        <span className="skeleton-line mt-2" style={{ width: '92%', height: 12 }} />
+        <span className="skeleton-line mt-2" style={{ width: '70%', height: 12 }} />
+      </div>
+    </div>
+  );
+}
+
 export function ListingDetail() {
   const { id } = useParams();
+  const location = useLocation();
   useLayoutEffect(() => {
     // A listing opens at its gallery even after scrolling through the feed.
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [id]);
   const navigate = useNavigate();
   const { current: dest, select: selectDest } = useUserDestination();
-  const [p, setP] = useState<any>(null),
+  const seed = (location.state as { product?: any } | null)?.product;
+  const [p, setP] = useState<any>(() => {
+    const cached = peekProduct(id);
+    if (cached) return cached;
+    return seed && String(seed.id) === String(id) ? seed : null;
+  }),
     [config, setConfig] = useState<any>(null),
     [image, setImage] = useState(0),
     [showFullDesc, setShowFullDesc] = useState(false),
-    [qty, setQty] = useState(1),
+    [qty, setQty] = useState(() => {
+      const cached = peekProduct(id);
+      return cached ? defaultQuantity(cached) : 1;
+    }),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [shippingMode, setShippingMode] = useState<ShippingMode>("EXPRESS"),
     [sellerProducts, setSellerProducts] = useState<any[]>([]);
   useEffect(() => {
-    setP(null);
+    let active = true;
+    // Affichage instantané depuis le cache, sans écran de chargement.
+    const cached = peekProduct(id);
+    if (cached) {
+      setP(cached);
+      setQty(defaultQuantity(cached));
+    } else {
+      setP((current: any) =>
+        current && String(current.id) === String(id) ? current : null,
+      );
+    }
     setImage(0);
     setShowFullDesc(false);
     setError("");
     call(`/products/${id}`)
-      .then((p) => {
-        setP(p);
-        setQty(Math.ceil((p.minimumOrder || 1) / (p.packSize || 1)) * (p.packSize || 1));
-        const sellerId = p.sellerId || p.seller?.id;
+      .then((fresh) => {
+        if (!active) return;
+        rememberProduct(fresh);
+        setP(fresh);
+        setQty(defaultQuantity(fresh));
+        const sellerId = fresh.sellerId || fresh.seller?.id;
         if (sellerId) {
-          call("/products").then((all: any[]) => {
-            setSellerProducts(
-              all
-                .filter(
-                  (item: any) =>
-                    (item.sellerId === sellerId || item.seller?.id === sellerId) &&
-                    item.id !== p.id
-                )
-                .slice(0, 4)
-            );
-          }).catch(() => {});
+          call("/products")
+            .then((all: any[]) => {
+              if (!active) return;
+              rememberProducts(all);
+              setSellerProducts(
+                all
+                  .filter(
+                    (item: any) =>
+                      (item.sellerId === sellerId || item.seller?.id === sellerId) &&
+                      item.id !== fresh.id
+                  )
+                  .slice(0, 4)
+              );
+            })
+            .catch(() => {});
         }
       })
-      .catch((e) => setError(e.message));
+      .catch((e) => active && setError(e.message));
     call("/concierge/config")
       .then(setConfig)
       .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   const freight = estimateFreight({
@@ -1133,15 +1217,17 @@ export function ListingDetail() {
       setBusy(false);
     }
   }
-  if (!p)
-    return (
-      <>
-        <Notice>{error}</Notice>
-        <Empty
-          title={error ? "Annonce indisponible" : "Chargement de l’annonce…"}
-        />
-      </>
-    );
+  if (!p) {
+    if (error) {
+      return (
+        <>
+          <Notice>{error}</Notice>
+          <Empty title="Annonce indisponible" />
+        </>
+      );
+    }
+    return <ListingSkeleton />;
+  }
   const message = `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} de "${p.name}" vers ${dest.name} en ${freight.modeLabel}. Référence ${p.id}. ${window.location.href}`;
 
   if (isVehicleProduct(p)) {
@@ -1488,7 +1574,7 @@ export function ListingDetail() {
           </div>
           <div className="seller-showcase-grid">
             {sellerProducts.map((rel: any) => (
-              <Link key={rel.id} to={`/products/${rel.id}`} className="seller-showcase-card">
+              <Link key={rel.id} to={`/products/${rel.id}`} state={{ product: rel }} className="seller-showcase-card">
                 <div className="seller-showcase-img">
                   {isVideoUrl(rel.images?.[0]) ? (
                     <video
@@ -2372,6 +2458,7 @@ export function Storefront() {
     setLoading(true);
     call("/products")
       .then((allProducts) => {
+        rememberProducts(allProducts);
         const matching = allProducts.filter(
           (p: any) =>
             p.sellerId === id ||
@@ -2506,7 +2593,7 @@ export function Storefront() {
       ) : (
         <div className="storefront-grid">
           {filtered.map((item) => (
-            <Link key={item.id} to={`/products/${item.id}`} className="storefront-card">
+            <Link key={item.id} to={`/products/${item.id}`} state={{ product: item }} className="storefront-card">
               <div className="storefront-card-img">
                 <img
                   src={
