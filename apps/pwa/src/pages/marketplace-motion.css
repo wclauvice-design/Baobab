@@ -490,8 +490,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .search-ideas > span { display: block; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Consolidated promise styling located at end of file */
 @media (prefers-reduced-motion: reduce) { .discovery-roll { animation: none !important; } }
-.market:has(.app-sticky-header) { background: #f6f4ee; color: #20372f; }
-.market:has(.app-sticky-header) .market-main { max-width: 1440px; }
+.market { background: #f6f4ee; color: #20372f; }
+.market .market-main { max-width: 1440px; }
 .app-sticky-header { background: #f2c35e; border-color: #dfb254; backdrop-filter: none; box-shadow: none; }
 .app-brand-text { background: none; -webkit-text-fill-color: #173e32; color: #173e32; }
 .app-top-nav-row { height: 54px; }
@@ -537,25 +537,25 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .feed-filters .filter-bar { position: static; margin: 0 0 12px; background: #fffefb; border-color: #dedfd4; box-shadow: none; }
 .feed-filters .filter-bar :is(input, select) { color: #20372f; background: #f6f4ee; border-color: #d4dbcf; }
 .feed-filters .text-button { color: #245c47; }
-.market:has(.app-sticky-header) .filter-chip { background: #e5eee5; color: #245c47; border-color: #c6d6c9; }
-.market:has(.app-sticky-header) .listing-tile { background: #fffefb; border: 1px solid #e3e5dc; box-shadow: none; border-radius: 12px; overflow: hidden; }
-.market:has(.app-sticky-header) .listing-tile:hover { border-color: #b1bfae; box-shadow: 0 8px 22px #173e3210; transform: translateY(-3px); }
-.market:has(.app-sticky-header) .listing-copy { padding: 12px; gap: 5px; }
-.market:has(.app-sticky-header) .listing-copy h3 { color: #263b30; font-size: 14px; }
-.market:has(.app-sticky-header) .listing-copy :is(.eyebrow, .origin-tag, .listing-meta) { color: #6b7567; }
-.market:has(.app-sticky-header) .listing-copy > strong { color: #174d37; font-size: 21px; letter-spacing: -.035em; }
-.market:has(.app-sticky-header) .listing-copy > strong small { color: #697568; font-size: 11px; letter-spacing: 0; }
-.market:has(.app-sticky-header) .meta-moq { color: #45614b; }
-.market:has(.app-sticky-header) .listing-picture { aspect-ratio: 1.15; background: #e9ece4; }
-.market:has(.app-sticky-header) .listing-picture::after { display: none; }
-.market:has(.app-sticky-header) .favorite { background: #fffefbe8; color: #375843; border-color: #e0e4da; box-shadow: none; }
-.market:has(.app-sticky-header) .favorite.selected { color: #b84b35; }
-.market:has(.app-sticky-header) .favorite.selected svg { fill: #b84b35; }
-.market:has(.app-sticky-header) .listing-grid { gap: 14px; }
+.market .filter-chip { background: #e5eee5; color: #245c47; border-color: #c6d6c9; }
+.market .listing-tile { background: #fffefb; border: 1px solid #e3e5dc; box-shadow: none; border-radius: 12px; overflow: hidden; }
+.market .listing-tile:hover { border-color: #b1bfae; box-shadow: 0 8px 22px #173e3210; transform: translateY(-3px); }
+.market .listing-copy { padding: 12px; gap: 5px; }
+.market .listing-copy h3 { color: #263b30; font-size: 14px; }
+.market .listing-copy :is(.eyebrow, .origin-tag, .listing-meta) { color: #6b7567; }
+.market .listing-copy > strong { color: #174d37; font-size: 21px; letter-spacing: -.035em; }
+.market .listing-copy > strong small { color: #697568; font-size: 11px; letter-spacing: 0; }
+.market .meta-moq { color: #45614b; }
+.market .listing-picture { aspect-ratio: 1.15; background: #e9ece4; }
+.market .listing-picture::after { display: none; }
+.market .favorite { background: #fffefbe8; color: #375843; border-color: #e0e4da; box-shadow: none; }
+.market .favorite.selected { color: #b84b35; }
+.market .favorite.selected svg { fill: #b84b35; }
+.market .listing-grid { gap: 14px; }
 .app-sticky-header :focus-visible, .listings :focus-visible, .flash-card:focus-visible { outline: 3px solid #49795c; outline-offset: 3px; }
 @media (min-width: 701px) {
   .app-sticky-header { top: 0; margin: 0 0 12px; padding: 10px 18px 0; border-radius: 16px; }
-  .market:has(.app-sticky-header) .listing-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .market .listing-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (max-width: 700px) {
   .app-top-nav-row { height: 48px; gap: 6px; }
@@ -579,17 +579,17 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   .app-feed-chips { min-width: 0; gap: 5px; }
   .feed-chip { padding: 6px 10px; }
   .feed-counter { font-size: 11px; }
-  .market:has(.app-sticky-header) .listing-copy { padding: 10px; }
-  .market:has(.app-sticky-header) .listing-copy > strong { font-size: 18px; }
-  .market:has(.app-sticky-header) .listing-copy > strong { color: #174d37 !important; }
-  .market:has(.app-sticky-header) .meta-moq { color: #45614b !important; background: #eef3e9 !important; }
-  .market:has(.app-sticky-header) .listing-picture { height: auto !important; }
-  .market:has(.app-sticky-header) .app-dest-select { background: transparent; color: #20372f; padding: 0 10px 0 0; border: 0; }
-  .market:has(.app-sticky-header) .listing-header-line { display: none; }
-  .market:has(.app-sticky-header) .mobile-nav { left: 0; right: 0; bottom: 0; padding: 5px 6px max(5px, env(safe-area-inset-bottom)); border-radius: 0; background: #fffefbf5; border-color: #e0e4da; box-shadow: 0 -3px 18px #173e3210; }
-  .market:has(.app-sticky-header) .mobile-nav a { color: #687568; min-height: 48px; }
-  .market:has(.app-sticky-header) .mobile-nav a.active { color: #174d37; }
-  .market:has(.app-sticky-header) .mobile-nav a.active .mobile-nav-icon { background: #f2d17c; color: #173e32; box-shadow: none; transform: none; }
+  .market .listing-copy { padding: 10px; }
+  .market .listing-copy > strong { font-size: 18px; }
+  .market .listing-copy > strong { color: #174d37 !important; }
+  .market .meta-moq { color: #45614b !important; background: #eef3e9 !important; }
+  .market .listing-picture { height: auto !important; }
+  .market .app-dest-select { background: transparent; color: #20372f; padding: 0 10px 0 0; border: 0; }
+  .market .listing-header-line { display: none; }
+  .market .mobile-nav { left: 0; right: 0; bottom: 0; padding: 5px 6px max(5px, env(safe-area-inset-bottom)); border-radius: 0; background: #fffefbf5; border-color: #e0e4da; box-shadow: 0 -3px 18px #173e3210; }
+  .market .mobile-nav a { color: #687568; min-height: 48px; }
+  .market .mobile-nav a.active { color: #174d37; }
+  .market .mobile-nav a.active .mobile-nav-icon { background: #f2d17c; color: #173e32; box-shadow: none; transform: none; }
 }
 
 

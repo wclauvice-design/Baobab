@@ -11,7 +11,6 @@ import { useAuth } from "../lib/auth";
 import { useCurrency } from "../lib/currency";
 import { useUnreadMessages } from "../lib/unreadMessages";
 import { usePendingClientCounts } from "../lib/clientCounts";
-import { ClientNotificationBell } from "../components/ClientNotificationBell";
 import {
   call,
   date,
@@ -121,6 +120,14 @@ export function Icon({ name, size = 22 }: { name: string; size?: number }) {
     close: <path d="M6 6l12 12M18 6 6 18" />,
     check: <path d="m5 12 5 5 9-10" />,
     plane: <path d="M2 16l20-8-6 14-4-6-6-2Zm10 0 10-8" />,
+    share: (
+      <>
+        <circle cx="18" cy="5" r="3" />
+        <circle cx="6" cy="12" r="3" />
+        <circle cx="18" cy="19" r="3" />
+        <path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" />
+      </>
+    ),
   };
   return (
     <svg
@@ -140,13 +147,13 @@ export function Icon({ name, size = 22 }: { name: string; size?: number }) {
 }
 
 export const DESTINATIONS = [
+  { id: "BF", flag: "🇧🇫", name: "Burkina Faso (Ouagadougou)", cbmRate: 230000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
   { id: "CI", flag: "🇨🇮", name: "Côte d'Ivoire (Abidjan)", cbmRate: 185000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
   { id: "SN", flag: "🇸🇳", name: "Sénégal (Dakar)", cbmRate: 190000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
   { id: "CM", flag: "🇨🇲", name: "Cameroun (Douala)", cbmRate: 195000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
   { id: "CD", flag: "🇨🇩", name: "RD Congo (Kinshasa)", cbmRate: 275000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
   { id: "TG", flag: "🇹🇬", name: "Togo (Lomé)", cbmRate: 175000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
   { id: "BJ", flag: "🇧🇯", name: "Bénin (Cotonou)", cbmRate: 180000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
-  { id: "BF", flag: "🇧🇫", name: "Burkina Faso (Ouagadougou)", cbmRate: 230000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
   { id: "ML", flag: "🇲🇱", name: "Mali (Bamako)", cbmRate: 240000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
   { id: "NE", flag: "🇳🇪", name: "Niger (Niamey)", cbmRate: 245000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
   { id: "GN", flag: "🇬🇳", name: "Guinée (Conakry)", cbmRate: 210000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
@@ -155,11 +162,12 @@ export const DESTINATIONS = [
 
 const DEST_KEY = "baobab_selected_destination";
 const DEST_EVENT = "baobab:destination";
+export const DEFAULT_DEST_ID = "BF";
 
 export function useUserDestination() {
-  const [destId, setDestId] = useState<string>(() => saved<string>(DEST_KEY, "CI"));
+  const [destId, setDestId] = useState<string>(() => saved<string>(DEST_KEY, DEFAULT_DEST_ID));
   useEffect(() => {
-    const sync = () => setDestId(saved<string>(DEST_KEY, "CI"));
+    const sync = () => setDestId(saved<string>(DEST_KEY, DEFAULT_DEST_ID));
     window.addEventListener(DEST_EVENT, sync);
     window.addEventListener("storage", sync);
     return () => {
@@ -249,107 +257,129 @@ function useFavorites() {
 export function CurrencySelector() {
   const { currency, setCurrency } = useCurrency();
   return (
-    <div className="currency-selector-badge" style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-      <select
-        value={currency}
-        onChange={(e) => setCurrency(e.target.value as any)}
-        aria-label="Choisir la devise"
-        style={{
-          background: "rgba(255, 255, 255, 0.18)",
-          color: "#fff",
-          border: "1px solid rgba(255, 255, 255, 0.35)",
-          borderRadius: "8px",
-          padding: "2px 8px",
-          fontSize: "0.76rem",
-          fontWeight: 700,
-          cursor: "pointer",
-          outline: "none",
-        }}
-      >
-        <option value="XOF" style={{ color: "#000" }}>🌍 FCFA (XOF)</option>
-        <option value="AED" style={{ color: "#000" }}>🇦🇪 AED (Dubaï)</option>
-        <option value="EUR" style={{ color: "#000" }}>🇪🇺 EUR (€)</option>
-        <option value="USD" style={{ color: "#000" }}>🇺🇸 USD ($)</option>
-      </select>
-    </div>
+    <select
+      className="bb-currency-select"
+      value={currency}
+      onChange={(e) => setCurrency(e.target.value as any)}
+      aria-label="Choisir la devise"
+    >
+      <option value="XOF">FCFA</option>
+      <option value="AED">AED</option>
+      <option value="EUR">EUR</option>
+      <option value="USD">USD</option>
+    </select>
   );
 }
 
 export function MarketShell({ children }: { children: React.ReactNode }) {
   const { ids: favoriteIds } = useFavorites();
-  const { current: userDest } = useUserDestination();
+  const { current: userDest, select: selectDest, all: allDests } = useUserDestination();
   const { unreadCount } = useUnreadMessages();
   const pending = usePendingClientCounts();
+  const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const search = params.get("search") || "";
+  const showDestBar =
+    location.pathname === "/" ||
+    location.pathname === "/search" ||
+    location.pathname === "/favorites" ||
+    location.pathname.startsWith("/shop/") ||
+    location.pathname.startsWith("/store/");
+
+  function submitSearch(value: string) {
+    const next = new URLSearchParams(params);
+    if (value) next.set("search", value);
+    else next.delete("search");
+    if (location.pathname === "/" || location.pathname === "/search") {
+      setParams(next);
+    } else {
+      navigate(`/?${next.toString()}`);
+    }
+  }
+
+  const badge = (count: number) =>
+    count > 0 ? <b className="bb-badge">{count > 99 ? "99+" : count}</b> : null;
+
   return (
     <div className="market">
-      <div className="top-note">
-        <span className="gold-badge-live">DUBAÏ ➔ AFRIQUE</span>
-        <span className="dest-quick-wrap">
-          Expédition vers : <strong>{userDest.flag} {userDest.name}</strong>
-        </span>
-        <span className="transit-quick-info">Express 3–6j · Cargo 14–16j · Maritime 45–50j</span>
-        <CurrencySelector />
-      </div>
-      <header className="market-header">
-        <Link to="/" className="brand">
-          <Icon name="tree" size={30} />
-          baobab<span>Le bon achat, bien accompagné.</span>
+      <header className="bb-header">
+        <Link
+          to="/"
+          className="bb-brand"
+          onClick={() => setParams(new URLSearchParams())}
+          aria-label="Baobab, retour à l'accueil"
+        >
+          <span className="bb-brand-mark"><Icon name="tree" size={19} /></span>
+          <span className="bb-brand-name">
+            baobab
+            <span className="bb-brand-sub">Dubaï → Afrique</span>
+          </span>
         </Link>
-        <nav>
-          <NavLink to="/" end>Explorer</NavLink>
-          <NavLink to="/favorites">
-            Favoris
-            {favoriteIds.length > 0 && (
-              <em className="nav-count" data-testid="nav-favorites-count">
-                {favoriteIds.length}
-              </em>
-            )}
+
+        <div className="bb-header-search">
+          <DiscoverySearch search={search} onSearch={submitSearch} paused={false} />
+        </div>
+
+        <div className="bb-header-actions">
+          <NavLink
+            to="/messages"
+            className={({ isActive }) => `bb-icon-btn bb-hide-sm ${isActive ? "active" : ""}`}
+            aria-label="Messages"
+          >
+            <Icon name="chat" size={20} />
+            {badge(unreadCount)}
           </NavLink>
-          <NavLink to="/messages">
-            Messages
-            {unreadCount > 0 && (
-              <em
-                className="nav-count"
-                style={{
-                  background: "#ef4444",
-                  color: "#ffffff",
-                  fontWeight: 800,
-                  minWidth: "18px",
-                  padding: "1px 5px",
-                  animation: "pulse 2s infinite",
-                }}
-              >
-                {unreadCount}
-              </em>
-            )}
+          <NavLink
+            to="/favorites"
+            className={({ isActive }) => `bb-icon-btn ${isActive ? "active" : ""}`}
+            aria-label="Favoris"
+          >
+            <Icon name="heart" size={20} />
+            {badge(favoriteIds.length)}
           </NavLink>
-          <NavLink to="/orders">
-            Mes commandes
-            {pending.total > 0 && (
-              <em
-                className="nav-count"
-                style={{
-                  background: "#ef4444",
-                  color: "#ffffff",
-                  fontWeight: 800,
-                  minWidth: "18px",
-                  padding: "1px 5px",
-                }}
-              >
-                {pending.total > 99 ? "99+" : pending.total}
-              </em>
-            )}
+          <NavLink
+            to="/orders"
+            className={({ isActive }) => `bb-icon-btn ${isActive ? "active" : ""}`}
+            aria-label="Mes commandes"
+          >
+            <Icon name="box" size={20} />
+            {badge(pending.total)}
           </NavLink>
-        </nav>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <ClientNotificationBell unreadCount={unreadCount} toPay={pending.toPay} quotes={pending.quotes} />
-          <Link className="account-link" to="/account">
-            <Icon name="user" />
-            <span>Mon espace</span>
-          </Link>
+          <NavLink
+            to="/account"
+            className={({ isActive }) => `bb-icon-btn bb-hide-sm ${isActive ? "active" : ""}`}
+            aria-label="Mon espace"
+          >
+            <Icon name="user" size={20} />
+          </NavLink>
         </div>
       </header>
+
+      {showDestBar && (
+        <div className="bb-dest-bar">
+          <span className="bb-flag" aria-hidden="true">{userDest.flag}</span>
+          <span className="bb-dest-label">Livraison vers</span>
+          <select
+            value={userDest.id}
+            onChange={(e) => selectDest(e.target.value)}
+            className="bb-dest-select"
+            aria-label="Pays de destination"
+          >
+            {allDests.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name.split(" (")[0]}
+              </option>
+            ))}
+          </select>
+          <span className="bb-dest-spacer" />
+          <span className="bb-dest-transit">Express 3–6 j</span>
+          <CurrencySelector />
+        </div>
+      )}
+
       <main className="market-main">{children}</main>
+
       <footer className="market-footer">
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "16px", width: "100%", maxWidth: "1200px", margin: "0 auto" }}>
           <div>
@@ -368,6 +398,7 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </footer>
+
       <nav className="mobile-nav">
         {[
           ["/", "home", "Explorer"],
@@ -385,43 +416,13 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
                 </b>
               )}
               {to === "/messages" && unreadCount > 0 && (
-                <b
-                  className="mobile-nav-badge"
-                  style={{
-                    background: "#ef4444",
-                    color: "#ffffff",
-                    fontWeight: 800,
-                    boxShadow: "0 0 0 2px #fff",
-                    animation: "pulse 2s infinite",
-                  }}
-                >
+                <b className="mobile-nav-badge">
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </b>
               )}
               {to === "/orders" && pending.total > 0 && (
-                <b
-                  className="mobile-nav-badge"
-                  style={{
-                    background: "#ef4444",
-                    color: "#ffffff",
-                    fontWeight: 800,
-                    boxShadow: "0 0 0 2px #fff",
-                  }}
-                >
+                <b className="mobile-nav-badge">
                   {pending.total > 99 ? "99+" : pending.total}
-                </b>
-              )}
-              {to === "/account" && unreadCount > 0 && (
-                <b
-                  className="mobile-nav-badge"
-                  style={{
-                    background: "#ef4444",
-                    color: "#ffffff",
-                    fontWeight: 800,
-                    boxShadow: "0 0 0 2px #fff",
-                  }}
-                >
-                  {unreadCount > 99 ? "99+" : unreadCount}
                 </b>
               )}
             </span>
@@ -459,18 +460,20 @@ function productCategoryLabel(product: any): string {
 }
 
 function subcategoryLabel(product: any): string {
+  const usable = (value: any) =>
+    typeof value === "string" &&
+    value.trim() !== "" &&
+    value.trim().toLowerCase() !== "autres";
   const canonical: string[] = Array.isArray(product?.canonicalSubcategories)
-    ? product.canonicalSubcategories.filter(Boolean)
+    ? product.canonicalSubcategories.filter(usable)
     : [];
   const list: string[] = canonical.length
     ? canonical
     : Array.isArray(product?.subcategories)
-      ? product.subcategories.filter(Boolean)
+      ? product.subcategories.filter(usable)
       : [];
   if (list.length) return list.join(' · ');
-  return product?.subcategory && product.subcategory !== 'Autres'
-    ? product.subcategory
-    : '';
+  return usable(product?.subcategory) ? product.subcategory : '';
 }
 
 /** Quantité initiale respectant le minimum de commande et le conditionnement. */
@@ -539,6 +542,11 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
         >
           <Icon name="heart" size={19} />
         </button>
+        {p.condition && (
+          <span className={`picture-tag condition-tag condition-${String(p.condition).toLowerCase()}`}>
+            {p.condition === "NEW" ? "Neuf" : p.condition === "REFURBISHED" ? "Reconditionné" : "Occasion"}
+          </span>
+        )}
         {!isRealPhoto && !imageFailed && <span className="picture-tag is-sample-label">Illustration</span>}
       </div>
       <div className="listing-copy">
@@ -548,6 +556,10 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
         <strong>
           {money(p.price)} <small>/ {p.unit || "pièce"}</small>
         </strong>
+        <span className="listing-meta">
+          <Icon name="pin" size={11} />
+          {p.location || "Dubaï"} · {p.shippingIncluded ? "Livraison incluse" : "Expédié"}
+        </span>
       </div>
     </article>
   );
@@ -567,7 +579,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
       () => !feedCache.has(params.toString()),
     );
   const { ids: favoriteIds } = useFavorites();
-  const { current: currentDest, select: selectDest, all: allDests } = useUserDestination();
+  const { current: currentDest } = useUserDestination();
   const universe = params.get("universe") || "",
     search = params.get("search") || "",
     categoryKey = params.get("categoryKey") || "",
@@ -711,159 +723,104 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
       }));
   return (
     <>
-      {/* 1. Header Compact & Sticky : Recherche, Destination & Catégories (Style Temu / Farfetch Premium) */}
-      <section className="app-sticky-header" role="banner">
-        <div className="app-top-nav-row">
-          <Link
-            to="/"
-            className="app-brand-badge"
-            onClick={() => setParams(new URLSearchParams())}
-            title="Accueil Baobab"
-          >
-            <span className="app-brand-icon">🌳</span>
-            <span className="app-brand-text">baobab</span>
-          </Link>
-
-          <DiscoverySearch search={search} onSearch={(value) => filter("search", value)} paused={motionPaused} />
-
-          <div className="app-dest-pill" title="Destination de livraison">
-            <span className="dest-flag">{currentDest.flag}</span>
-            <select
-              value={currentDest.id}
-              onChange={(e) => selectDest(e.target.value)}
-              className="app-dest-select"
-              aria-label="Pays de destination"
+      {/* 1. Hero éditorial — un seul point focal */}
+      {!search && !favorites && (
+        <section className="bb-hero">
+          <p className="bb-eyebrow">La sélection Baobab · Dubaï</p>
+          <h1>Vos envies. De Dubaï à chez vous.</h1>
+          <p className="bb-hero-copy">
+            Achat à l’unité ou en gros. Douane, fret et livraison organisés pour vous.
+          </p>
+          <div className="bb-route" aria-label={`Dubaï vers ${currentDest.name}`}>
+            <span className="bb-flag ae" aria-hidden="true" />
+            <span>Dubaï</span>
+            <span className="bb-route-line" />
+            <Icon name="plane" size={12} />
+            <span className="bb-route-line" />
+            <span className="bb-flag" aria-hidden="true">{currentDest.flag}</span>
+            <span>{currentDest.name.split(" (")[0]}</span>
+          </div>
+          <div className="bb-hero-actions">
+            <button
+              type="button"
+              className="bb-btn bb-btn-primary"
+              onClick={() =>
+                document
+                  .getElementById("bb-feed")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
             >
-              {allDests.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.flag} {d.name.split(" ")[0]}
-                </option>
-              ))}
-            </select>
-            <span className="dest-chevron">▾</span>
-          </div>
-        </div>
-
-        {/* Barre de Catégories Défilante avec Glissement Or (Tabs) */}
-        <nav className="app-category-strip" aria-label="Catégories">
-          {STORY_CATEGORIES.map((cat) => {
-            const isSelected =
-              !cat.universe && !cat.categoryKey && !cat.subcategoryKey
-                ? !universe && !categoryKey && !subcategoryKey
-                : cat.subcategoryKey
-                  ? subcategoryKey === cat.subcategoryKey
-                  : cat.categoryKey
-                    ? categoryKey === cat.categoryKey && !subcategoryKey
-                    : universe === cat.universe && !categoryKey;
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                className={`app-cat-tab ${isSelected ? "active" : ""}`}
-                aria-pressed={isSelected}
-                onClick={() => {
-                  const next = new URLSearchParams(params);
-                  if (cat.universe) next.set("universe", cat.universe);
-                  else next.delete("universe");
-                  if (config?.taxonomy) {
-                    if (cat.categoryKey) next.set("categoryKey", cat.categoryKey);
-                    else next.delete("categoryKey");
-                    if (cat.subcategoryKey)
-                      next.set("subcategoryKey", cat.subcategoryKey);
-                    else next.delete("subcategoryKey");
-                    next.delete("subcategory");
-                  } else {
-                    next.delete("categoryKey");
-                    next.delete("subcategoryKey");
-                    if (cat.fallbackSubcategory)
-                      next.set("subcategory", cat.fallbackSubcategory);
-                    else next.delete("subcategory");
-                  }
-                  setParams(next);
-                }}
-              >
-                <span className="tab-emoji">{cat.emoji}</span>
-                <span className="tab-label">{cat.label}</span>
-                {isSelected && <span className="tab-gold-indicator" />}
-              </button>
-            );
-          })}
-        </nav>
-      </section>
-
-      {/* 2. Hero Card Compacte & Dynamique (Sourcing Dubaï) */}
-      {!search && (
-        <section className="app-hero-strip">
-          <div className="hero-strip-badge">
-            <span className="live-sparkle">✨</span>
-            <span>LA SÉLECTION BAOBAB · DUBAÏ</span>
-          </div>
-          <div className="hero-strip-main">
-            <h1>Vos envies. De Dubaï à chez vous.</h1>
-            <p>À l’unité ou en gros · Destination : {currentDest.name}</p>
-          </div>
-          <div className="hero-strip-pills">
-            <span className="pill-item">Aérien & maritime</span>
-            <Link className="pill-item highlight" to="/messages">Un projet ? Parlons-en ↗</Link>
+              Explorer la sélection <Icon name="arrow" size={14} />
+            </button>
+            <Link className="bb-link" to="/messages">
+              Un projet ? Parlons-en
+            </Link>
           </div>
         </section>
       )}
 
+      {/* 2. Réassurance & activité */}
       <BaobabPromises paused={motionPaused} onPause={() => setMotionPaused((value) => !value)} />
       <LiveActivityTicker paused={motionPaused} />
 
-      {/* 3. Vitrine Flash 2 Colonnes (comme Temu Clearance & Lightning Deals) */}
-      {!search && !universe && (
-        <section className="app-flash-showcase">
-          <button type="button"
-            className="flash-card card-motors"
-            onClick={() => {
-              const next = new URLSearchParams(params);
-              next.set("universe", "motors");
-              setParams(next);
-            }}
-          >
-            <div className="flash-card-head">
-              <span className="flash-label">L’UNIVERS AUTO ↗</span>
-              <h3>Véhicules & 4×4</h3>
-              <p>4×4, utilitaires & accessoires</p>
-            </div>
-            <div className="flash-card-foot">
-              <span className="flash-badge">Explorer les véhicules →</span>
-            </div>
-          </button>
+      {/* 3. Catégories — chips sobres, sans emoji */}
+      <nav className="bb-cat-strip" aria-label="Catégories">
+        {STORY_CATEGORIES.map((cat) => {
+          const isSelected =
+            !cat.universe && !cat.categoryKey && !cat.subcategoryKey
+              ? !universe && !categoryKey && !subcategoryKey
+              : cat.subcategoryKey
+                ? subcategoryKey === cat.subcategoryKey
+                : cat.categoryKey
+                  ? categoryKey === cat.categoryKey && !subcategoryKey
+                  : universe === cat.universe && !categoryKey;
+          return (
+            <button
+              key={cat.id}
+              type="button"
+              className={`bb-chip ${isSelected ? "active" : ""}`}
+              aria-pressed={isSelected}
+              onClick={() => {
+                const next = new URLSearchParams(params);
+                if (cat.universe) next.set("universe", cat.universe);
+                else next.delete("universe");
+                if (config?.taxonomy) {
+                  if (cat.categoryKey) next.set("categoryKey", cat.categoryKey);
+                  else next.delete("categoryKey");
+                  if (cat.subcategoryKey)
+                    next.set("subcategoryKey", cat.subcategoryKey);
+                  else next.delete("subcategoryKey");
+                  next.delete("subcategory");
+                } else {
+                  next.delete("categoryKey");
+                  next.delete("subcategoryKey");
+                  if (cat.fallbackSubcategory)
+                    next.set("subcategory", cat.fallbackSubcategory);
+                  else next.delete("subcategory");
+                }
+                setParams(next);
+              }}
+            >
+              {cat.label}
+            </button>
+          );
+        })}
+      </nav>
 
-          <button type="button"
-            className="flash-card card-solar"
-            onClick={() => {
-              const next = new URLSearchParams(params);
-              next.set("universe", "classifieds");
-              if (config?.taxonomy) {
-                next.set("categoryKey", "energie-solaire");
-                next.delete("subcategoryKey");
-                next.delete("subcategory");
-              } else {
-                next.delete("categoryKey");
-                next.delete("subcategoryKey");
-                next.set("subcategory", "Énergie Solaire & Batteries");
-              }
-              setParams(next);
-            }}
-          >
-            <div className="flash-card-head">
-              <span className="flash-label">ÉNERGIE SOLAIRE ↗</span>
-              <h3>Solaire & batteries</h3>
-              <p>Panneaux, batteries & onduleurs</p>
-            </div>
-            <div className="flash-card-foot">
-              <span className="flash-badge">Découvrir la sélection →</span>
-            </div>
-          </button>
-        </section>
-      )}
-
-      {/* 4. Barre de Filtres Rapides & Décompte */}
-      <section className="listings">
+      {/* 4. Fil */}
+      <section className="listings" id="bb-feed">
+        <div className="bb-sec-head">
+          <h2>
+            {search
+              ? `« ${search} »`
+              : universe
+                ? universes.find((u) => u.id === universe)?.name || "Sélection"
+                : "Nouveautés"}
+          </h2>
+          <span className="feed-counter">
+            {loading ? "…" : `${shown.length} offres`}
+          </span>
+        </div>
         <div className="app-feed-header">
           <div className="app-feed-chips">
             <button
@@ -888,9 +845,6 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
               Prix décroissants
             </button>
           </div>
-          <span className="feed-counter">
-            {loading ? "..." : `${shown.length} offres`}
-          </span>
         </div>
         <details className="feed-filters">
         <summary>Affiner la sélection <span>État, budget, catégorie</span></summary>
@@ -1257,7 +1211,13 @@ export function ListingDetail() {
     );
   }
 
-  const rawDesc = p.description || "";
+  const rawDescription = (p.description || "").trim();
+  const firstLine = rawDescription.split("\n")[0]?.trim() || "";
+  const normalize = (value: string) => value.toLowerCase().replace(/\s+/g, " ").trim();
+  const rawDesc =
+    firstLine && normalize(firstLine) === normalize(String(p.name || ""))
+      ? rawDescription.slice(firstLine.length).trim()
+      : rawDescription;
   const isLongDesc = rawDesc.length > 220;
   const displayedDesc = isLongDesc && !showFullDesc ? `${rawDesc.slice(0, 220)}…` : rawDesc;
 
@@ -1301,7 +1261,7 @@ export function ListingDetail() {
               }
               alt={p.name}
               decoding="async"
-              className="h-full w-full object-contain p-3"
+              className="h-full w-full object-cover"
             />
           )}
 
@@ -1385,9 +1345,9 @@ export function ListingDetail() {
         {/* Vendeur & Localisation */}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800 pt-3 text-xs text-slate-300">
           <div className="flex items-center gap-2">
-            <span className="text-base">👑</span>
+            <Icon name="shield" size={14} />
             <span>Vendu par <strong>{p.seller?.shopName || "Baobab Dubaï Officiel"}</strong></span>
-            <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">✓ Vérifié</span>
+            <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">Vérifié</span>
           </div>
           <div className="flex items-center gap-1 text-slate-400">
             <Icon name="pin" size={14} />
@@ -1484,7 +1444,7 @@ export function ListingDetail() {
                 className={`mode-btn ${freight.mode === "EXPRESS" ? "active" : ""}`}
                 onClick={() => setShippingMode("EXPRESS")}
               >
-                <span className="mode-btn-title">✈️ Express (3–6 j)</span>
+                <span className="mode-btn-title">Express (3–6 j)</span>
                 <small>12 500 F/kg</small>
               </button>
             )}
@@ -1494,7 +1454,7 @@ export function ListingDetail() {
                 className={`mode-btn ${freight.mode === "CARGO" ? "active" : ""}`}
                 onClick={() => setShippingMode("CARGO")}
               >
-                <span className="mode-btn-title">✈️ Cargo (14–16 j)</span>
+                <span className="mode-btn-title">Cargo (14–16 j)</span>
                 <small>8 600 F/kg</small>
               </button>
             )}
@@ -1504,7 +1464,7 @@ export function ListingDetail() {
                 className={`mode-btn ${freight.mode === "SEA" ? "active" : ""}`}
                 onClick={() => setShippingMode("SEA")}
               >
-                <span className="mode-btn-title">🚢 Maritime (45–50 j)</span>
+                <span className="mode-btn-title">Maritime (45–50 j)</span>
                 <small>{money(dest.cbmRate)}/m³</small>
               </button>
             )}
@@ -1524,7 +1484,7 @@ export function ListingDetail() {
               <span>
                 {freight.modeLabel}
                 <br />
-                <small style={{ color: "#94a3b8" }}>
+                <small style={{ color: "var(--muted)" }}>
                   Poids total : ~{totalWeight.toFixed(1)} kg
                   {freight.mode === "SEA" ? ` · Volume : ${freight.volumeCbm.toFixed(2)} m³` : ""}
                   {freight.basis === "volumetric" ? " (poids volumétrique)" : ""}
@@ -1570,12 +1530,12 @@ export function ListingDetail() {
             type="button"
             onClick={() => {
               navigator.clipboard.writeText(window.location.href);
-              alert("Lien direct copié ! Vous pouvez le coller dans votre publicité Facebook Ads ou TikTok Ads.");
+              alert("Lien de l’annonce copié. Vous pouvez le partager.");
             }}
             className="sponsor-share-btn"
           >
-            <span>📱</span>
-            <span>Copier le lien pour pub TikTok / Facebook</span>
+            <Icon name="share" size={15} />
+            <span>Copier le lien de l’annonce</span>
           </button>
         </div>
       </div>
@@ -1618,6 +1578,16 @@ export function ListingDetail() {
           </div>
         </div>
       )}
+      <div className="bb-detail-cta">
+        <div className="bb-detail-cta-price">
+          <strong>{money(p.price)}</strong>
+          <small>{p.shippingIncluded ? "Douane & livraison incluses" : "Hors fret · devis immédiat"}</small>
+        </div>
+        <button type="button" onClick={discuss} disabled={busy}>
+          {busy ? "Ouverture…" : "Demander un devis"}
+          <Icon name="arrow" size={14} />
+        </button>
+      </div>
     </>
   );
 }
@@ -2523,47 +2493,56 @@ export function Storefront() {
 
   return (
     <div className="storefront-container">
-      {/* 1. Header Hero */}
-      <div className="storefront-hero">
+      {/* 1. Couverture & identité */}
+      <div className="storefront-cover">
+        <span className="storefront-cover-label">Sélectionneur vérifié · Dubaï</span>
+      </div>
+      <div className="storefront-head">
         <div className="storefront-avatar">
           {shopName.charAt(0)}
+          <span className="storefront-verified"><Icon name="check" size={11} /></span>
         </div>
-        <div className="storefront-hero-content">
-          <div className="storefront-title-row">
-            <h1>{shopName}</h1>
-            <span className="storefront-badge">✓ Boutique Officielle Partenaire</span>
-          </div>
-          <p className="storefront-meta">
-            📍 {seller?.city || "Dubaï"} · 📦 {products.length} article{products.length > 1 ? "s" : ""} disponible{products.length > 1 ? "s" : ""} · 🛡️ Vente certifiée Baobab
-          </p>
-          <div className="storefront-actions">
-            <button onClick={handleShare} className="storefront-btn-share">
-              {copied ? "✓ Lien copié !" : "🔗 Partager / Copier le lien"}
-            </button>
-            <a
-              href={`https://wa.me/971568934905?text=${encodeURIComponent(
-                `Bonjour, je visite la vitrine de la boutique ${shopName} sur Baobab et je souhaite commander un article.`
-              )}`}
-              target="_blank"
-              rel="noreferrer"
-              className="storefront-btn-whatsapp"
-            >
-              💬 Discuter sur WhatsApp
-            </a>
-          </div>
-        </div>
+        <h1>
+          {shopName}
+          <span className="storefront-badge">Vérifié</span>
+        </h1>
+        <p className="storefront-meta">
+          {seller?.city || "Dubaï"}, Émirats · Depuis 2023 · Réponse &lt; 2 h
+        </p>
       </div>
 
-      {/* 2. Reassurance banner */}
+      <div className="storefront-stats">
+        <div><b>{products.length}</b><span>articles</span></div>
+        <div><b>{categories.length}</b><span>catégories</span></div>
+        <div><b>100 %</b><span>vérifié</span></div>
+      </div>
+
+      <div className="storefront-actions">
+        <button onClick={handleShare} className="storefront-btn-share">
+          {copied ? "Lien copié" : "Partager la boutique"}
+        </button>
+        <a
+          href={`https://wa.me/971568934905?text=${encodeURIComponent(
+            `Bonjour, je visite la vitrine de la boutique ${shopName} sur Baobab et je souhaite commander un article.`
+          )}`}
+          target="_blank"
+          rel="noreferrer"
+          className="storefront-btn-whatsapp"
+        >
+          Message
+        </a>
+      </div>
+
+      {/* 2. Réassurance */}
       <div className="storefront-reassurance">
         <div className="reassurance-pill">
           <span>✓</span> Photos réelles & conformité garantie
         </div>
         <div className="reassurance-pill">
-          <span>🛡️</span> Paiement sécurisé via Baobab (à la livraison possible)
+          <span>✓</span> Paiement sécurisé via Baobab
         </div>
         <div className="reassurance-pill">
-          <span>✈️</span> Expédition express Dubaï ➔ Afrique de l'Ouest
+          <span>✓</span> Expédition suivie Dubaï → Afrique
         </div>
       </div>
 
@@ -2599,11 +2578,11 @@ export function Storefront() {
 
       {/* 4. Products Grid */}
       {loading ? (
-        <div className="storefront-loading" style={{ textAlign: "center", padding: "40px", color: "#94a3b8" }}>
+        <div className="storefront-loading" style={{ textAlign: "center", padding: "40px", color: "var(--muted)" }}>
           <p>Chargement des articles de {shopName}…</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="storefront-empty" style={{ textAlign: "center", padding: "40px", color: "#94a3b8" }}>
+        <div className="storefront-empty" style={{ textAlign: "center", padding: "40px", color: "var(--muted)" }}>
           <p>Aucun article trouvé dans cette sélection.</p>
         </div>
       ) : (
@@ -2625,7 +2604,7 @@ export function Storefront() {
                   loading="lazy"
                 />
                 {item.location && (
-                  <span className="card-location-tag">📍 {item.location}</span>
+                  <span className="card-location-tag"><Icon name="pin" size={10} /> {item.location}</span>
                 )}
               </div>
               <div className="storefront-card-body">

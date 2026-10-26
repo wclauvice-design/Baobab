@@ -1,0 +1,12 @@
+{
+  "requiredMatch": "exact_item_sold",
+  "illustrationsAllowed": false,
+  "sameModelAndColourSufficient": false,
+  "requiredEvidence": [
+    "Baobab SKU linked to a specific supplier listing or supplier article identifier",
+    "Gallery belongs to that supplier article",
+    "Variant and condition agree with the Baobab product"
+  ],
+  "currentBlocker": "The 5200-row manifest provides search URLs, not supplier listing identities. No exact-item mapping is verified yet.",
+  "productionImagesChanged": false
+}

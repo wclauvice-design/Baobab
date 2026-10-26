@@ -52,9 +52,15 @@ export function VehicleCard({ product, isFavorite = false, onToggleFavorite }: {
         onClick={() => onToggleFavorite(product.id)}>
         <IconHeart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
       </button>}
+      {product.condition && (
+        <span className={`picture-tag condition-tag condition-${String(product.condition).toLowerCase()}`}>
+          {product.condition === 'NEW' ? 'Neuf' : product.condition === 'REFURBISHED' ? 'Reconditionné' : 'Occasion'}
+        </span>
+      )}
       <Link to={`/products/${product.id}`} state={{ product }} className="visual-product-caption">
         <h3 title={product.name}>{product.name}</h3>
         <strong>{format(Number(product.price || 0))}</strong>
+        <span className="listing-meta">{product.location || 'Dubaï'} · Fret</span>
       </Link>
     </article>
   );

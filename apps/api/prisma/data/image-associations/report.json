@@ -1,0 +1,18 @@
+{
+  "catalogueSha256": "d1cd57a4379e6fd6e0bfc80f9b6b9ed175268f780b922f98889977dbca551b0f",
+  "products": 5200,
+  "verifiedProducts": 0,
+  "verifiedImages": 0,
+  "pendingProducts": 5200,
+  "galleryOrder": [
+    "principal",
+    "avant",
+    "profil",
+    "arriere",
+    "interieur",
+    "detail",
+    "accessoires",
+    "dimensions"
+  ],
+  "productionModified": false
+}

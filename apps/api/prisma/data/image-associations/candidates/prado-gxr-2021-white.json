@@ -1,0 +1,29 @@
+{
+  "sourcePage": "https://dubai.dubizzle.com/motors/used-cars/toyota/prado/2026/08/30/aed-2006m-0-dp-free-3-months-warranty-serv-2-312---10618515d7b5452f901602b7fc7605dc/",
+  "sourceModel": "Toyota Prado GXR",
+  "sourceYear": 2021,
+  "sourceColour": "White",
+  "sourceCondition": "USED",
+  "sourceMileageKm": 84527,
+  "advertisedGalleryCount": 13,
+  "exposedImageLinks": 2,
+  "assignedSku": null,
+  "status": "not_matched",
+  "reason": "No Prado GXR reference found in the local catalogue; TX and TX-L are different trims. Do not assign by generic model name alone.",
+  "images": [
+    {
+      "sourcePosition": 1,
+      "localFile": "prado-gxr-2021-white-01.jpg",
+      "url": "https://dbz-images.dubizzle.com/images/2026/08/30/7b2912277a2842f09edb8cc4c6419c15-.jpg?impolicy=dpv",
+      "visuallyVerified": true,
+      "view": "front three-quarter",
+      "suggestedRole": "principal"
+    },
+    {
+      "sourcePosition": 2,
+      "localFile": "prado-gxr-2021-white-02.jpg",
+      "url": "https://dbz-images.dubizzle.com/images/2026/08/30/6284b877cf074ed6a3bea8afe1852df2-.jpg?impolicy=dpv",
+      "visuallyVerified": false
+    }
+  ]
+}

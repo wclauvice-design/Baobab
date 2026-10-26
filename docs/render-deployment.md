@@ -20,6 +20,10 @@ Les dossiers frontend sont apps/pwa et apps/admin, avec la sortie dist. Conserve
 
 ## Validation
 
+Le package `@baobab/shared` expose `dist/index.js` à Node et `src/index.ts` aux bundlers via `module`. Compiler le package partagé avant l’API, puis vérifier `node -e "require('@baobab/shared')"`. Un build TypeScript réussi ne suffit pas : un point d’entrée vers une source TypeScript contenant des enums peut faire échouer le démarrage Node en production.
+
+Le réglage Render « On Commit » doit être accompagné d’une intégration GitHub fonctionnelle. Après un push sur `main`, vérifier qu’un déploiement Render apparaît pour ce SHA avec un déclencheur Git, puis attendre `live`. Un déploiement lancé par API prouve la publication, pas le fonctionnement du déclenchement automatique. Si aucun événement n’apparaît, vérifier la source connectée, la branche, les filtres et les droits de l’application Render sur le dépôt GitHub. Ne pas enregistrer un Deploy Hook privé dans ce dépôt.
+
 - GET /health : 200 et status ok.
 - GET /products : réponse JSON.
 - OPTIONS /auth/dev-login avec Origin de chaque frontend et Access-Control-Request-Method POST : origine autorisée.

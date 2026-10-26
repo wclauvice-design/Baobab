@@ -1,0 +1,62 @@
+[
+  {
+    "id": "BAO-SOURCE-DBZ-10618515D7B5452F901602B7FC7605DC",
+    "merchant": "Baobab",
+    "status": "DRAFT_SOURCE_RECHECK_REQUIRED",
+    "name": "Toyota Prado GXR 2021 — blanc — occasion, 84 527 km",
+    "condition": "USED",
+    "stock": null,
+    "source": {
+      "platform": "Dubizzle",
+      "seller": "CARS24",
+      "listingUrl": "https://dubai.dubizzle.com/motors/used-cars/toyota/prado/2026/08/30/aed-2006m-0-dp-free-3-months-warranty-serv-2-312---10618515d7b5452f901602b7fc7605dc/",
+      "observedDate": "2026-10-25",
+      "evidence": "Public search index snapshot; live availability and price not confirmed",
+      "price": "131999.00",
+      "currency": "AED",
+      "advertisedImageCount": 13
+    },
+    "pricing": {
+      "markupPercent": "15",
+      "priceBeforeCurrencyConversion": "151798.85",
+      "currency": "AED",
+      "xofExchangeRate": null,
+      "priceXof": null,
+      "shippingIncluded": false,
+      "rounding": "Decimal arithmetic; round once to whole XOF after a documented currency conversion"
+    },
+    "attributes": {
+      "brand": "Toyota",
+      "model": "Prado",
+      "trim": "GXR",
+      "year": 2021,
+      "exteriorColour": "White",
+      "interiorColour": "Beige",
+      "mileageKm": 84527,
+      "regionalSpecs": "GCC"
+    },
+    "images": [
+      {
+        "position": 1,
+        "role": "principal",
+        "view": "front three-quarter",
+        "localFile": "../candidates/prado-gxr-2021-white-01.jpg",
+        "sourceUrl": "https://dbz-images.dubizzle.com/images/2026/08/30/7b2912277a2842f09edb8cc4c6419c15-.jpg?impolicy=dpv",
+        "visuallyVerified": true
+      },
+      {
+        "position": 2,
+        "role": "avant",
+        "view": "front",
+        "localFile": "../candidates/prado-gxr-2021-white-02.jpg",
+        "sourceUrl": "https://dbz-images.dubizzle.com/images/2026/08/30/6284b877cf074ed6a3bea8afe1852df2-.jpg?impolicy=dpv",
+        "visuallyVerified": true
+      }
+    ],
+    "publicationBlockers": [
+      "Confirm live supplier availability and current price",
+      "Document AED to XOF conversion rate",
+      "Retrieve remaining gallery views if accessible"
+    ]
+  }
+]
