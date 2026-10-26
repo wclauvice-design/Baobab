@@ -53,12 +53,12 @@ export const CORE_GUARANTEES = [
 
 // Live social proof ticker simulating real verified logistics activities
 export const LIVE_ACTIVITIES = [
-  { icon: "🟢", city: "Ouagadougou", text: "Devis validé · Kit Solaire 5 kVA Hybride", time: "il y a 3 min" },
-  { icon: "✈️", city: "Abidjan", text: "Fret Express pris en charge à Dubaï · Lot Électronique", time: "il y a 7 min" },
-  { icon: "🚢", city: "Lomé", text: "Conteneur maritime en cours de chargement à Jebel Ali", time: "il y a 14 min" },
-  { icon: "📹", city: "Bamako", text: "Inspection vidéo validée pour un commerçant partenaire", time: "il y a 22 min" },
-  { icon: "📦", city: "Cotonou", text: "Colis remis en main propre au destinataire avec succès", time: "il y a 35 min" },
-  { icon: "🟢", city: "Niamey", text: "Commande confirmée · Pièces détachées Toyota Land Cruiser", time: "il y a 48 min" },
+  { icon: "🚗", city: "Ouagadougou", text: "Toyota Hilux 2024 inspectée au showroom Dubaï & réservée", time: "il y a 2 min" },
+  { icon: "⚡", city: "Abidjan", text: "10 kits solaires 5 kVA Hybride expédiés en fret express", time: "il y a 6 min" },
+  { icon: "🚢", city: "Lomé", text: "Arrivage conteneur Jetour Dashing au port de transit", time: "il y a 12 min" },
+  { icon: "📹", city: "Bamako", text: "Inspection vidéo en direct validée pour un commerçant", time: "il y a 19 min" },
+  { icon: "📦", city: "Cotonou", text: "Colis électronique remis en main propre au destinataire", time: "il y a 31 min" },
+  { icon: "🛡️", city: "Niamey", text: "Devis proforma validé · Pièces détachées Toyota d'origine", time: "il y a 44 min" },
 ];
 
 function useRotation(count: number, intervalMs: number, paused: boolean) {
@@ -201,7 +201,11 @@ export function LiveActivityTicker({ paused }: { paused: boolean }) {
   return (
     <div className="live-activity-stream" aria-label="Flux des commandes en direct">
       <div className="stream-badge">
-        <span className="pulse-dot" /> EN DIRECT
+        <span className="relative flex h-2 w-2 mr-1">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+        </span>
+        <span>EN DIRECT</span>
       </div>
       <div className="stream-content" key={`${index}-${running}`}>
         <span className="stream-icon">{current.icon}</span>

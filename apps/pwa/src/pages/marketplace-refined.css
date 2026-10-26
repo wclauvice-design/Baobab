@@ -5,18 +5,18 @@
    ========================================================================== */
 
 .market {
-  --bb-bg: #FAF7F0;
+  --bb-bg: #F8F9FA;
   --bb-surface: #FFFFFF;
-  --bb-surface-2: #F3EFE4;
-  --bb-surface-3: #FBF8F0;
-  --bb-ink: #173E32;
-  --bb-ink-2: #3F5749;
-  --bb-muted: #5E6B60;
-  --bb-line: #E6E1D4;
-  --bb-line-strong: #D8D1BE;
-  --bb-brand: #E8A33D;
-  --bb-brand-soft: #FBF0D8;
-  --bb-brand-ink: #8A5A00;
+  --bb-surface-2: #F1F5F3;
+  --bb-surface-3: #F8F9FA;
+  --bb-ink: #0B1E17;
+  --bb-ink-2: #2D3748;
+  --bb-muted: #64748B;
+  --bb-line: #E2E8F0;
+  --bb-line-strong: #CBD5E1;
+  --bb-brand: #D4AF37;
+  --bb-brand-soft: #FEF9C3;
+  --bb-brand-ink: #92400E;
   --bb-accent: #B85732;
   --bb-accent-soft: #F7E7E0;
   --bb-accent-ink: #A34E2D;
@@ -345,7 +345,12 @@
   padding: 24px 2px 20px;
   border-bottom: 1px solid var(--bb-line);
   background:
-    radial-gradient(120% 100% at 100% 0%, #FBE9C6 0%, rgba(251, 233, 198, 0) 56%);
+    radial-gradient(100% 120% at 100% 0%, rgba(16, 185, 129, 0.07) 0%, rgba(212, 175, 55, 0.04) 45%, transparent 75%), #FFFFFF;
+  border-radius: 24px;
+  margin-top: 10px;
+  padding: 24px 20px 22px;
+  border: 1px solid var(--bb-line);
+  box-shadow: 0 4px 20px rgba(11, 30, 23, 0.03);
 }
 
 .bb-eyebrow {

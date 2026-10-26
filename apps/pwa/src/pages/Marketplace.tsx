@@ -41,6 +41,7 @@ import {
 } from "../lib/productCache";
 import { VehicleCard } from "../components/VehicleCard";
 import { DubizzleVehicleDetail } from "../components/DubizzleVehicleDetail";
+import { ImageSwipeGallery } from "../components/ImageSwipeGallery";
 import "./marketplace.css";
 import "./marketplace-premium.css";
 import "./marketplace-motion.css";
@@ -726,21 +727,22 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
       {/* 1. Hero éditorial — un seul point focal */}
       {!search && !favorites && (
         <section className="bb-hero">
-          <p className="bb-eyebrow">La sélection Baobab · Dubaï</p>
-          <h1>Vos envies. De Dubaï à chez vous.</h1>
-          <p className="bb-hero-copy">
-            Achat à l’unité ou en gros. Douane, fret et livraison organisés pour vous.
-          </p>
-          <div className="bb-route" aria-label={`Dubaï vers ${currentDest.name}`}>
-            <span className="bb-flag ae" aria-hidden="true" />
-            <span>Dubaï</span>
-            <span className="bb-route-line" />
-            <Icon name="plane" size={12} />
-            <span className="bb-route-line" />
-            <span className="bb-flag" aria-hidden="true">{currentDest.flag}</span>
-            <span>{currentDest.name.split(" (")[0]}</span>
+          <div className="bb-eyebrow-container flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            <span className="bb-eyebrow">Sélection Privée · Sourcing Dubaï &amp; Asie</span>
           </div>
-          <div className="bb-hero-actions">
+          <h1>Achetez au prix source. Garanti &amp; livré chez vous.</h1>
+          <p className="bb-hero-copy">
+            Véhicules certifiés, électronique, solaire et gros volumes. Zéro intermédiaire inutile, douane et livraison sécurisées en Afrique de l’Ouest.
+          </p>
+          <div className="bb-hero-live-badge flex items-center gap-2 rounded-full bg-emerald-50 border border-emerald-200/80 px-3.5 py-1.5 text-xs font-semibold text-emerald-900 shadow-sm w-fit mt-3">
+            <span className="text-emerald-600 font-bold">⚡ Hub Logistique Dubaï :</span>
+            <span>Départs maritimes &amp; fret aérien chaque semaine · Dédouané</span>
+          </div>
+          <div className="bb-hero-actions mt-4">
             <button
               type="button"
               className="bb-btn bb-btn-primary"
@@ -750,10 +752,10 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
                   ?.scrollIntoView({ behavior: "smooth", block: "start" })
               }
             >
-              Explorer la sélection <Icon name="arrow" size={14} />
+              Explorer les nouveautés <Icon name="arrow" size={14} />
             </button>
             <Link className="bb-link" to="/messages">
-              Un projet ? Parlons-en
+              💬 Devis sur mesure
             </Link>
           </div>
         </section>
@@ -1224,120 +1226,27 @@ export function ListingDetail() {
   return (
     <>
       <div className="product-detail-page mx-auto max-w-4xl pb-28">
-        {/* 1. VISUEL HERO SUPÉRIEUR PLEIN ÉCRAN (Full-Bleed Edge-to-Edge sur Mobile) */}
-        <div className="detail-hero-top relative -mx-4 sm:mx-0 overflow-hidden sm:rounded-3xl shadow-2xl bg-[#0d1612]">
-          <div className="product-detail-hero relative aspect-square sm:aspect-[4/3] w-full max-h-[480px] overflow-hidden flex items-center justify-center">
-            {isVideoUrl(p.images?.[image]) ? (
-              <video
-                src={p.images[image]}
-                muted
-                playsInline
-                loop
-                autoPlay
-                preload="metadata"
-                aria-label={p.name}
-                className="h-full w-full object-cover transition-opacity duration-300"
-              />
-            ) : (
-              <img
-                src={
-                  p.images?.[image] ||
-                  fallbackPhoto(p.subcategory, productCategoryLabel(p), p.category?.universe, p.name)
-                }
-                alt={p.name}
-                decoding="async"
-                className="h-full w-full object-cover transition-opacity duration-300"
-              />
-            )}
-
-            {/* Dégradé supérieur pour contraster les boutons flottants */}
-            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/60 via-black/20 to-transparent pointer-events-none" />
-
-            {/* Barre flottante supérieure avec Retour, Compteur & Actions (Glassmorphism) */}
-            <div className="absolute top-3.5 inset-x-3.5 flex items-center justify-between z-10">
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-md border border-white/20 shadow-lg hover:bg-black/70 hover:scale-105 active:scale-95 transition-all"
-                aria-label="Retour aux annonces"
-              >
-                <span className="text-lg leading-none">←</span>
-              </button>
-
-              {p.images && p.images.length > 1 && (
-                <div className="flex items-center gap-1.5 rounded-full bg-black/50 px-3.5 py-1 text-xs font-semibold text-white/95 backdrop-blur-md border border-white/15 shadow-md">
-                  <span className="opacity-80">📷</span>
-                  <span>{image + 1} / {p.images.length}</span>
-                </div>
-              )}
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({ title: p.name, url: window.location.href }).catch(() => {});
-                  } else {
-                    navigator.clipboard.writeText(window.location.href);
-                    alert("Lien de l’annonce copié dans le presse-papier !");
-                  }
-                }}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-md border border-white/20 hover:bg-black/70 hover:scale-105 active:scale-95 shadow-lg transition-all"
-                title="Partager"
-              >
-                <span className="text-base leading-none">↗</span>
-              </button>
-            </div>
-
-            {/* Badges d'état et d'origine en bas de la photo */}
-            <div className="absolute bottom-3.5 left-3.5 right-3.5 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-lg border border-[#E8A33D]/60 bg-[#173E32]/90 px-3 py-1 text-xs font-bold text-[#FBF0D8] backdrop-blur-md shadow-md">
-                  {p.condition === "NEW" ? "Neuf" : p.condition === "REFURBISHED" ? "Reconditionné" : "Occasion"}
-                </span>
-                <span className="rounded-lg border border-white/20 bg-black/60 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur-md shadow-md">
-                  🇦🇪 Dubaï Export
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Galerie de miniatures immédiatement sous l'image principale */}
-          {p.images && p.images.length > 1 && (
-            <div className="bg-[#101915] p-2.5 flex gap-2 overflow-x-auto scrollbar-none">
-              {p.images.map((url: string, i: number) => (
-                <button
-                  key={url}
-                  type="button"
-                  onClick={() => setImage(i)}
-                  aria-label={`Afficher la photo ${i + 1}`}
-                  aria-pressed={image === i}
-                  className={`relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all ${
-                    image === i
-                      ? "border-[#E8A33D] ring-2 ring-[#E8A33D]/40 scale-[1.02]"
-                      : "border-white/10 opacity-60 hover:opacity-100"
-                  }`}
-                >
-                  {isVideoUrl(url) ? (
-                    <video
-                      src={url}
-                      muted
-                      playsInline
-                      loop
-                      autoPlay
-                      preload="metadata"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <img src={url} alt="" className="h-full w-full object-cover" />
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* 1. VISUEL HERO SUPÉRIEUR : SWIPE TACTILE HORIZONTAL FLUIDE (Image propre sans encombrement) */}
+        <ImageSwipeGallery
+          images={p.images || []}
+          title={p.name}
+          aspectRatioClass="aspect-square sm:aspect-[4/3]"
+        />
 
         {/* 2. NOM & PRIX (Carte Blanc Pur Haut de Gamme) */}
         <div className="product-detail-summary mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E6E1D4] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
+          {/* LIGNE MARKETING STATUTAIRE & RÉASSURANCE (Placée proprement sous l'image) */}
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span className="rounded-lg bg-[#0F2D24] text-[#F3EFE4] px-3 py-1 text-xs font-bold shadow-sm">
+              {p.condition === "NEW" ? "Neuf" : p.condition === "REFURBISHED" ? "Reconditionné" : "Occasion"}
+            </span>
+            <span className="rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2.5 py-1 text-xs font-semibold">
+              ✓ Contrôle qualité Dubaï
+            </span>
+            <span className="rounded-lg bg-amber-50 text-amber-800 border border-amber-200/80 px-2.5 py-1 text-xs font-semibold">
+              🇦🇪 Import Direct Dubaï
+            </span>
+          </div>
           <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#8A5A00] mb-2">
             <span>{subcategoryLabel(p) || productCategoryLabel(p)}</span>
             <span className="text-[#5E6B60] font-normal normal-case">Réf: {p.id}</span>
