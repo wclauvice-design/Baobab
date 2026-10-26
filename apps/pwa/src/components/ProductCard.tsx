@@ -41,9 +41,9 @@ export function ProductCard({ product }: { product: Product }) {
     <Link
       to={`/products/${product.id}`}
       state={{ product }}
-      className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-[#E6E1D4] shadow-[0_1px_3px_rgba(23,62,50,0.04)] hover:border-[#173E32]/30 hover:shadow-[0_10px_24px_-18px_rgba(23,62,50,0.45)] transition-all duration-300 hover:-translate-y-0.5"
+      className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-[#E2E8F0] shadow-[0_1px_3px_rgba(23,62,50,0.04)] hover:border-[#0B1E17]/30 hover:shadow-[0_10px_24px_-18px_rgba(23,62,50,0.45)] transition-all duration-300 hover:-translate-y-0.5"
     >
-      <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-[#F3EFE4]">
+      <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-slate-50">
         {product.images[0] ? (
           isVideoUrl(product.images[0]) ? (
             <video
@@ -64,7 +64,7 @@ export function ProductCard({ product }: { product: Product }) {
             />
           )
         ) : (
-          <BaobabMark className="h-10 w-10 text-[#5E6B60] opacity-30" />
+          <BaobabMark className="h-10 w-10 text-slate-500 opacity-30" />
         )}
         {discount && (
           <span className="absolute left-2 top-2 rounded-md bg-[#B85732] px-2 py-0.5 text-[10px] font-extrabold text-white shadow-sm">
@@ -72,7 +72,7 @@ export function ProductCard({ product }: { product: Product }) {
           </span>
         )}
         {product.condition && (
-          <span className="absolute right-2 top-2 rounded-md bg-white/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-bold text-[#173E32] border border-[#E6E1D4] shadow-sm">
+          <span className="absolute right-2 top-2 rounded-md bg-white/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-bold text-[#0B1E17] border border-[#E2E8F0] shadow-sm">
             {product.condition === 'NEW' ? 'Neuf' : product.condition === 'REFURBISHED' ? 'Reconditionné' : 'Occasion'}
           </span>
         )}
@@ -86,18 +86,18 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3.5">
         {product.category && (
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#8A5A00]">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800">
             {product.category.name}
           </span>
         )}
-        <h3 className="line-clamp-2 text-xs sm:text-sm font-medium text-[#173E32] leading-snug">
+        <h3 className="line-clamp-2 text-xs sm:text-sm font-medium text-[#0B1E17] leading-snug">
           {product.name}
         </h3>
 
         {(product.avgRating || product.soldCount) ? (
-          <div className="flex items-center gap-1.5 text-[11px] text-[#5E6B60] mt-0.5">
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-0.5">
             {product.avgRating && (
-              <span className="flex items-center gap-1 text-[#8A5A00] font-semibold">
+              <span className="flex items-center gap-1 text-amber-800 font-semibold">
                 <IconStar className="h-3 w-3 fill-current text-[#E8A33D]" /> {Number(product.avgRating).toFixed(1)}
               </span>
             )}
@@ -107,16 +107,16 @@ export function ProductCard({ product }: { product: Product }) {
 
         <div className="mt-auto flex items-end justify-between gap-1 pt-2">
           <div className="flex flex-col">
-            <span className="font-heading text-sm sm:text-base font-bold tabular-nums text-[#173E32]">
+            <span className="font-heading text-sm sm:text-base font-bold tabular-nums text-[#0B1E17]">
               {format(Number(product.price))}
             </span>
             {discount && (
-              <span className="text-[11px] tabular-nums text-[#5E6B60] line-through">
+              <span className="text-[11px] tabular-nums text-slate-500 line-through">
                 {format(Number(product.compareAtPrice))}
               </span>
             )}
           </div>
-          <span className="text-[11px] font-medium text-[#1F7A5C]">
+          <span className="text-[11px] font-medium text-emerald-700">
             ✓ Dubaï
           </span>
         </div>
@@ -127,8 +127,8 @@ export function ProductCard({ product }: { product: Product }) {
 
 export function ProductCardSkeleton() {
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl bg-white border border-[#E6E1D4] animate-pulse">
-      <div className="aspect-square bg-[#F3EFE4]" />
+    <div className="flex flex-col overflow-hidden rounded-2xl bg-white border border-[#E2E8F0] animate-pulse">
+      <div className="aspect-square bg-slate-50" />
       <div className="flex flex-1 flex-col gap-2 p-3.5">
         <div className="h-3 w-16 rounded bg-[#E6E1D4]" />
         <div className="h-4 w-full rounded bg-[#E6E1D4]" />

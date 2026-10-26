@@ -287,62 +287,50 @@ export function DynamicTrustRibbon({
 }
 
 /**
- * Floating Social Proof Notification Toast (Temu-style live social proof)
- * Appears subtly in bottom-left every 10-15s to inspire confidence.
+ * Dynamic Kinetic Headline Hooks
+ * Captivating, space-saving typography animation that cycles key value propositions.
  */
-export function LiveFloatingToast() {
-  const [visible, setVisible] = useState(false);
-  const [itemIdx, setItemIdx] = useState(0);
+export const HERO_DYNAMIC_HOOKS = [
+  "Garanti & livré chez vous.",
+  "Véhicules certifiés Dubaï.",
+  "Énergie solaire & batteries.",
+  "Inspection vidéo en direct.",
+  "Fret sécurisé & dédouané.",
+];
+
+export function HeroAnimatedHeadline() {
+  const [index, setIndex] = useState(0);
+  const [fade, setFade] = useState(true);
 
   useEffect(() => {
-    // Show toast for 4.5 seconds every 14 seconds
-    const interval = setInterval(() => {
-      setItemIdx((prev) => (prev + 1) % STREAM_FOCAL_POINTS.length);
-      setVisible(true);
-      const timer = setTimeout(() => {
-        setVisible(false);
-      }, 4500);
-      return () => clearTimeout(timer);
-    }, 14000);
+    const timer = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % HERO_DYNAMIC_HOOKS.length);
+        setFade(true);
+      }, 220);
+    }, 3200);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(timer);
   }, []);
 
-  if (!visible) return null;
-
-  const current = STREAM_FOCAL_POINTS[itemIdx];
-
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="fixed bottom-20 left-4 z-40 max-w-sm rounded-2xl bg-[#0B1E17]/95 text-white p-3 shadow-2xl backdrop-blur-xl border border-white/10 flex items-center gap-3 transition-all duration-300 animate-slide-up"
-    >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-xl">
-        {current.icon}
-      </div>
-      <div className="text-xs min-w-0 pr-2">
-        <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-          </span>
-          <span>{current.city} · {current.time}</span>
-        </div>
-        <p className="font-medium text-white/95 leading-tight line-clamp-1 mt-0.5">
-          {current.text}
-        </p>
-      </div>
-      <button
-        type="button"
-        onClick={() => setVisible(false)}
-        className="text-white/40 hover:text-white text-xs ml-auto shrink-0"
-        aria-label="Fermer"
+    <h1 className="bb-hero-title">
+      <span className="bb-hero-fixed">Achetez au prix source.</span>{" "}
+      <span
+        className={`bb-hero-rotating inline-block transition-all duration-300 ${
+          fade ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"
+        }`}
       >
-        ✕
-      </button>
-    </div>
+        <span className="bb-hero-gradient">{HERO_DYNAMIC_HOOKS[index]}</span>
+      </span>
+    </h1>
   );
+}
+
+// LiveFloatingToast removed per user request (unprofessional / intrusive)
+export function LiveFloatingToast() {
+  return null;
 }
 
 // Backward-compatible exports

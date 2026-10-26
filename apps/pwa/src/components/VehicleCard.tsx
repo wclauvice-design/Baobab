@@ -104,7 +104,7 @@ export function VehicleCard({
         <h3 title={product.name}>{product.name}</h3>
 
         {/* Ligne de spécifications automobiles immédiates (Dubizzle Motors) */}
-        <div className="vehicle-specs-row flex flex-wrap items-center gap-1.5 text-[11px] text-[#5E6B60] mt-1 font-medium">
+        <div className="vehicle-specs-row flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 mt-1 font-medium">
           <span>{specs.year || '2024'}</span>
           <span>·</span>
           <span>{specs.mileage || '0 km'}</span>
@@ -114,9 +114,9 @@ export function VehicleCard({
 
         <strong className="mt-1.5">{format(Number(product.price || 0))}</strong>
 
-        <div className="listing-meta mt-1 flex items-center justify-between text-[11px] text-[#5E6B60]">
+        <div className="listing-meta mt-1 flex items-center justify-between text-[11px] text-slate-500">
           <span>{product.location || 'Dubaï'} · GCC Specs</span>
-          <span className="text-[#1F7A5C] font-semibold">✓ Sérénité</span>
+          <span className="text-emerald-700 font-semibold">✓ Sérénité</span>
         </div>
       </Link>
     </article>

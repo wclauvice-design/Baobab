@@ -25,7 +25,7 @@ import {
 } from "../lib/concierge";
 import { estimateFreight, ShippingMode } from "../lib/freight";
 import { fallbackPhoto } from "../lib/photos";
-import { DiscoverySearch, DynamicTrustRibbon, LiveFloatingToast } from "./DiscoveryMotion";
+import { DiscoverySearch, DynamicTrustRibbon, HeroAnimatedHeadline } from "./DiscoveryMotion";
 import {
   getNotificationPermission,
   hasNotificationSupport,
@@ -734,7 +734,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
             </span>
             <span className="bb-eyebrow">Sourcing Direct Dubaï &amp; Asie</span>
           </div>
-          <h1>Achetez au prix source. Garanti &amp; livré chez vous.</h1>
+          <HeroAnimatedHeadline />
           <div className="bb-hero-actions mt-3">
             <button
               type="button"
@@ -1014,7 +1014,6 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
           Discuter de mon projet <Icon name="arrow" size={18} />
         </Link>
       </section>
-      <LiveFloatingToast />
     </>
   );
 }
@@ -1238,10 +1237,10 @@ export function ListingDetail() {
         />
 
         {/* 2. NOM & PRIX (Carte Blanc Pur Haut de Gamme) */}
-        <div className="product-detail-summary mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E6E1D4] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
+        <div className="product-detail-summary mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E2E8F0] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
           {/* LIGNE MARKETING STATUTAIRE & RÉASSURANCE (Placée proprement sous l'image) */}
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="rounded-lg bg-[#0F2D24] text-[#F3EFE4] px-3 py-1 text-xs font-bold shadow-sm">
+            <span className="rounded-lg bg-[#0B1E17] text-white px-3 py-1 text-xs font-bold shadow-sm">
               {p.condition === "NEW" ? "Neuf" : p.condition === "REFURBISHED" ? "Reconditionné" : "Occasion"}
             </span>
             <span className="rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2.5 py-1 text-xs font-semibold">
@@ -1251,35 +1250,35 @@ export function ListingDetail() {
               🇦🇪 Import Direct Dubaï
             </span>
           </div>
-          <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#8A5A00] mb-2">
+          <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-amber-800 mb-2">
             <span>{subcategoryLabel(p) || productCategoryLabel(p)}</span>
-            <span className="text-[#5E6B60] font-normal normal-case">Réf: {p.id}</span>
+            <span className="text-slate-500 font-normal normal-case">Réf: {p.id}</span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#173E32] leading-tight tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#0B1E17] leading-tight tracking-tight">
             {p.name}
           </h1>
 
           <div className="mt-3 flex flex-wrap items-baseline gap-3">
-            <div className="font-heading text-3xl sm:text-4xl font-extrabold text-[#173E32] tracking-tight">
+            <div className="font-heading text-3xl sm:text-4xl font-extrabold text-[#0B1E17] tracking-tight">
               {money(p.price)}
-              <small className="text-xs font-normal text-[#5E6B60] ml-2">par {p.unit || "pièce"}</small>
+              <small className="text-xs font-normal text-slate-500 ml-2">par {p.unit || "pièce"}</small>
             </div>
             {p.compareAtPrice && Number(p.compareAtPrice) > Number(p.price) && (
-              <span className="text-sm text-[#5E6B60] line-through">
+              <span className="text-sm text-slate-500 line-through">
                 Prix catalogue : {money(p.compareAtPrice)}
               </span>
             )}
           </div>
 
           {/* Vendeur & Localisation */}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#F0ECE1] pt-3 text-xs text-[#3F5749]">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-700">
             <div className="flex items-center gap-2">
               <Icon name="shield" size={14} />
               <span>Vendu par <strong>{p.seller?.shopName || "Baobab Dubaï Officiel"}</strong></span>
               <span className="rounded-full bg-[#E4F1EB] px-2 py-0.5 text-[10px] font-bold text-[#1F7A5C]">✓ Vérifié</span>
             </div>
-            <div className="flex items-center gap-1 text-[#5E6B60]">
+            <div className="flex items-center gap-1 text-slate-500">
               <Icon name="pin" size={14} />
               <span>Disponible à {p.location || "Dubaï"}</span>
             </div>
@@ -1290,11 +1289,11 @@ export function ListingDetail() {
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#173E32] text-[#FFF8E6] font-bold text-lg shadow-sm">
               🛡️
             </div>
-            <div className="text-xs leading-relaxed text-[#173E32]">
-              <div className="font-bold text-sm text-[#173E32] mb-0.5">
+            <div className="text-xs leading-relaxed text-[#0B1E17]">
+              <div className="font-bold text-sm text-[#0B1E17] mb-0.5">
                 Conciergerie Baobab Dubaï & Contrôle Qualité Inclus (+15%)
               </div>
-              <p className="text-[#3F5749]">
+              <p className="text-slate-700">
                 Audit physique de la marchandise à Dubaï avant expédition, formalités de transit et garantie de livraison sécurisée vers <strong>{dest.name}</strong>.
               </p>
             </div>
@@ -1304,12 +1303,12 @@ export function ListingDetail() {
         <a className="product-detail-jump" href="#product-purchase">Aller au simulateur de livraison et devis →</a>
 
         {/* 3. DESCRIPTION AVEC OPTION « VOIR PLUS... » */}
-        <div className="mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E6E1D4] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
-          <h2 className="text-lg font-bold font-heading text-[#173E32] mb-3 flex items-center gap-2">
+        <div className="mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E2E8F0] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
+          <h2 className="text-lg font-bold font-heading text-[#0B1E17] mb-3 flex items-center gap-2">
             À propos du produit
           </h2>
 
-          <div className="prose max-w-none text-sm text-[#3F5749] leading-relaxed whitespace-pre-line font-normal">
+          <div className="prose max-w-none text-sm text-slate-700 leading-relaxed whitespace-pre-line font-normal">
             {displayedDesc}
           </div>
 
@@ -1318,7 +1317,7 @@ export function ListingDetail() {
               type="button"
               onClick={() => setShowFullDesc(!showFullDesc)}
               aria-expanded={showFullDesc}
-              className="mt-3.5 inline-flex items-center gap-1.5 text-xs font-bold text-[#8A5A00] hover:text-[#173E32] transition-colors cursor-pointer"
+              className="mt-3.5 inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-[#0B1E17] transition-colors cursor-pointer"
             >
               <span>{showFullDesc ? "▲ Voir moins de description" : "▼ Voir toute la description…"}</span>
             </button>
@@ -1326,8 +1325,8 @@ export function ListingDetail() {
         </div>
 
         {/* 4. CARACTÉRISTIQUES DU PRODUIT */}
-        <details className="product-detail-section mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E6E1D4] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
-          <summary className="text-lg font-bold font-heading text-[#173E32] cursor-pointer">
+        <details className="product-detail-section mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E2E8F0] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
+          <summary className="text-lg font-bold font-heading text-[#0B1E17] cursor-pointer">
             Caractéristiques techniques
           </summary>
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-xs sm:text-sm">
@@ -1339,18 +1338,18 @@ export function ListingDetail() {
               ...(p.dimensions ? { "Dimensions": p.dimensions } : {}),
               ...p.attributes,
             }).map(([k, v]) => (
-              <div key={k} className="flex justify-between items-baseline border-b border-[#F0ECE1] pb-2">
-                <span className="text-[#5E6B60]">{k}</span>
-                <strong className="font-semibold text-[#173E32]">{String(v)}</strong>
+              <div key={k} className="flex justify-between items-baseline border-b border-slate-100 pb-2">
+                <span className="text-slate-500">{k}</span>
+                <strong className="font-semibold text-[#0B1E17]">{String(v)}</strong>
               </div>
             ))}
           </div>
         </details>
 
         {/* 5. COMMANDE, FRET & ACTIONS RAPIDES */}
-        <div id="product-purchase" className="mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E6E1D4] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
+        <div id="product-purchase" className="mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E2E8F0] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <label className="text-sm font-bold text-[#173E32] flex items-center gap-2">
+            <label className="text-sm font-bold text-[#0B1E17] flex items-center gap-2">
               <span>Quantité souhaitée :</span>
               <input
                 type="number"
@@ -1358,11 +1357,11 @@ export function ListingDetail() {
                 step={p.packSize || 1}
                 value={qty}
                 onChange={(e) => setQty(Math.max(1, Number(e.target.value)))}
-                className="w-24 rounded-xl border border-[#E6E1D4] bg-[#FAF7F0] px-3 py-1.5 text-sm font-bold text-[#173E32] text-center"
+                className="w-24 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-sm font-bold text-[#0B1E17] text-center"
               />
             </label>
-            <span className="text-xs text-[#5E6B60]">
-              Total marchandise : <strong className="text-[#173E32] font-bold text-sm">{money(Math.round(Number(p.price) * qty))}</strong>
+            <span className="text-xs text-slate-500">
+              Total marchandise : <strong className="text-[#0B1E17] font-bold text-sm">{money(Math.round(Number(p.price) * qty))}</strong>
             </span>
           </div>
 
