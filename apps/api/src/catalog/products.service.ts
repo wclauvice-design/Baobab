@@ -229,12 +229,13 @@ export class ProductsService {
   async findMineOrAll(userId: string, role: Role) {
     if (role === Role.ADMIN)
       return this.prisma.product.findMany({
+        where: { moderation: { not: "ARCHIVED" } },
         include: { category: true, seller: true },
       });
     const seller = await this.prisma.seller.findUnique({ where: { userId } });
     if (!seller) return [];
     return this.prisma.product.findMany({
-      where: { sellerId: seller.id },
+      where: { sellerId: seller.id, moderation: { not: "ARCHIVED" } },
       include: { category: true },
     });
   }
