@@ -1064,6 +1064,28 @@ export class CommerceService {
       }
     }
   }
+  /**
+   * Compteurs légers pour les pastilles rouges du back-office.
+   * Chaque valeur retombe à 0 dès que l'élément est traité, sans cache.
+   */
+  async adminCounts() {
+    const [unreadMessages, pendingSellers, pendingListings, pendingPayments, pendingQuotes] =
+      await Promise.all([
+        this.db.conversation.count({ where: { needsReply: true, state: "OPEN" } }),
+        this.db.seller.count({ where: { status: "PENDING" } }),
+        this.db.product.count({ where: { moderation: "PENDING" } }),
+        this.db.tradeEntry.count({ where: { state: "PENDING" } }),
+        this.db.tradeOrder.count({ where: { status: { in: ["DRAFT", "QUOTED"] } } }),
+      ]);
+    return {
+      unreadMessages,
+      pendingSellers,
+      pendingListings,
+      pendingPayments,
+      pendingQuotes,
+    };
+  }
+
   async overview() {
     const orders = await this.all();
     const sum = (key: string) =>

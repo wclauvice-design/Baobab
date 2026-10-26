@@ -3,7 +3,13 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 
 export function NotificationBell() {
-  const [counts, setCounts] = useState({ pendingSellers: 0, pendingListings: 0, unreadMessages: 0 });
+  const [counts, setCounts] = useState({
+    pendingSellers: 0,
+    pendingListings: 0,
+    unreadMessages: 0,
+    pendingPayments: 0,
+    pendingQuotes: 0,
+  });
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -12,7 +18,13 @@ export function NotificationBell() {
     const load = async () => {
       try {
         // Try dedicated counts endpoint first
-        const data = await api.get<{ pendingSellers: number; pendingListings: number; unreadMessages: number }>('/admin/counts');
+        const data = await api.get<{
+          pendingSellers: number;
+          pendingListings: number;
+          unreadMessages: number;
+          pendingPayments?: number;
+          pendingQuotes?: number;
+        }>('/admin/concierge/counts');
         if (active && data) {
           // If unreadMessages was 0 from backend, still cross-check conversations
           let unread = data.unreadMessages || 0;
@@ -20,7 +32,13 @@ export function NotificationBell() {
             const convs = await api.get<any[]>('/admin/concierge/conversations').catch(() => []);
             unread = (convs || []).filter((c: any) => c.needsReply && c.state === 'OPEN').length;
           }
-          setCounts({ ...data, unreadMessages: unread });
+          setCounts({
+            pendingSellers: data.pendingSellers || 0,
+            pendingListings: data.pendingListings || 0,
+            unreadMessages: unread,
+            pendingPayments: data.pendingPayments || 0,
+            pendingQuotes: data.pendingQuotes || 0,
+          });
           return;
         }
       } catch {
@@ -35,7 +53,7 @@ export function NotificationBell() {
             const unread = (convs || []).filter((c: any) => c.needsReply && c.state === 'OPEN').length;
             const pendingSellers = (sellers || []).filter((s: any) => s.status === 'PENDING').length;
             const pendingListings = (Array.isArray(prods) ? prods : (prods as any)?.data || []).filter((p: any) => p.moderation === 'PENDING').length;
-            setCounts({ unreadMessages: unread, pendingSellers, pendingListings });
+            setCounts({ unreadMessages: unread, pendingSellers, pendingListings, pendingPayments: 0, pendingQuotes: 0 });
           }
         } catch {
           // ignore
@@ -45,9 +63,12 @@ export function NotificationBell() {
 
     load();
     const id = setInterval(load, 12000);
+    const onRefresh = () => load();
+    window.addEventListener('baobab:refresh-counts', onRefresh);
     return () => {
       active = false;
       clearInterval(id);
+      window.removeEventListener('baobab:refresh-counts', onRefresh);
     };
   }, []);
 
@@ -62,7 +83,12 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const total = counts.pendingSellers + counts.pendingListings + counts.unreadMessages;
+  const total =
+    counts.pendingSellers +
+    counts.pendingListings +
+    counts.unreadMessages +
+    counts.pendingPayments +
+    counts.pendingQuotes;
 
   return (
     <div ref={dropdownRef} style={{ position: 'relative', display: 'inline-block' }}>
@@ -215,6 +241,58 @@ export function NotificationBell() {
               {counts.pendingListings > 0 ? (
                 <span style={{ background: '#ef4444', color: '#fff', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700, padding: '1px 7px' }}>
                   {counts.pendingListings}
+                </span>
+              ) : (
+                <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>0</span>
+              )}
+            </Link>
+            <Link
+              to="/orders"
+              onClick={() => setOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 16px',
+                textDecoration: 'none',
+                color: 'inherit',
+                fontSize: '0.82rem',
+                borderTop: '1px solid #f1f5f9',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>💳</span>
+                <span>Paiements à vérifier</span>
+              </div>
+              {counts.pendingPayments > 0 ? (
+                <span style={{ background: '#ef4444', color: '#fff', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700, padding: '1px 7px' }}>
+                  {counts.pendingPayments}
+                </span>
+              ) : (
+                <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>0</span>
+              )}
+            </Link>
+
+            <Link
+              to="/orders"
+              onClick={() => setOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 16px',
+                textDecoration: 'none',
+                color: 'inherit',
+                fontSize: '0.82rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>📝</span>
+                <span>Devis en attente</span>
+              </div>
+              {counts.pendingQuotes > 0 ? (
+                <span style={{ background: '#ef4444', color: '#fff', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700, padding: '1px 7px' }}>
+                  {counts.pendingQuotes}
                 </span>
               ) : (
                 <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>0</span>

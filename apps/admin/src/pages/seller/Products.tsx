@@ -1,6 +1,11 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { api, ApiError, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from '../../lib/api';
-import { formatXof } from '../../lib/format';
+import {
+  formatXof,
+  toXof,
+  MERCHANT_DEFAULT_CURRENCY,
+  PRICING_CURRENCIES,
+} from '../../lib/format';
 
 interface Category {
   id: string;
@@ -15,6 +20,7 @@ interface ProductRow {
   stock: number;
   images: string[];
   category: { name: string };
+  attributes?: Record<string, string>;
 }
 
 export function Products() {
@@ -25,6 +31,8 @@ export function Products() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [busyProductId, setBusyProductId] = useState<string | null>(null);
   const [busyMessage, setBusyMessage] = useState<string>('');
+  const [priceCurrency, setPriceCurrency] = useState<string>(MERCHANT_DEFAULT_CURRENCY);
+  const [priceInput, setPriceInput] = useState<string>('');
 
   // Target for replacing a specific photo: { productId, oldUrl }
   const [replaceTarget, setReplaceTarget] = useState<{ productId: string; oldUrl: string } | null>(null);
@@ -51,17 +59,22 @@ export function Products() {
     const form = new FormData(e.currentTarget);
     try {
       const compareAtPrice = form.get('compareAtPrice');
+      const amount = Number(form.get('sourcePrice') || form.get('price') || 0);
       await api.post('/products', {
         name: form.get('name'),
         description: form.get('description'),
-        price: Number(form.get('price')),
+        price: toXof(amount, priceCurrency),
+        sourcePrice: amount,
+        sourceCurrency: priceCurrency,
         compareAtPrice: compareAtPrice ? Number(compareAtPrice) : undefined,
         stock: Number(form.get('stock')),
         categoryId: form.get('categoryId'),
       });
       (e.target as HTMLFormElement).reset();
+      setPriceInput('');
       flashSuccess('Produit créé avec succès !');
       load();
+      window.dispatchEvent(new Event('baobab:refresh-counts'));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Erreur réseau');
     }
@@ -262,14 +275,46 @@ export function Products() {
             rows={2}
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
+          <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-2.5 space-y-2">
+            <label className="block text-[11px] font-semibold text-amber-800">
+              Prix de vente — saisi en {priceCurrency} (converti automatiquement en FCFA)
+            </label>
+            <div className="flex gap-2">
+              <select
+                value={priceCurrency}
+                onChange={(e) => setPriceCurrency(e.target.value)}
+                className="rounded-lg border border-amber-300 bg-white px-2 py-2 text-sm font-semibold"
+                aria-label="Devise du prix"
+              >
+                {PRICING_CURRENCIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.code}
+                  </option>
+                ))}
+              </select>
+              <input
+                name="sourcePrice"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+                value={priceInput}
+                onChange={(e) => setPriceInput(e.target.value)}
+                placeholder={`Montant en ${priceCurrency}`}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+            </div>
+            <p className="text-[11px] text-amber-700">
+              Prix affiché aux clients :{' '}
+              <b>{formatXof(toXof(Number(priceInput || 0), priceCurrency))}</b>
+              {priceCurrency !== 'XOF' && (
+                <span className="ml-1 text-amber-600">
+                  (1 {priceCurrency} ≈ {formatXof(toXof(1, priceCurrency))})
+                </span>
+              )}
+            </p>
+          </div>
           <div className="grid grid-cols-2 gap-2">
-            <input
-              name="price"
-              type="number"
-              required
-              placeholder="Prix de vente (FCFA)"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
             <input
               name="stock"
               type="number"
@@ -277,13 +322,13 @@ export function Products() {
               placeholder="Stock disponible"
               className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
             />
+            <input
+              name="compareAtPrice"
+              type="number"
+              placeholder="Prix barré indicatif (FCFA, optionnel)"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
           </div>
-          <input
-            name="compareAtPrice"
-            type="number"
-            placeholder="Prix barré indicatif (optionnel)"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          />
           <select
             name="categoryId"
             required
@@ -428,6 +473,11 @@ export function Products() {
 
                   <td className="px-4 py-3 font-semibold text-slate-900 whitespace-nowrap">
                     {formatXof(Number(p.price))}
+                    {p.attributes?.sourceCurrency && p.attributes?.sourcePrice && (
+                      <span className="block text-[10px] font-normal text-amber-700">
+                        saisi : {Number(p.attributes.sourcePrice).toLocaleString('fr-FR')} {p.attributes.sourceCurrency}
+                      </span>
+                    )}
                     {p.compareAtPrice && Number(p.compareAtPrice) > Number(p.price) && (
                       <span className="block text-xs font-normal text-slate-400 line-through">
                         {formatXof(Number(p.compareAtPrice))}

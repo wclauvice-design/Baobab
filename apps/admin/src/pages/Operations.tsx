@@ -441,6 +441,8 @@ export function OperationsInbox() {
       await detail.refresh();
       await list.refresh();
       setMessage("");
+      // Fait disparaître immédiatement la pastille rouge de la page concernée
+      window.dispatchEvent(new Event("baobab:refresh-counts"));
     } catch (e: any) {
       setMessage(e.message);
     } finally {
@@ -720,6 +722,7 @@ export function TradeDetail() {
       if (r?.whatsappUrl) setWhatsapp(r.whatsappUrl);
       setMessage("Enregistré.");
       await refresh();
+      window.dispatchEvent(new Event("baobab:refresh-counts"));
       return true;
     } catch (e: any) {
       setMessage(e.message);

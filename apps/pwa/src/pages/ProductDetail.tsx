@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
-import { formatXof } from '../lib/format';
+import { useCurrency } from '../lib/currency';
 import { useCart } from '../lib/cart';
 import { useAuth } from '../lib/auth';
 import { recordView } from '../lib/history';
@@ -88,6 +88,7 @@ export function ProductDetail() {
   const [followBusy, setFollowBusy] = useState(false);
   const { addItem } = useCart();
   const { user } = useAuth();
+  const { format } = useCurrency();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -194,11 +195,11 @@ export function ProductDetail() {
         )}
         <div className="mt-3 flex items-center gap-2">
           <p className="font-heading text-2xl font-semibold tabular-nums text-amber-400">
-            {formatXof(Number(product.price))}
+            {format(Number(product.price))}
           </p>
           {discount && (
             <p className="text-sm tabular-nums text-slate-500 line-through">
-              {formatXof(Number(product.compareAtPrice))}
+              {format(Number(product.compareAtPrice))}
             </p>
           )}
         </div>

@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api, ApiError } from '../lib/api';
-import { formatXof } from '../lib/format';
+import { useCurrency } from '../lib/currency';
 import { PageLoader } from '../components/PageLoader';
 import { IconCheck, IconClock, IconClose, IconHome, IconHourglass, IconOrders, IconTruck } from '../components/icons';
 import { ComponentType } from 'react';
@@ -118,6 +118,7 @@ function Timeline({ order }: { order: OrderData }) {
 
 export function OrderDetail() {
   const { id } = useParams();
+  const { format } = useCurrency();
   const [order, setOrder] = useState<OrderData | null>(null);
   const [reviewSent, setReviewSent] = useState<Record<string, boolean>>({});
 
@@ -163,7 +164,7 @@ export function OrderDetail() {
           <li key={item.id} className="card p-4">
             <div className="flex items-center justify-between text-sm">
               <span>{item.product.name} × {item.quantity}</span>
-              <span className="tabular-nums text-amber-400">{formatXof(Number(item.unitPrice) * item.quantity)}</span>
+              <span className="tabular-nums text-amber-400">{format(Number(item.unitPrice) * item.quantity)}</span>
             </div>
 
             {order.status === 'DELIVERED' && !reviewSent[item.productId] && (
@@ -197,18 +198,18 @@ export function OrderDetail() {
       <div className="card mt-4 flex flex-col gap-1 p-4 text-sm">
         <div className="flex items-center justify-between text-slate-400">
           <span>Sous-total</span>
-          <span className="tabular-nums">{formatXof(itemsTotal)}</span>
+          <span className="tabular-nums">{format(itemsTotal)}</span>
         </div>
         {Number(order.deliveryFee) > 0 && (
           <div className="flex items-center justify-between text-slate-400">
             <span>Frais de livraison</span>
-            <span className="tabular-nums">{formatXof(Number(order.deliveryFee))}</span>
+            <span className="tabular-nums">{format(Number(order.deliveryFee))}</span>
           </div>
         )}
         <div className="flex items-center justify-between pt-1">
           <span className="text-slate-400">Total</span>
           <span className="font-heading text-lg font-semibold tabular-nums text-amber-400">
-            {formatXof(Number(order.totalAmount))}
+            {format(Number(order.totalAmount))}
           </span>
         </div>
       </div>

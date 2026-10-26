@@ -9,6 +9,7 @@ import {
 import { useAuth } from "../lib/auth";
 import { useCurrency } from "../lib/currency";
 import { useUnreadMessages } from "../lib/unreadMessages";
+import { usePendingClientCounts } from "../lib/clientCounts";
 import { ClientNotificationBell } from "../components/ClientNotificationBell";
 import {
   call,
@@ -241,6 +242,7 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
   const { ids: favoriteIds } = useFavorites();
   const { current: userDest } = useUserDestination();
   const { unreadCount } = useUnreadMessages();
+  const pending = usePendingClientCounts();
   return (
     <div className="market">
       <div className="top-note">
@@ -284,10 +286,26 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
               </em>
             )}
           </NavLink>
-          <NavLink to="/orders">Mes commandes</NavLink>
+          <NavLink to="/orders">
+            Mes commandes
+            {pending.total > 0 && (
+              <em
+                className="nav-count"
+                style={{
+                  background: "#ef4444",
+                  color: "#ffffff",
+                  fontWeight: 800,
+                  minWidth: "18px",
+                  padding: "1px 5px",
+                }}
+              >
+                {pending.total > 99 ? "99+" : pending.total}
+              </em>
+            )}
+          </NavLink>
         </nav>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <ClientNotificationBell unreadCount={unreadCount} />
+          <ClientNotificationBell unreadCount={unreadCount} toPay={pending.toPay} quotes={pending.quotes} />
           <Link className="account-link" to="/account">
             <Icon name="user" />
             <span>Mon espace</span>
@@ -340,7 +358,33 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
                     animation: "pulse 2s infinite",
                   }}
                 >
-                  {unreadCount}
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </b>
+              )}
+              {to === "/orders" && pending.total > 0 && (
+                <b
+                  className="mobile-nav-badge"
+                  style={{
+                    background: "#ef4444",
+                    color: "#ffffff",
+                    fontWeight: 800,
+                    boxShadow: "0 0 0 2px #fff",
+                  }}
+                >
+                  {pending.total > 99 ? "99+" : pending.total}
+                </b>
+              )}
+              {to === "/account" && unreadCount > 0 && (
+                <b
+                  className="mobile-nav-badge"
+                  style={{
+                    background: "#ef4444",
+                    color: "#ffffff",
+                    fontWeight: 800,
+                    boxShadow: "0 0 0 2px #fff",
+                  }}
+                >
+                  {unreadCount > 99 ? "99+" : unreadCount}
                 </b>
               )}
             </span>

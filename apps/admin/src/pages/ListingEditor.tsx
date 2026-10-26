@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { isVehicleProduct } from "../lib/vehicles";
 import { api, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { toXof, fromXof, formatXof, MERCHANT_DEFAULT_CURRENCY, PRICING_CURRENCIES } from "../lib/format";
 import { Alert, money } from "./Operations";
 export function ListingEditor() {
   const { user } = useAuth(),
@@ -16,6 +17,9 @@ export function ListingEditor() {
   const [busyProductId, setBusyProductId] = useState<string | null>(null);
   const [busyMessage, setBusyMessage] = useState<string>("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [priceCurrency, setPriceCurrency] = useState<string>(admin ? "XOF" : MERCHANT_DEFAULT_CURRENCY);
+  const [supplierAmount, setSupplierAmount] = useState<string>("");
+  const [publicAmount, setPublicAmount] = useState<string>("");
 
   async function deleteListing(product: any) {
     if (!admin || deletingId) return;
@@ -56,7 +60,12 @@ export function ListingEditor() {
 
   // Update vehicle states when editing changes
   useEffect(() => {
-    if (!editing) return;
+    if (!editing) {
+      setPriceCurrency(admin ? "XOF" : MERCHANT_DEFAULT_CURRENCY);
+      setSupplierAmount("");
+      setPublicAmount("");
+      return;
+    }
     setFormCategory(editing.categoryId || "");
     setFormSubcategory(editing.subcategory || "Voitures & SUV");
     setFormCondition(editing.condition || "NEW");
@@ -81,6 +90,15 @@ export function ListingEditor() {
         ? String(attrs["Équipements"]).split(",").map((s: string) => s.trim())
         : ["Climatisation Tropicalisée", "Écran Tactile & Apple CarPlay", "Caméra de recul", "4x4 Sélecteur de terrain"]
     );
+
+    const storedCurrency = attrs["sourceCurrency"] || (admin ? "XOF" : MERCHANT_DEFAULT_CURRENCY);
+    setPriceCurrency(storedCurrency);
+    setSupplierAmount(
+      attrs["sourcePrice"]
+        ? String(attrs["sourcePrice"])
+        : String(fromXof(Number(editing.supplierPrice ?? editing.price ?? 0), storedCurrency))
+    );
+    setPublicAmount(String(fromXof(Number(editing.price ?? 0), storedCurrency)));
   }, [editing]);
 
   const isVehCategory =
@@ -228,15 +246,16 @@ export function ListingEditor() {
         "dimensions",
       ])
         body[name] = fd.get(name) || "";
-      for (const name of [
-        "price",
-        "supplierPrice",
-        "stock",
-        "minimumOrder",
-        "packSize",
-      ])
+      for (const name of ["stock", "minimumOrder", "packSize"])
         body[name] = Number(fd.get(name) || (name === "minimumOrder" || name === "packSize" ? 1 : 0));
-      if (!admin) body.price = body.supplierPrice;
+      // Prix saisis dans la devise du commerçant (AED par défaut), convertis en XOF côté serveur
+      const supplierInput = Number(fd.get("supplierPrice") || 0);
+      const publicInput = Number(fd.get("price") || 0);
+      body.supplierPrice = toXof(supplierInput, priceCurrency);
+      body.price = admin ? toXof(publicInput, priceCurrency) : body.supplierPrice;
+      body.sourcePrice = supplierInput;
+      body.sourceCurrency = priceCurrency;
+      if (admin) body.sourcePublicPrice = publicInput;
       body.shippingIncluded = fd.get("shippingIncluded") === "on";
 
       // If category is a vehicle, enrich with smart automotive specs
@@ -301,6 +320,7 @@ export function ListingEditor() {
           (!admin ? " et transmise à Baobab pour validation." : "."),
       );
       await load();
+      window.dispatchEvent(new Event("baobab:refresh-counts"));
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -315,6 +335,7 @@ export function ListingEditor() {
       await api.patch(`/products/${p.id}/moderation`, Object.fromEntries(fd));
       await load();
       setError("Modération enregistrée.");
+      window.dispatchEvent(new Event("baobab:refresh-counts"));
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -727,27 +748,50 @@ export function ListingEditor() {
               />
             </label>
             <label>
-              Prix net fournisseur par unité (FCFA)
+              Devise de saisie du prix
+              <select
+                value={priceCurrency}
+                onChange={(e) => setPriceCurrency(e.target.value)}
+                aria-label="Devise de saisie du prix"
+              >
+                {PRICING_CURRENCIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Prix net fournisseur par unité ({priceCurrency})
               <input
                 name="supplierPrice"
                 type="number"
                 min="0"
                 step="0.01"
                 required
-                defaultValue={editing.supplierPrice ?? editing.price ?? 0}
+                value={supplierAmount}
+                onChange={(e) => setSupplierAmount(e.target.value)}
               />
+              <small style={{ display: "block", fontSize: "11px", opacity: 0.75, marginTop: 2 }}>
+                Soit {formatXof(toXof(Number(supplierAmount || 0), priceCurrency))} en FCFA
+                {priceCurrency !== "XOF" && ` · 1 ${priceCurrency} = ${formatXof(toXof(1, priceCurrency))}`}
+              </small>
             </label>
             {admin && (
               <label>
-                Prix public par unité (FCFA)
+                Prix public par unité ({priceCurrency})
                 <input
                   name="price"
                   type="number"
                   min="0"
                   step="0.01"
                   required
-                  defaultValue={editing.price ?? 0}
+                  value={publicAmount}
+                  onChange={(e) => setPublicAmount(e.target.value)}
                 />
+                <small style={{ display: "block", fontSize: "11px", opacity: 0.75, marginTop: 2 }}>
+                  Soit {formatXof(toXof(Number(publicAmount || 0), priceCurrency))} en FCFA
+                </small>
               </label>
             )}
             <label>

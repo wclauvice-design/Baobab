@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
-import { formatXof } from '../lib/format';
+import { useCurrency } from '../lib/currency';
 import { PageLoader } from '../components/PageLoader';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -32,6 +32,7 @@ interface OrderSummary {
 }
 
 export function OrderHistory() {
+  const { format } = useCurrency();
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -62,7 +63,7 @@ export function OrderHistory() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-semibold tabular-nums text-amber-400">
-                    {formatXof(Number(o.totalAmount))}
+                    {format(Number(o.totalAmount))}
                   </p>
                   <p className={`text-xs font-medium ${STATUS_TINT[o.status] ?? 'text-slate-400'}`}>
                     {STATUS_LABELS[o.status] ?? o.status}

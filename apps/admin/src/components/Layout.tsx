@@ -7,21 +7,40 @@ import "../pages/operations.css";
 
 export function Layout() {
   const { user, logout, impersonatedShopName, stopImpersonation } = useAuth();
-  const [counts, setCounts] = useState({ pendingSellers: 0, pendingListings: 0, unreadMessages: 0 });
+  const [counts, setCounts] = useState({
+    pendingSellers: 0,
+    pendingListings: 0,
+    unreadMessages: 0,
+    pendingPayments: 0,
+    pendingQuotes: 0,
+  });
+  const [sellerCounts, setSellerCounts] = useState({ rejectedListings: 0 });
 
   useEffect(() => {
     if (user?.role !== "ADMIN") return;
     let active = true;
     const load = async () => {
       try {
-        const data = await api.get<{ pendingSellers: number; pendingListings: number; unreadMessages: number }>("/admin/counts");
+        const data = await api.get<{
+          pendingSellers: number;
+          pendingListings: number;
+          unreadMessages: number;
+          pendingPayments?: number;
+          pendingQuotes?: number;
+        }>("/admin/concierge/counts");
         if (active && data) {
           let unread = data.unreadMessages || 0;
           if (unread === 0) {
             const convs = await api.get<any[]>('/admin/concierge/conversations').catch(() => []);
             unread = (convs || []).filter((c: any) => c.needsReply && c.state === 'OPEN').length;
           }
-          setCounts({ ...data, unreadMessages: unread });
+          setCounts({
+            pendingSellers: data.pendingSellers || 0,
+            pendingListings: data.pendingListings || 0,
+            unreadMessages: unread,
+            pendingPayments: data.pendingPayments || 0,
+            pendingQuotes: data.pendingQuotes || 0,
+          });
           return;
         }
       } catch {
@@ -36,7 +55,7 @@ export function Layout() {
             const unread = (convs || []).filter((c: any) => c.needsReply && c.state === 'OPEN').length;
             const pendingSellers = (sellers || []).filter((s: any) => s.status === 'PENDING').length;
             const pendingListings = (Array.isArray(prods) ? prods : (prods as any)?.data || []).filter((p: any) => p.moderation === 'PENDING').length;
-            setCounts({ unreadMessages: unread, pendingSellers, pendingListings });
+            setCounts({ unreadMessages: unread, pendingSellers, pendingListings, pendingPayments: 0, pendingQuotes: 0 });
           }
         } catch {
           // ignore
@@ -45,13 +64,51 @@ export function Layout() {
     };
     load();
     const id = setInterval(load, 12000);
-    return () => { active = false; clearInterval(id); };
+    // Rafraîchissement immédiat après traitement d'un élément
+    const onRefresh = () => load();
+    window.addEventListener("baobab:refresh-counts", onRefresh);
+    return () => {
+      active = false;
+      clearInterval(id);
+      window.removeEventListener("baobab:refresh-counts", onRefresh);
+    };
+  }, [user?.role]);
+
+  // Commerçant : compteur rouge des annonces refusées à corriger
+  useEffect(() => {
+    if (user?.role !== "SELLER") return;
+    let active = true;
+    const load = async () => {
+      try {
+        const products = await api.get<any[]>("/products/mine");
+        if (!active) return;
+        setSellerCounts({
+          rejectedListings: (products || []).filter((p) => p.moderation === "REJECTED").length,
+        });
+      } catch {
+        // silencieux
+      }
+    };
+    load();
+    const id = setInterval(load, 20000);
+    const onRefresh = () => load();
+    window.addEventListener("baobab:refresh-counts", onRefresh);
+    return () => {
+      active = false;
+      clearInterval(id);
+      window.removeEventListener("baobab:refresh-counts", onRefresh);
+    };
   }, [user?.role]);
 
   const badgeFor = (to: string): number => {
+    if (user?.role !== "ADMIN") {
+      // Commerçant : annonces refusées à corriger
+      return to === "/products" ? sellerCounts.rejectedListings : 0;
+    }
     if (to === "/messages") return counts.unreadMessages;
     if (to === "/sellers") return counts.pendingSellers;
     if (to === "/catalog") return counts.pendingListings;
+    if (to === "/orders") return counts.pendingPayments + counts.pendingQuotes;
     return 0;
   };
 

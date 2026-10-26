@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../lib/cart';
-import { formatXof } from '../lib/format';
+import { useCurrency } from '../lib/currency';
 import { api } from '../lib/api';
 import { Product, ProductCard } from '../components/ProductCard';
 import { BaobabMark, IconBag, IconShop } from '../components/icons';
@@ -9,6 +9,7 @@ import { BaobabMark, IconBag, IconShop } from '../components/icons';
 export function Cart() {
   const { items, updateQuantity, removeItem, toggleSelected, setAllSelected, selectedTotal, selectedCount } =
     useCart();
+  const { format } = useCurrency();
   const navigate = useNavigate();
   const [suggestions, setSuggestions] = useState<Product[]>([]);
 
@@ -90,7 +91,7 @@ export function Cart() {
                     </div>
                     <div className="flex flex-1 flex-col">
                       <p className="text-sm font-medium">{item.name}</p>
-                      <p className="text-sm text-amber-400">{formatXof(item.price)}</p>
+                      <p className="text-sm text-amber-400">{format(item.price)}</p>
                       <div className="mt-auto flex items-center justify-between">
                         <div className="flex items-center rounded-lg border border-base-700">
                           <button
@@ -140,7 +141,7 @@ export function Cart() {
         <div className="mb-3 flex items-center justify-between text-sm">
           <span className="text-slate-400">Total ({selectedCount} article{selectedCount > 1 ? 's' : ''})</span>
           <span className="font-heading text-lg font-semibold tabular-nums text-amber-400">
-            {formatXof(selectedTotal)}
+            {format(selectedTotal)}
           </span>
         </div>
         <button

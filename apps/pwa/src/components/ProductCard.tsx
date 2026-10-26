@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { formatXof } from '../lib/format';
+import { useCurrency } from '../lib/currency';
 import { BaobabMark, IconStar } from './icons';
 import { isVehicleProduct } from '../lib/vehicles';
 import { VehicleCard } from './VehicleCard';
@@ -28,6 +28,7 @@ function discountPercent(price: number, compareAtPrice?: number | null) {
 }
 
 export function ProductCard({ product }: { product: Product }) {
+  const { format } = useCurrency();
   // If product is an actual vehicle, render dedicated Dubizzle Motors vehicle card
   if (isVehicleProduct(product)) {
     return <VehicleCard product={product} />;
@@ -85,11 +86,11 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="mt-auto flex items-end justify-between gap-1 pt-1">
           <div className="flex flex-col">
             <span className="font-heading text-sm font-semibold tabular-nums text-amber-400">
-              {formatXof(Number(product.price))}
+              {format(Number(product.price))}
             </span>
             {discount && (
               <span className="text-[11px] tabular-nums text-slate-500 line-through">
-                {formatXof(Number(product.compareAtPrice))}
+                {format(Number(product.compareAtPrice))}
               </span>
             )}
           </div>

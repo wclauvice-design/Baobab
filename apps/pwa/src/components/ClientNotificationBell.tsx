@@ -1,9 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-export function ClientNotificationBell({ unreadCount }: { unreadCount: number }) {
+export function ClientNotificationBell({
+  unreadCount,
+  toPay = 0,
+  quotes = 0,
+}: {
+  unreadCount: number;
+  toPay?: number;
+  quotes?: number;
+}) {
   const [open, setOpen] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
+  const total = unreadCount + toPay + quotes;
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -37,7 +46,7 @@ export function ClientNotificationBell({ unreadCount }: { unreadCount: number })
         }}
       >
         <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>🔔</span>
-        {unreadCount > 0 && (
+        {total > 0 && (
           <span
             style={{
               position: 'absolute',
@@ -57,7 +66,7 @@ export function ClientNotificationBell({ unreadCount }: { unreadCount: number })
               animation: 'pulse 2s infinite',
             }}
           >
-            {unreadCount}
+            {total > 99 ? '99+' : total}
           </span>
         )}
       </button>
@@ -90,9 +99,9 @@ export function ClientNotificationBell({ unreadCount }: { unreadCount: number })
             }}
           >
             <strong style={{ fontSize: '0.88rem', color: '#0f172a' }}>Vos Notifications</strong>
-            {unreadCount > 0 && (
+            {total > 0 && (
               <span style={{ background: '#fee2e2', color: '#ef4444', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 800 }}>
-                {unreadCount} nouveau(x)
+                {total} à traiter
               </span>
             )}
           </div>
@@ -143,13 +152,81 @@ export function ClientNotificationBell({ unreadCount }: { unreadCount: number })
                 textDecoration: 'none',
                 color: 'inherit',
                 borderBottom: '1px solid #f8fafc',
+                background: toPay > 0 ? '#fef2f2' : 'transparent',
+              }}
+            >
+              <span style={{ fontSize: '1.3rem' }}>💳</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <strong style={{ fontSize: '0.85rem', color: toPay > 0 ? '#b91c1c' : '#0f172a' }}>
+                    Commandes à payer
+                  </strong>
+                  {toPay > 0 && (
+                    <span style={{ background: '#ef4444', color: '#fff', borderRadius: '9999px', fontSize: '0.68rem', fontWeight: 800, padding: '1px 6px' }}>
+                      {toPay}
+                    </span>
+                  )}
+                </div>
+                <p style={{ margin: '3px 0 0', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.35 }}>
+                  {toPay > 0
+                    ? `${toPay} commande(s) attendent votre paiement pour être confirmées.`
+                    : 'Aucun paiement en attente de votre part.'}
+                </p>
+              </div>
+            </Link>
+
+            <Link
+              to="/orders"
+              onClick={() => setOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px',
+                padding: '12px 16px',
+                textDecoration: 'none',
+                color: 'inherit',
+                borderBottom: '1px solid #f8fafc',
+                background: quotes > 0 ? '#fef2f2' : 'transparent',
+              }}
+            >
+              <span style={{ fontSize: '1.3rem' }}>📝</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <strong style={{ fontSize: '0.85rem', color: quotes > 0 ? '#b91c1c' : '#0f172a' }}>
+                    Devis à confirmer
+                  </strong>
+                  {quotes > 0 && (
+                    <span style={{ background: '#ef4444', color: '#fff', borderRadius: '9999px', fontSize: '0.68rem', fontWeight: 800, padding: '1px 6px' }}>
+                      {quotes}
+                    </span>
+                  )}
+                </div>
+                <p style={{ margin: '3px 0 0', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.35 }}>
+                  {quotes > 0
+                    ? `${quotes} devis vous attendent : vérifiez les frais et validez en 1 clic.`
+                    : 'Aucun devis en attente de validation.'}
+                </p>
+              </div>
+            </Link>
+
+            <Link
+              to="/orders"
+              onClick={() => setOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px',
+                padding: '12px 16px',
+                textDecoration: 'none',
+                color: 'inherit',
+                borderBottom: '1px solid #f8fafc',
               }}
             >
               <span style={{ fontSize: '1.3rem' }}>📦</span>
               <div style={{ flex: 1 }}>
-                <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>Mes Commandes & Devis</strong>
+                <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>Suivi de mes commandes</strong>
                 <p style={{ margin: '3px 0 0', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.35 }}>
-                  Consultez l'avancement de vos achats et validez vos devis en 1 clic.
+                  Consultez l'avancement de vos achats, expéditions et livraisons.
                 </p>
               </div>
             </Link>

@@ -31,6 +31,13 @@ export class CreateProductDto {
   images?: string[];
   @IsOptional() @IsString() sellerId?: string;
   @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) supplierPrice?: number;
+  /**
+   * Devise de saisie du commerçant (AED par défaut côté interface).
+   * Si sourcePrice + sourceCurrency sont fournis, le serveur calcule le prix XOF.
+   */
+  @IsOptional() @IsIn(['XOF', 'AED', 'EUR', 'USD']) sourceCurrency?: string;
+  @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) sourcePrice?: number;
+  @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) sourcePublicPrice?: number;
   @IsOptional() @IsString() @MaxLength(100) subcategory?: string;
   @IsOptional() @IsIn(['NEW', 'USED', 'REFURBISHED']) condition?: string;
   @IsOptional() @IsString() @MaxLength(100) location?: string;

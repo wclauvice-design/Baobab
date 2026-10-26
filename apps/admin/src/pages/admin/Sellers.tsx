@@ -29,6 +29,7 @@ export function Sellers() {
   async function setStatus(id: string, status: string) {
     await api.patch(`/admin/sellers/${id}/status`, { status });
     load();
+    window.dispatchEvent(new Event('baobab:refresh-counts'));
   }
 
   return (

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { formatXof } from '../lib/format';
+import { useCurrency } from '../lib/currency';
 import { parseVehicleData, VehicleSpecs } from '../lib/vehicles';
 import { IconHeart, IconLocation } from './icons';
 
@@ -18,6 +19,7 @@ export function DubizzleVehicleDetail({
   busy = false,
 }: DubizzleVehicleDetailProps) {
   const navigate = useNavigate();
+  const { format } = useCurrency();
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
@@ -177,7 +179,7 @@ export function DubizzleVehicleDetail({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-heading text-3xl sm:text-4xl font-black text-amber-400 tracking-tight">
-                {formatXof(price)}
+                {format(price)}
               </span>
               {discount && (
                 <span className="rounded-md bg-rose-600 px-2 py-0.5 text-xs font-bold text-white">
@@ -187,7 +189,7 @@ export function DubizzleVehicleDetail({
             </div>
             {compareAt && compareAt > price && (
               <p className="text-sm text-slate-500 line-through">
-                Prix catalogue : {formatXof(compareAt)}
+                Prix catalogue : {format(compareAt)}
               </p>
             )}
           </div>

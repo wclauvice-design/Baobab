@@ -2,7 +2,9 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { api, ApiError } from '../lib/api';
-import { formatXof } from '../lib/format';
+import { useCurrency } from '../lib/currency';
+import { useUnreadMessages } from '../lib/unreadMessages';
+import { usePendingClientCounts } from '../lib/clientCounts';
 import { IconChat, IconHeart, IconHistory, IconLocation, IconOrders, IconSettings, IconStar } from '../components/icons';
 
 const SUPPORT_WHATSAPP_NUMBER = '22676950089';
@@ -22,6 +24,9 @@ const MENU_ITEMS = [
 
 export function Account() {
   const { user } = useAuth();
+  const { format } = useCurrency();
+  const { unreadCount } = useUnreadMessages();
+  const pending = usePendingClientCounts();
   const [showSellerForm, setShowSellerForm] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [couponCount, setCouponCount] = useState(0);
@@ -85,7 +90,7 @@ export function Account() {
           <div>
             <p className="text-xs font-medium opacity-70">Solde crédit</p>
             <p className="font-heading text-xl font-bold tabular-nums">
-              {formatXof(Number(user?.creditBalance ?? 0))}
+              {format(Number(user?.creditBalance ?? 0))}
             </p>
           </div>
           <div className="text-right">
@@ -96,18 +101,31 @@ export function Account() {
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-3">
-        {MENU_ITEMS.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            className="card-interactive flex flex-col items-center gap-1.5 py-4 text-center"
-          >
-            <span className={`flex h-9 w-9 items-center justify-center rounded-xl2 bg-gradient-to-br ${item.tint}`}>
-              <item.Icon className="h-4 w-4" />
-            </span>
-            <span className="text-[11px] text-slate-300">{item.label}</span>
-          </Link>
-        ))}
+        {MENU_ITEMS.map((item) => {
+          const badge =
+            item.to === '/account/messages'
+              ? unreadCount
+              : item.to === '/orders'
+                ? pending.total
+                : 0;
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              className="card-interactive relative flex flex-col items-center gap-1.5 py-4 text-center"
+            >
+              <span className={`relative flex h-9 w-9 items-center justify-center rounded-xl2 bg-gradient-to-br ${item.tint}`}>
+                <item.Icon className="h-4 w-4" />
+                {badge > 0 && (
+                  <span className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-extrabold leading-none text-white shadow-[0_0_0_2px_rgba(10,14,23,0.85)]">
+                    {badge > 99 ? '99+' : badge}
+                  </span>
+                )}
+              </span>
+              <span className="text-[11px] text-slate-300">{item.label}</span>
+            </Link>
+          );
+        })}
       </div>
 
       {user?.role === 'BUYER' && (

@@ -128,6 +128,9 @@ export class CommerceAdminController {
   @Get("overview") overview() {
     return this.service.overview();
   }
+  @Get("counts") counts() {
+    return this.service.adminCounts();
+  }
   @Get("settings") settings() {
     return this.service.settings();
   }

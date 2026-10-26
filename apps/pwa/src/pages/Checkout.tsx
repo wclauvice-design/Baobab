@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../lib/cart';
 import { api, ApiError } from '../lib/api';
-import { formatXof } from '../lib/format';
+import { useCurrency } from '../lib/currency';
 
 type DeliveryMode = 'STANDARD' | 'EXPRESS';
 type Provider = 'MANUAL_ORANGE_MONEY' | 'CASH_ON_DELIVERY';
@@ -19,6 +19,7 @@ const CASH_ON_DELIVERY_FEE = 1000;
 
 export function Checkout() {
   const { items, selectedTotal, clearSelected } = useCart();
+  const { format } = useCurrency();
   const checkoutItems = items.filter((i) => i.selected);
   const navigate = useNavigate();
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
@@ -174,7 +175,7 @@ export function Checkout() {
             >
               Paiement à la livraison
               <span className="block text-xs text-slate-500">
-                Frais de livraison de {formatXof(CASH_ON_DELIVERY_FEE)} appliqués
+                Frais de livraison de {format(CASH_ON_DELIVERY_FEE)} appliqués
               </span>
             </button>
           </div>
@@ -186,18 +187,18 @@ export function Checkout() {
           <div className="mb-3 flex flex-col gap-1 text-sm">
             <div className="flex items-center justify-between text-slate-400">
               <span>Sous-total ({checkoutItems.length} article{checkoutItems.length > 1 ? 's' : ''})</span>
-              <span className="tabular-nums">{formatXof(selectedTotal)}</span>
+              <span className="tabular-nums">{format(selectedTotal)}</span>
             </div>
             {deliveryFee > 0 && (
               <div className="flex items-center justify-between text-slate-400">
                 <span>Frais de livraison</span>
-                <span className="tabular-nums">{formatXof(deliveryFee)}</span>
+                <span className="tabular-nums">{format(deliveryFee)}</span>
               </div>
             )}
             <div className="flex items-center justify-between">
               <span className="text-slate-400">Total</span>
               <span className="font-heading text-lg font-semibold tabular-nums text-amber-400">
-                {formatXof(grandTotal)}
+                {format(grandTotal)}
               </span>
             </div>
           </div>

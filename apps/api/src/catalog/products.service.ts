@@ -9,6 +9,7 @@ import { ModerateDto } from "../commerce/dto";
 import { minor, amount } from "../commerce/rules";
 import { OrderStatus, Role } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
+import { FX_TO_XOF, isPricingCurrency, toXof } from "../common/currency";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
 import { SupabaseStorageService } from "./supabase-storage.service";
@@ -152,12 +153,13 @@ export class ProductsService {
 
   async create(userId: string, role: Role, dto: CreateProductDto) {
     const sellerId = (role === Role.ADMIN && dto.sellerId) ? dto.sellerId : await this.resolveSellerId(userId, role);
-    this.validateListing(dto);
+    const normalized = this.normalizePricing(dto);
+    this.validateListing(normalized);
     return this.prisma.product.create({
       data: {
-        ...dto,
-        supplierPrice: dto.supplierPrice ?? dto.price,
-        images: dto.images ?? [],
+        ...normalized,
+        supplierPrice: normalized.supplierPrice ?? normalized.price,
+        images: normalized.images ?? [],
         sellerId,
         moderation: role === Role.ADMIN ? "PUBLISHED" : "PENDING",
       },
@@ -171,23 +173,62 @@ export class ProductsService {
     dto: UpdateProductDto,
   ) {
     const product = await this.assertOwnership(userId, role, productId);
-    this.validateListing({ ...product, ...dto });
+    const merged = this.normalizePricing({ ...product, ...dto });
+    this.validateListing(merged);
+    const patch = this.normalizePricing({ ...(dto as Record<string, any>) });
     return this.prisma.product.update({
       where: { id: productId },
       data: {
-        ...dto,
+        ...patch,
         ...(role === Role.SELLER
           ? {
               moderation: "PENDING",
               supplierPrice:
-                dto.supplierPrice ??
-                dto.price ??
+                patch.supplierPrice ??
+                patch.price ??
                 product.supplierPrice ??
                 product.price,
             }
           : {}),
       },
     });
+  }
+
+  /**
+   * Convertit une saisie en devise commerçant (AED par défaut) vers le XOF
+   * qui reste la seule devise stockée en base. Les valeurs d'origine sont
+   * conservées dans `attributes` pour l'affichage back-office.
+   */
+  private normalizePricing<T extends Record<string, any>>(input: T): T {
+    const sourceCurrency = String(input.sourceCurrency || "XOF").toUpperCase();
+    const sourcePrice = input.sourcePrice != null ? Number(input.sourcePrice) : undefined;
+    const sourcePublicPrice =
+      input.sourcePublicPrice != null ? Number(input.sourcePublicPrice) : undefined;
+
+    const clean: any = { ...input };
+    delete clean.sourceCurrency;
+    delete clean.sourcePrice;
+    delete clean.sourcePublicPrice;
+
+    if (sourcePrice != null && Number.isFinite(sourcePrice) && isPricingCurrency(sourceCurrency)) {
+      // `sourcePrice` = prix fournisseur saisi dans la devise du commerçant.
+      // `sourcePublicPrice` = prix public saisi dans la même devise (admin).
+      // Tout est converti une seule fois ici, en XOF.
+      clean.supplierPrice = toXof(sourcePrice, sourceCurrency);
+      clean.price = toXof(
+        sourcePublicPrice != null && Number.isFinite(sourcePublicPrice)
+          ? sourcePublicPrice
+          : sourcePrice,
+        sourceCurrency,
+      );
+      const attributes = { ...(clean.attributes || {}) };
+      attributes.sourceCurrency = sourceCurrency;
+      attributes.sourcePrice = String(sourcePrice);
+      attributes.fxRate = String(FX_TO_XOF[sourceCurrency] ?? 1);
+      clean.attributes = attributes;
+    }
+
+    return clean as T;
   }
 
   async addImage(

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatXof } from '../lib/format';
+import { useCurrency } from '../lib/currency';
 import { IconHeart } from './icons';
 
 export interface VehicleProduct {
@@ -24,6 +24,7 @@ export function VehicleCard({ product, isFavorite = false, onToggleFavorite }: {
   onToggleFavorite?: (id: string) => void;
 }) {
   const [failed, setFailed] = useState(false);
+  const { format } = useCurrency();
   const image = product.images?.find(url => !/https:\/\/(?:images\.)?unsplash\.com\//i.test(url));
   return (
     <article className="visual-product-card">
@@ -39,7 +40,7 @@ export function VehicleCard({ product, isFavorite = false, onToggleFavorite }: {
       </button>}
       <Link to={`/products/${product.id}`} className="visual-product-caption">
         <h3 title={product.name}>{product.name}</h3>
-        <strong>{formatXof(Number(product.price || 0))}</strong>
+        <strong>{format(Number(product.price || 0))}</strong>
       </Link>
     </article>
   );

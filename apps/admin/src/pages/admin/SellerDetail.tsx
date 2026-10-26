@@ -199,6 +199,7 @@ export function SellerDetail() {
     try {
       await api.patch(`/admin/sellers/${id}/status`, { status });
       await load();
+      window.dispatchEvent(new Event('baobab:refresh-counts'));
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -422,6 +423,7 @@ export function SellerDetail() {
 
       setModifyingProduct(null);
       await load();
+      window.dispatchEvent(new Event('baobab:refresh-counts'));
     } catch (e: any) {
       alert("Erreur lors de la mise à jour : " + (e?.message || e));
     } finally {
