@@ -2338,34 +2338,48 @@
   /* Fiche produit */
   .market .product-detail-page {
     padding-bottom: 118px;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
-  .market .product-detail-hero {
-    max-height: 340px;
-    border-radius: 14px;
+  .market .detail-hero-top,
+  .market .product-detail-hero,
+  .market .product-detail-page > .relative.-mx-4 {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    border-radius: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    max-height: 420px;
+  }
+
+  .market .product-detail-summary,
+  .market .product-detail-page > .rounded-2xl:not(.product-detail-hero),
+  .market .product-detail-page > .sm\:rounded-3xl,
+  .market #product-purchase,
+  .market .product-detail-section {
+    margin-left: 12px;
+    margin-right: 12px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .market .product-detail-summary {
-    padding-bottom: 14px;
+    padding-bottom: 16px;
   }
 
   .market .product-detail-summary h1 {
-    font-size: 19px;
+    font-size: 21px;
+    line-height: 1.25;
   }
 
   .market .product-detail-summary .font-heading {
-    font-size: 28px;
-  }
-
-  .market .product-detail-page > .rounded-2xl:not(.product-detail-hero):not(.product-detail-summary),
-  .market #product-purchase,
-  .market .product-detail-section {
-    padding-left: 14px;
-    padding-right: 14px;
+    font-size: 30px;
   }
 
   .market .product-detail-page .prose {
-    font-size: 12.5px;
+    font-size: 13px;
   }
 
   .market .bb-detail-cta {

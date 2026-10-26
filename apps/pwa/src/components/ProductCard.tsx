@@ -41,9 +41,9 @@ export function ProductCard({ product }: { product: Product }) {
     <Link
       to={`/products/${product.id}`}
       state={{ product }}
-      className="card-interactive group flex flex-col overflow-hidden"
+      className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-[#E6E1D4] shadow-[0_1px_3px_rgba(23,62,50,0.04)] hover:border-[#173E32]/30 hover:shadow-[0_10px_24px_-18px_rgba(23,62,50,0.45)] transition-all duration-300 hover:-translate-y-0.5"
     >
-      <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-gradient-to-br from-base-700 to-base-800">
+      <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-[#F3EFE4]">
         {product.images[0] ? (
           isVideoUrl(product.images[0]) ? (
             <video
@@ -64,51 +64,61 @@ export function ProductCard({ product }: { product: Product }) {
             />
           )
         ) : (
-          <BaobabMark className="h-10 w-10 opacity-30" />
+          <BaobabMark className="h-10 w-10 text-[#5E6B60] opacity-30" />
         )}
         {discount && (
-          <span className="absolute left-1.5 top-1.5 rounded-md bg-flame px-1.5 py-0.5 text-[10px] font-bold text-base-950 shadow-glow">
+          <span className="absolute left-2 top-2 rounded-md bg-[#B85732] px-2 py-0.5 text-[10px] font-extrabold text-white shadow-sm">
             -{discount}%
           </span>
         )}
+        {product.condition && (
+          <span className="absolute right-2 top-2 rounded-md bg-white/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-bold text-[#173E32] border border-[#E6E1D4] shadow-sm">
+            {product.condition === 'NEW' ? 'Neuf' : product.condition === 'REFURBISHED' ? 'Reconditionné' : 'Occasion'}
+          </span>
+        )}
         {product.stock === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center bg-base-950/70 backdrop-blur-[1px]">
-            <span className="rounded-full border border-white/10 bg-base-900/80 px-2.5 py-1 text-[10px] font-medium text-slate-300">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+            <span className="rounded-full bg-black/75 px-3 py-1 text-[11px] font-bold text-white border border-white/20">
               Rupture de stock
             </span>
           </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-3">
+      <div className="flex flex-1 flex-col gap-1 p-3.5">
         {product.category && (
-          <span className="text-[11px] uppercase tracking-wide text-emerald-400">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#8A5A00]">
             {product.category.name}
           </span>
         )}
-        <h3 className="line-clamp-2 text-sm font-medium text-slate-100">{product.name}</h3>
+        <h3 className="line-clamp-2 text-xs sm:text-sm font-medium text-[#173E32] leading-snug">
+          {product.name}
+        </h3>
 
         {(product.avgRating || product.soldCount) ? (
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#5E6B60] mt-0.5">
             {product.avgRating && (
-              <span className="flex items-center gap-1 text-amber-400">
-                <IconStar className="h-3 w-3" /> {Number(product.avgRating).toFixed(1)}
+              <span className="flex items-center gap-1 text-[#8A5A00] font-semibold">
+                <IconStar className="h-3 w-3 fill-current text-[#E8A33D]" /> {Number(product.avgRating).toFixed(1)}
               </span>
             )}
             {!!product.soldCount && <span>{product.soldCount} vendu{product.soldCount > 1 ? 's' : ''}</span>}
           </div>
         ) : null}
 
-        <div className="mt-auto flex items-end justify-between gap-1 pt-1">
+        <div className="mt-auto flex items-end justify-between gap-1 pt-2">
           <div className="flex flex-col">
-            <span className="font-heading text-sm font-semibold tabular-nums text-amber-400">
+            <span className="font-heading text-sm sm:text-base font-bold tabular-nums text-[#173E32]">
               {format(Number(product.price))}
             </span>
             {discount && (
-              <span className="text-[11px] tabular-nums text-slate-500 line-through">
+              <span className="text-[11px] tabular-nums text-[#5E6B60] line-through">
                 {format(Number(product.compareAtPrice))}
               </span>
             )}
           </div>
+          <span className="text-[11px] font-medium text-[#1F7A5C]">
+            ✓ Dubaï
+          </span>
         </div>
       </div>
     </Link>
@@ -117,12 +127,12 @@ export function ProductCard({ product }: { product: Product }) {
 
 export function ProductCardSkeleton() {
   return (
-    <div className="card-interactive flex flex-col overflow-hidden animate-pulse">
-      <div className="aspect-square bg-base-700" />
-      <div className="flex flex-1 flex-col gap-2 p-3">
-        <div className="h-3 w-16 rounded bg-base-700" />
-        <div className="h-4 w-full rounded bg-base-700" />
-        <div className="mt-auto h-4 w-20 rounded bg-base-700" />
+    <div className="flex flex-col overflow-hidden rounded-2xl bg-white border border-[#E6E1D4] animate-pulse">
+      <div className="aspect-square bg-[#F3EFE4]" />
+      <div className="flex flex-1 flex-col gap-2 p-3.5">
+        <div className="h-3 w-16 rounded bg-[#E6E1D4]" />
+        <div className="h-4 w-full rounded bg-[#E6E1D4]" />
+        <div className="mt-auto h-4 w-20 rounded bg-[#E6E1D4]" />
       </div>
     </div>
   );

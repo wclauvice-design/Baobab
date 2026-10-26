@@ -1223,323 +1223,359 @@ export function ListingDetail() {
 
   return (
     <>
-      <div className="product-detail-page mx-auto max-w-4xl pb-16 text-slate-100">
-      {/* Navigation retour rapide */}
-      <div className="mb-3 flex items-center justify-between text-xs text-slate-400">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1 text-slate-300 hover:text-amber-400 font-semibold transition-colors"
-        >
-          <span>←</span>
-          <span>Retour aux annonces</span>
-        </button>
-        <span>
-          {productCategoryLabel(p)} {subcategoryLabel(p) ? `· ${subcategoryLabel(p)}` : ""}
-        </span>
-      </div>
+      <div className="product-detail-page mx-auto max-w-4xl pb-28">
+        {/* 1. VISUEL HERO SUPÉRIEUR PLEIN ÉCRAN (Full-Bleed Edge-to-Edge sur Mobile) */}
+        <div className="detail-hero-top relative -mx-4 sm:mx-0 overflow-hidden sm:rounded-3xl shadow-2xl bg-[#0d1612]">
+          <div className="product-detail-hero relative aspect-square sm:aspect-[4/3] w-full max-h-[480px] overflow-hidden flex items-center justify-center">
+            {isVideoUrl(p.images?.[image]) ? (
+              <video
+                src={p.images[image]}
+                muted
+                playsInline
+                loop
+                autoPlay
+                preload="metadata"
+                aria-label={p.name}
+                className="h-full w-full object-cover transition-opacity duration-300"
+              />
+            ) : (
+              <img
+                src={
+                  p.images?.[image] ||
+                  fallbackPhoto(p.subcategory, productCategoryLabel(p), p.category?.universe, p.name)
+                }
+                alt={p.name}
+                decoding="async"
+                className="h-full w-full object-cover transition-opacity duration-300"
+              />
+            )}
 
-      {/* 1. VISUEL HERO SUPÉRIEUR (Image en partie supérieure de l'écran - Les gens achètent par la vue) */}
-      <div className="detail-hero-top">
-        <div className="product-detail-hero relative aspect-square sm:aspect-[4/3] w-full max-h-[460px] overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-black border border-slate-800 shadow-2xl flex items-center justify-center">
-          {isVideoUrl(p.images?.[image]) ? (
-            <video
-              src={p.images[image]}
-              muted
-              playsInline
-              loop
-              autoPlay
-              preload="metadata"
-              aria-label={p.name}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <img
-              src={
-                p.images?.[image] ||
-                fallbackPhoto(p.subcategory, productCategoryLabel(p), p.category?.universe, p.name)
-              }
-              alt={p.name}
-              decoding="async"
-              className="h-full w-full object-cover"
-            />
-          )}
+            {/* Dégradé supérieur pour contraster les boutons flottants */}
+            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/60 via-black/20 to-transparent pointer-events-none" />
 
+            {/* Barre flottante supérieure avec Retour, Compteur & Actions (Glassmorphism) */}
+            <div className="absolute top-3.5 inset-x-3.5 flex items-center justify-between z-10">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-md border border-white/20 shadow-lg hover:bg-black/70 hover:scale-105 active:scale-95 transition-all"
+                aria-label="Retour aux annonces"
+              >
+                <span className="text-lg leading-none">←</span>
+              </button>
+
+              {p.images && p.images.length > 1 && (
+                <div className="flex items-center gap-1.5 rounded-full bg-black/50 px-3.5 py-1 text-xs font-semibold text-white/95 backdrop-blur-md border border-white/15 shadow-md">
+                  <span className="opacity-80">📷</span>
+                  <span>{image + 1} / {p.images.length}</span>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({ title: p.name, url: window.location.href }).catch(() => {});
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    alert("Lien de l’annonce copié dans le presse-papier !");
+                  }
+                }}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-md border border-white/20 hover:bg-black/70 hover:scale-105 active:scale-95 shadow-lg transition-all"
+                title="Partager"
+              >
+                <span className="text-base leading-none">↗</span>
+              </button>
+            </div>
+
+            {/* Badges d'état et d'origine en bas de la photo */}
+            <div className="absolute bottom-3.5 left-3.5 right-3.5 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-lg border border-[#E8A33D]/60 bg-[#173E32]/90 px-3 py-1 text-xs font-bold text-[#FBF0D8] backdrop-blur-md shadow-md">
+                  {p.condition === "NEW" ? "Neuf" : p.condition === "REFURBISHED" ? "Reconditionné" : "Occasion"}
+                </span>
+                <span className="rounded-lg border border-white/20 bg-black/60 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur-md shadow-md">
+                  🇦🇪 Dubaï Export
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Galerie de miniatures immédiatement sous l'image principale */}
           {p.images && p.images.length > 1 && (
-            <div className="absolute top-3.5 left-3.5 flex items-center gap-1.5 rounded-lg bg-black/75 px-3 py-1 text-xs font-bold text-white backdrop-blur-md border border-white/10 shadow-lg">
-              <span>📷</span>
-              <span>{image + 1} / {p.images.length}</span>
+            <div className="bg-[#101915] p-2.5 flex gap-2 overflow-x-auto scrollbar-none">
+              {p.images.map((url: string, i: number) => (
+                <button
+                  key={url}
+                  type="button"
+                  onClick={() => setImage(i)}
+                  aria-label={`Afficher la photo ${i + 1}`}
+                  aria-pressed={image === i}
+                  className={`relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all ${
+                    image === i
+                      ? "border-[#E8A33D] ring-2 ring-[#E8A33D]/40 scale-[1.02]"
+                      : "border-white/10 opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  {isVideoUrl(url) ? (
+                    <video
+                      src={url}
+                      muted
+                      playsInline
+                      loop
+                      autoPlay
+                      preload="metadata"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <img src={url} alt="" className="h-full w-full object-cover" />
+                  )}
+                </button>
+              ))}
             </div>
           )}
-
-          <div className="absolute bottom-3.5 left-3.5 flex flex-wrap gap-2">
-            <span className="rounded-md border border-emerald-500/50 bg-emerald-950/85 px-2.5 py-1 text-xs font-black text-emerald-300 shadow-md backdrop-blur-md">
-              {p.condition === "NEW" ? "Neuf" : p.condition === "REFURBISHED" ? "Reconditionné" : "Occasion"}
-            </span>
-            <span className="rounded-md border border-slate-700 bg-slate-900/90 px-2.5 py-1 text-xs font-semibold text-slate-200 shadow-md backdrop-blur-md">
-              🇦🇪 Dubaï Export
-            </span>
-          </div>
         </div>
 
-        {/* Galerie de miniatures immédiatement sous l'image principale */}
-        {p.images && p.images.length > 1 && (
-          <div className="mt-3 flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
-            {p.images.map((url: string, i: number) => (
-              <button
-                key={url}
-                type="button"
-                onClick={() => setImage(i)}
-                aria-label={`Afficher la photo ${i + 1}`}
-                aria-pressed={image === i}
-                className={`relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all ${
-                  image === i
-                    ? "border-amber-400 ring-2 ring-amber-400/30 scale-102"
-                    : "border-slate-800 opacity-60 hover:opacity-100"
-                }`}
-              >
-                {isVideoUrl(url) ? (
-                  <video
-                    src={url}
-                    muted
-                    playsInline
-                    loop
-                    autoPlay
-                    preload="metadata"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <img src={url} alt="" className="h-full w-full object-cover" />
-                )}
-              </button>
-            ))}
+        {/* 2. NOM & PRIX (Carte Blanc Pur Haut de Gamme) */}
+        <div className="product-detail-summary mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E6E1D4] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
+          <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#8A5A00] mb-2">
+            <span>{subcategoryLabel(p) || productCategoryLabel(p)}</span>
+            <span className="text-[#5E6B60] font-normal normal-case">Réf: {p.id}</span>
           </div>
-        )}
-      </div>
 
-      {/* 2. NOM & PRIX (Immédiatement après les images) */}
-      <div className="product-detail-summary mt-5 rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl backdrop-blur-sm">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <div>
-            <div className="font-heading text-3xl sm:text-4xl font-black text-amber-400 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-[#173E32] leading-tight tracking-tight">
+            {p.name}
+          </h1>
+
+          <div className="mt-3 flex flex-wrap items-baseline gap-3">
+            <div className="font-heading text-3xl sm:text-4xl font-extrabold text-[#173E32] tracking-tight">
               {money(p.price)}
-              <small className="text-xs font-normal text-slate-400 ml-2">par {p.unit || "pièce"}</small>
+              <small className="text-xs font-normal text-[#5E6B60] ml-2">par {p.unit || "pièce"}</small>
             </div>
             {p.compareAtPrice && Number(p.compareAtPrice) > Number(p.price) && (
-              <p className="text-sm text-slate-500 line-through">
+              <span className="text-sm text-[#5E6B60] line-through">
                 Prix catalogue : {money(p.compareAtPrice)}
-              </p>
-            )}
-          </div>
-
-
-        </div>
-
-        <p className="mt-3 text-xs font-bold uppercase tracking-wider text-emerald-400">
-          {subcategoryLabel(p) || productCategoryLabel(p)}
-        </p>
-        <h1 className="mt-1 text-xl sm:text-2xl font-black text-slate-100 leading-snug">
-          {p.name}
-        </h1>
-
-        {/* Vendeur & Localisation */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800 pt-3 text-xs text-slate-300">
-          <div className="flex items-center gap-2">
-            <Icon name="shield" size={14} />
-            <span>Vendu par <strong>{p.seller?.shopName || "Baobab Dubaï Officiel"}</strong></span>
-            <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">Vérifié</span>
-          </div>
-          <div className="flex items-center gap-1 text-slate-400">
-            <Icon name="pin" size={14} />
-            <span>Disponible à {p.location || "Dubaï"}</span>
-          </div>
-        </div>
-      </div>
-
-      <a className="product-detail-jump" href="#product-purchase">Livraison et demande de devis →</a>
-
-      {/* 3. DESCRIPTION AVEC OPTION « VOIR PLUS... » (Ensuite, directement après nom et prix) */}
-      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-xl">
-        <h2 className="text-base sm:text-lg font-black text-slate-100 mb-2 flex items-center gap-2">
-          À propos du produit
-        </h2>
-
-        <div className="prose prose-invert max-w-none text-sm text-slate-300 leading-relaxed whitespace-pre-line">
-          {displayedDesc}
-        </div>
-
-        {isLongDesc && (
-          <button
-            type="button"
-            onClick={() => setShowFullDesc(!showFullDesc)}
-            aria-expanded={showFullDesc}
-            className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
-          >
-            <span>{showFullDesc ? "▲ Voir moins" : "▼ Voir plus de description..."}</span>
-          </button>
-        )}
-      </div>
-
-      <details className="product-detail-section">
-        <summary>Caractéristiques du produit</summary>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5 text-xs sm:text-sm">
-          {Object.entries({
-            État: p.condition === "NEW" ? "Neuf" : p.condition === "USED" ? "Occasion" : "Reconditionné",
-            Localisation: p.location || "Dubaï",
-            Conditionnement: `${p.packSize || 1} ${p.unit || "pièce"}`,
-            ...(p.weightKg ? { "Poids unitaire": `${p.weightKg} kg` } : {}),
-            ...(p.dimensions ? { "Dimensions": p.dimensions } : {}),
-            ...p.attributes,
-          }).map(([k, v]) => (
-            <div key={k} className="flex justify-between items-baseline border-b border-slate-800/60 pb-2">
-              <span className="text-slate-400">{k}</span>
-              <strong className="font-semibold text-slate-100">{String(v)}</strong>
-            </div>
-          ))}
-        </div>
-      </details>
-
-      {/* 5. COMMANDE, FRET & ACTIONS RAPIDES */}
-      <div id="product-purchase" className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/90 p-5 sm:p-6 shadow-xl">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <label className="text-sm font-bold text-slate-200 flex items-center gap-2">
-            <span>Quantité souhaitée :</span>
-            <input
-              type="number"
-              min={p.packSize || 1}
-              step={p.packSize || 1}
-              value={qty}
-              onChange={(e) => setQty(Math.max(1, Number(e.target.value)))}
-              className="w-24 rounded-xl border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm font-bold text-amber-400 text-center"
-            />
-          </label>
-          <span className="text-xs text-slate-400">
-            Total marchandise : <strong className="text-slate-100 font-bold text-sm">{money(Math.round(Number(p.price) * qty))}</strong>
-          </span>
-        </div>
-
-        {/* Simulateur Fret & Transit */}
-        <div className="freight-calculator">
-          <div className="freight-header">
-            <Icon name="shield" size={17} />
-            <strong>Simulateur Fret & Transit Dubaï ➔ Afrique</strong>
-          </div>
-          <label>
-            Destination d’arrivée
-            <select
-              value={dest.id}
-              onChange={(e) => selectDest(e.target.value)}
-            >
-              {DESTINATIONS.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="shipping-mode-selector">
-            {freight.availableModes.includes("EXPRESS") && (
-              <button
-                type="button"
-                className={`mode-btn ${freight.mode === "EXPRESS" ? "active" : ""}`}
-                onClick={() => setShippingMode("EXPRESS")}
-              >
-                <span className="mode-btn-title">Express (3–6 j)</span>
-                <small>12 500 F/kg</small>
-              </button>
-            )}
-            {freight.availableModes.includes("CARGO") && (
-              <button
-                type="button"
-                className={`mode-btn ${freight.mode === "CARGO" ? "active" : ""}`}
-                onClick={() => setShippingMode("CARGO")}
-              >
-                <span className="mode-btn-title">Cargo (14–16 j)</span>
-                <small>8 600 F/kg</small>
-              </button>
-            )}
-            {freight.availableModes.includes("SEA") && (
-              <button
-                type="button"
-                className={`mode-btn ${freight.mode === "SEA" ? "active" : ""}`}
-                onClick={() => setShippingMode("SEA")}
-              >
-                <span className="mode-btn-title">Maritime (45–50 j)</span>
-                <small>{money(dest.cbmRate)}/m³</small>
-              </button>
-            )}
-          </div>
-          {freight.restrictionNote && (
-            <div className="shipping-restriction-badge">
-              <Icon name="shield" size={13} />
-              <span>{freight.restrictionNote}</span>
-            </div>
-          )}
-          <div className="freight-breakdown">
-            <div>
-              <span>Marchandise ({qty} {p.unit || "pcs"})</span>
-              <b>{money(productSubtotal)}</b>
-            </div>
-            <div>
-              <span>
-                {freight.modeLabel}
-                <br />
-                <small style={{ color: "var(--muted)" }}>
-                  Poids total : ~{totalWeight.toFixed(1)} kg
-                  {freight.mode === "SEA" ? ` · Volume : ${freight.volumeCbm.toFixed(2)} m³` : ""}
-                  {freight.basis === "volumetric" ? " (poids volumétrique)" : ""}
-                </small>
               </span>
-              <b>{p.shippingIncluded ? "Inclus" : money(estimatedFreight)}</b>
+            )}
+          </div>
+
+          {/* Vendeur & Localisation */}
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#F0ECE1] pt-3 text-xs text-[#3F5749]">
+            <div className="flex items-center gap-2">
+              <Icon name="shield" size={14} />
+              <span>Vendu par <strong>{p.seller?.shopName || "Baobab Dubaï Officiel"}</strong></span>
+              <span className="rounded-full bg-[#E4F1EB] px-2 py-0.5 text-[10px] font-bold text-[#1F7A5C]">✓ Vérifié</span>
             </div>
-            <div className="freight-total">
-              <span>Total estimé rendu {dest.name.split(" ")[0]}</span>
-              <strong>{money(estimatedGrandTotal)}</strong>
+            <div className="flex items-center gap-1 text-[#5E6B60]">
+              <Icon name="pin" size={14} />
+              <span>Disponible à {p.location || "Dubaï"}</span>
+            </div>
+          </div>
+
+          {/* Bandeau Conciergerie Baobab */}
+          <div className="mt-5 rounded-2xl bg-[#FBF0D8]/60 border border-[#E8A33D]/30 p-4 sm:p-5 flex items-start gap-3.5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#173E32] text-[#FFF8E6] font-bold text-lg shadow-sm">
+              🛡️
+            </div>
+            <div className="text-xs leading-relaxed text-[#173E32]">
+              <div className="font-bold text-sm text-[#173E32] mb-0.5">
+                Conciergerie Baobab Dubaï & Contrôle Qualité Inclus (+15%)
+              </div>
+              <p className="text-[#3F5749]">
+                Audit physique de la marchandise à Dubaï avant expédition, formalités de transit et garantie de livraison sécurisée vers <strong>{dest.name}</strong>.
+              </p>
             </div>
           </div>
         </div>
 
-        <Notice>{error}</Notice>
+        <a className="product-detail-jump" href="#product-purchase">Aller au simulateur de livraison et devis →</a>
 
-        {/* Boutons d'action rapides */}
-        <div className="mt-5 flex flex-col sm:flex-row gap-3">
-          <button
-            type="button"
-            className="flex-1 rounded-xl bg-amber-500 py-3.5 px-4 text-center text-sm font-black text-slate-950 hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
-            onClick={discuss}
-            disabled={busy}
-          >
-            {busy ? "Ouverture…" : "Discuter & Demander un devis"}
-          </button>
+        {/* 3. DESCRIPTION AVEC OPTION « VOIR PLUS... » */}
+        <div className="mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E6E1D4] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
+          <h2 className="text-lg font-bold font-heading text-[#173E32] mb-3 flex items-center gap-2">
+            À propos du produit
+          </h2>
 
-          {config?.whatsapp && (
-            <a
-              className="flex-1 rounded-xl bg-emerald-600 py-3.5 px-4 text-center text-sm font-bold text-white hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"
-              href={`https://wa.me/${config.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`}
-              target="_blank"
-              rel="noreferrer"
+          <div className="prose max-w-none text-sm text-[#3F5749] leading-relaxed whitespace-pre-line font-normal">
+            {displayedDesc}
+          </div>
+
+          {isLongDesc && (
+            <button
+              type="button"
+              onClick={() => setShowFullDesc(!showFullDesc)}
+              aria-expanded={showFullDesc}
+              className="mt-3.5 inline-flex items-center gap-1.5 text-xs font-bold text-[#8A5A00] hover:text-[#173E32] transition-colors cursor-pointer"
             >
-              <span>💬</span>
-              <span>WhatsApp direct</span>
-            </a>
+              <span>{showFullDesc ? "▲ Voir moins de description" : "▼ Voir toute la description…"}</span>
+            </button>
           )}
         </div>
 
-        <div className="sponsor-share-banner mt-3">
-          <button
-            type="button"
-            onClick={() => {
-              navigator.clipboard.writeText(window.location.href);
-              alert("Lien de l’annonce copié. Vous pouvez le partager.");
-            }}
-            className="sponsor-share-btn"
-          >
-            <Icon name="share" size={15} />
-            <span>Copier le lien de l’annonce</span>
-          </button>
+        {/* 4. CARACTÉRISTIQUES DU PRODUIT */}
+        <details className="product-detail-section mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E6E1D4] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
+          <summary className="text-lg font-bold font-heading text-[#173E32] cursor-pointer">
+            Caractéristiques techniques
+          </summary>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-xs sm:text-sm">
+            {Object.entries({
+              État: p.condition === "NEW" ? "Neuf" : p.condition === "USED" ? "Occasion" : "Reconditionné",
+              Localisation: p.location || "Dubaï",
+              Conditionnement: `${p.packSize || 1} ${p.unit || "pièce"}`,
+              ...(p.weightKg ? { "Poids unitaire": `${p.weightKg} kg` } : {}),
+              ...(p.dimensions ? { "Dimensions": p.dimensions } : {}),
+              ...p.attributes,
+            }).map(([k, v]) => (
+              <div key={k} className="flex justify-between items-baseline border-b border-[#F0ECE1] pb-2">
+                <span className="text-[#5E6B60]">{k}</span>
+                <strong className="font-semibold text-[#173E32]">{String(v)}</strong>
+              </div>
+            ))}
+          </div>
+        </details>
+
+        {/* 5. COMMANDE, FRET & ACTIONS RAPIDES */}
+        <div id="product-purchase" className="mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E6E1D4] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <label className="text-sm font-bold text-[#173E32] flex items-center gap-2">
+              <span>Quantité souhaitée :</span>
+              <input
+                type="number"
+                min={p.packSize || 1}
+                step={p.packSize || 1}
+                value={qty}
+                onChange={(e) => setQty(Math.max(1, Number(e.target.value)))}
+                className="w-24 rounded-xl border border-[#E6E1D4] bg-[#FAF7F0] px-3 py-1.5 text-sm font-bold text-[#173E32] text-center"
+              />
+            </label>
+            <span className="text-xs text-[#5E6B60]">
+              Total marchandise : <strong className="text-[#173E32] font-bold text-sm">{money(Math.round(Number(p.price) * qty))}</strong>
+            </span>
+          </div>
+
+          {/* Simulateur Fret & Transit */}
+          <div className="freight-calculator">
+            <div className="freight-header">
+              <Icon name="shield" size={17} />
+              <strong>Simulateur Fret & Transit Dubaï ➔ Afrique</strong>
+            </div>
+            <label>
+              Destination d’arrivée
+              <select
+                value={dest.id}
+                onChange={(e) => selectDest(e.target.value)}
+              >
+                {DESTINATIONS.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="shipping-mode-selector">
+              {freight.availableModes.includes("EXPRESS") && (
+                <button
+                  type="button"
+                  className={`mode-btn ${freight.mode === "EXPRESS" ? "active" : ""}`}
+                  onClick={() => setShippingMode("EXPRESS")}
+                >
+                  <span className="mode-btn-title">Express (3–6 j)</span>
+                  <small>12 500 F/kg</small>
+                </button>
+              )}
+              {freight.availableModes.includes("CARGO") && (
+                <button
+                  type="button"
+                  className={`mode-btn ${freight.mode === "CARGO" ? "active" : ""}`}
+                  onClick={() => setShippingMode("CARGO")}
+                >
+                  <span className="mode-btn-title">Cargo (14–16 j)</span>
+                  <small>8 600 F/kg</small>
+                </button>
+              )}
+              {freight.availableModes.includes("SEA") && (
+                <button
+                  type="button"
+                  className={`mode-btn ${freight.mode === "SEA" ? "active" : ""}`}
+                  onClick={() => setShippingMode("SEA")}
+                >
+                  <span className="mode-btn-title">Maritime (45–50 j)</span>
+                  <small>{money(dest.cbmRate)}/m³</small>
+                </button>
+              )}
+            </div>
+            {freight.restrictionNote && (
+              <div className="shipping-restriction-badge">
+                <Icon name="shield" size={13} />
+                <span>{freight.restrictionNote}</span>
+              </div>
+            )}
+            <div className="freight-breakdown">
+              <div>
+                <span>Marchandise ({qty} {p.unit || "pcs"})</span>
+                <b>{money(productSubtotal)}</b>
+              </div>
+              <div>
+                <span>
+                  {freight.modeLabel}
+                  <br />
+                  <small style={{ color: "var(--muted)" }}>
+                    Poids total : ~{totalWeight.toFixed(1)} kg
+                    {freight.mode === "SEA" ? ` · Volume : ${freight.volumeCbm.toFixed(2)} m³` : ""}
+                    {freight.basis === "volumetric" ? " (poids volumétrique)" : ""}
+                  </small>
+                </span>
+                <b>{p.shippingIncluded ? "Inclus" : money(estimatedFreight)}</b>
+              </div>
+              <div className="freight-total">
+                <span>Total estimé rendu {dest.name.split(" ")[0]}</span>
+                <strong>{money(estimatedGrandTotal)}</strong>
+              </div>
+            </div>
+          </div>
+
+          <Notice>{error}</Notice>
+
+          {/* Boutons d'action rapides */}
+          <div className="mt-5 flex flex-col sm:flex-row gap-3">
+            <button
+              type="button"
+              className="flex-1 rounded-2xl bg-[#173E32] py-3.5 px-4 text-center text-sm font-bold text-[#FFF8E6] hover:bg-[#1f4d3e] transition-colors shadow-lg shadow-[#173E32]/20"
+              onClick={discuss}
+              disabled={busy}
+            >
+              {busy ? "Ouverture…" : "Discuter & Demander un devis"}
+            </button>
+
+            {config?.whatsapp && (
+              <a
+                className="flex-1 rounded-2xl bg-[#25D366] py-3.5 px-4 text-center text-sm font-bold text-white hover:bg-[#20bd5a] transition-colors shadow-lg shadow-[#25D366]/20 flex items-center justify-center gap-2"
+                href={`https://wa.me/${config.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span>💬</span>
+                <span>WhatsApp direct</span>
+              </a>
+            )}
+          </div>
+
+          <div className="sponsor-share-banner mt-3">
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                alert("Lien de l’annonce copié. Vous pouvez le partager.");
+              }}
+              className="sponsor-share-btn"
+            >
+              <Icon name="share" size={15} />
+              <span>Copier le lien de l’annonce</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
       {sellerProducts.length > 0 && (
         <div className="seller-showcase-section">
           <div className="seller-showcase-header">

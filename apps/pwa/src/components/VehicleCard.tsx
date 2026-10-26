@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCurrency } from '../lib/currency';
+import { parseVehicleData } from '../lib/vehicles';
 import { isVideoUrl } from '../lib/media';
 import { IconHeart } from './icons';
 
@@ -19,17 +20,28 @@ export interface VehicleProduct {
   seller?: { shopName: string; id?: string };
 }
 
-export function VehicleCard({ product, isFavorite = false, onToggleFavorite }: {
+export function VehicleCard({
+  product,
+  isFavorite = false,
+  onToggleFavorite,
+}: {
   product: VehicleProduct;
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
 }) {
   const [failed, setFailed] = useState(false);
   const { format } = useCurrency();
-  const image = product.images?.find(url => !/https:\/\/(?:images\.)?unsplash\.com\//i.test(url));
+  const specs = parseVehicleData(product);
+  const image = product.images?.find((url) => !/https:\/\/(?:images\.)?unsplash\.com\//i.test(url));
+
   return (
-    <article className="visual-product-card">
-      <Link to={`/products/${product.id}`} state={{ product }} className="visual-product-photo" aria-label={product.name}>
+    <article className="visual-product-card group">
+      <Link
+        to={`/products/${product.id}`}
+        state={{ product }}
+        className="visual-product-photo"
+        aria-label={product.name}
+      >
         {image && !failed ? (
           isVideoUrl(image) ? (
             <video
@@ -40,27 +52,72 @@ export function VehicleCard({ product, isFavorite = false, onToggleFavorite }: {
               autoPlay
               preload="metadata"
               aria-label={product.name}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />
           ) : (
-            <img src={image} alt={product.name} loading="lazy" decoding="async" onError={() => setFailed(true)} />
+            <img
+              src={image}
+              alt={product.name}
+              loading="lazy"
+              decoding="async"
+              onError={() => setFailed(true)}
+              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+            />
           )
-        ) : <span className="visual-photo-missing">Photo à venir</span>}
+        ) : (
+          <span className="visual-photo-missing">Photo à venir</span>
+        )}
       </Link>
-      {onToggleFavorite && <button type="button" className="visual-product-favorite"
-        aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'} aria-pressed={isFavorite}
-        onClick={() => onToggleFavorite(product.id)}>
-        <IconHeart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
-      </button>}
-      {product.condition && (
-        <span className={`picture-tag condition-tag condition-${String(product.condition).toLowerCase()}`}>
-          {product.condition === 'NEW' ? 'Neuf' : product.condition === 'REFURBISHED' ? 'Reconditionné' : 'Occasion'}
-        </span>
+
+      {onToggleFavorite && (
+        <button
+          type="button"
+          className="visual-product-favorite"
+          aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          aria-pressed={isFavorite}
+          onClick={() => onToggleFavorite(product.id)}
+        >
+          <IconHeart className={`h-4 w-4 ${isFavorite ? 'fill-current text-rose-500' : ''}`} />
+        </button>
       )}
-      <Link to={`/products/${product.id}`} state={{ product }} className="visual-product-caption">
+
+      {/* Badges d'état Dubizzle Motors */}
+      <div className="absolute top-2 left-2 flex flex-col gap-1 pointer-events-none z-10">
+        <span
+          className={`picture-tag condition-tag condition-${String(
+            product.condition || 'USED'
+          ).toLowerCase()}`}
+        >
+          {product.condition === 'NEW'
+            ? 'Neuf · 0 km'
+            : product.condition === 'REFURBISHED'
+            ? 'Reconditionné'
+            : 'Occasion'}
+        </span>
+      </div>
+
+      <Link
+        to={`/products/${product.id}`}
+        state={{ product }}
+        className="visual-product-caption"
+      >
         <h3 title={product.name}>{product.name}</h3>
-        <strong>{format(Number(product.price || 0))}</strong>
-        <span className="listing-meta">{product.location || 'Dubaï'} · Fret</span>
+
+        {/* Ligne de spécifications automobiles immédiates (Dubizzle Motors) */}
+        <div className="vehicle-specs-row flex flex-wrap items-center gap-1.5 text-[11px] text-[#5E6B60] mt-1 font-medium">
+          <span>{specs.year || '2024'}</span>
+          <span>·</span>
+          <span>{specs.mileage || '0 km'}</span>
+          <span>·</span>
+          <span>{specs.fuelType || 'Essence'}</span>
+        </div>
+
+        <strong className="mt-1.5">{format(Number(product.price || 0))}</strong>
+
+        <div className="listing-meta mt-1 flex items-center justify-between text-[11px] text-[#5E6B60]">
+          <span>{product.location || 'Dubaï'} · GCC Specs</span>
+          <span className="text-[#1F7A5C] font-semibold">✓ Sérénité</span>
+        </div>
       </Link>
     </article>
   );
