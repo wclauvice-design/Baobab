@@ -552,13 +552,20 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
     </article>
   );
 }
+/** Derniers résultats par requête, pour un retour arrière instantané. */
+const feedCache = new Map<string, any[]>();
+
 export function Marketplace({ favorites = false }: { favorites?: boolean }) {
   const [motionPaused, setMotionPaused] = useState(false);
   const [params, setParams] = useSearchParams();
-  const [products, setProducts] = useState<any[]>([]),
+  const [products, setProducts] = useState<any[]>(
+    () => feedCache.get(params.toString()) || [],
+  ),
     [config, setConfig] = useState<any>(null),
     [error, setError] = useState(""),
-    [loading, setLoading] = useState(true);
+    [loading, setLoading] = useState(
+      () => !feedCache.has(params.toString()),
+    );
   const { ids: favoriteIds } = useFavorites();
   const { current: currentDest, select: selectDest, all: allDests } = useUserDestination();
   const universe = params.get("universe") || "",
@@ -567,10 +574,19 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
     subcategoryKey = params.get("subcategoryKey") || "";
   useEffect(() => {
     let active = true;
-    setLoading(true);
+    const key = params.toString();
+    const cachedFeed = feedCache.get(key);
+    if (cachedFeed) {
+      // Retour depuis une fiche : le fil réapparaît immédiatement.
+      setProducts(cachedFeed);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     call(`/products?${params}`)
       .then((p) => {
         if (active) {
+          feedCache.set(key, p);
           rememberProducts(p);
           setProducts(p);
           setError("");
