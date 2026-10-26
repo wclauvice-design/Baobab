@@ -732,17 +732,10 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-            <span className="bb-eyebrow">Sélection Privée · Sourcing Dubaï &amp; Asie</span>
+            <span className="bb-eyebrow">Sourcing Direct Dubaï &amp; Asie</span>
           </div>
           <h1>Achetez au prix source. Garanti &amp; livré chez vous.</h1>
-          <p className="bb-hero-copy">
-            Véhicules certifiés, électronique, solaire et gros volumes. Zéro intermédiaire inutile, douane et livraison sécurisées en Afrique de l’Ouest.
-          </p>
-          <div className="bb-hero-live-badge flex items-center gap-2 rounded-full bg-emerald-50 border border-emerald-200/80 px-3.5 py-1.5 text-xs font-semibold text-emerald-900 shadow-sm w-fit mt-3">
-            <span className="text-emerald-600 font-bold">⚡ Hub Logistique Dubaï :</span>
-            <span>Départs maritimes &amp; fret aérien chaque semaine · Dédouané</span>
-          </div>
-          <div className="bb-hero-actions mt-4">
+          <div className="bb-hero-actions mt-3">
             <button
               type="button"
               className="bb-btn bb-btn-primary"
