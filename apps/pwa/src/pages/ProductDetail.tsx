@@ -69,6 +69,7 @@ function ImageGallery({ images, name }: { images: string[]; name: string }) {
     <div>
       <div
         className="relative aspect-square overflow-hidden bg-gradient-to-br from-base-700 to-base-800"
+        style={{ touchAction: 'pan-y' }}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
