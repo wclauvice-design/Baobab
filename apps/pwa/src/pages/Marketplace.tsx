@@ -25,7 +25,7 @@ import {
 } from "../lib/concierge";
 import { estimateFreight, ShippingMode } from "../lib/freight";
 import { fallbackPhoto } from "../lib/photos";
-import { BaobabPromises, DiscoverySearch, LiveActivityTicker } from "./DiscoveryMotion";
+import { DiscoverySearch, DynamicTrustRibbon, LiveFloatingToast } from "./DiscoveryMotion";
 import {
   getNotificationPermission,
   hasNotificationSupport,
@@ -754,9 +754,8 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
         </section>
       )}
 
-      {/* 2. Réassurance & activité */}
-      <BaobabPromises paused={motionPaused} onPause={() => setMotionPaused((value) => !value)} />
-      <LiveActivityTicker paused={motionPaused} />
+      {/* 2. Réassurance & activité dynamique (Temu-inspired compact ribbon) */}
+      <DynamicTrustRibbon paused={motionPaused} />
 
       {/* 3. Catégories — chips sobres, sans emoji */}
       <nav className="bb-cat-strip" aria-label="Catégories">
@@ -796,7 +795,8 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
                 setParams(next);
               }}
             >
-              {cat.label}
+              <span className="bb-chip-icon" aria-hidden="true">{cat.emoji}</span>
+              <span className="bb-chip-label">{cat.label}</span>
             </button>
           );
         })}
@@ -823,26 +823,36 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
               className={`feed-chip ${!params.get("sort") ? "active" : ""}`}
               onClick={() => filter("sort", "")}
             >
-              Nouveautés
+              <span className="feed-chip-icon" aria-hidden="true">⚡</span>
+              <span>Nouveautés</span>
             </button>
             <button
               type="button"
               className={`feed-chip ${params.get("sort") === "price-asc" ? "active" : ""}`}
               onClick={() => filter("sort", "price-asc")}
             >
-              Petits prix
+              <span className="feed-chip-icon" aria-hidden="true">🏷️</span>
+              <span>Petits prix</span>
             </button>
             <button
               type="button"
               className={`feed-chip ${params.get("sort") === "price-desc" ? "active" : ""}`}
               onClick={() => filter("sort", "price-desc")}
             >
-              Prix décroissants
+              <span className="feed-chip-icon" aria-hidden="true">📈</span>
+              <span>Prix décroissants</span>
             </button>
           </div>
         </div>
         <details className="feed-filters">
-        <summary>Affiner la sélection <span>État, budget, catégorie</span></summary>
+        <summary>
+          <span className="summary-title">⚙️ Affiner la sélection</span>
+          {activeFilters.length > 0 ? (
+            <span className="filter-badge-active">{activeFilters.length} actif{activeFilters.length > 1 ? "s" : ""}</span>
+          ) : (
+            <span className="summary-desc">État, budget, catégorie</span>
+          )}
+        </summary>
         <div className="filter-bar">
           {config?.taxonomy ? (
             <>
@@ -1004,6 +1014,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
           Discuter de mon projet <Icon name="arrow" size={18} />
         </Link>
       </section>
+      <LiveFloatingToast />
     </>
   );
 }

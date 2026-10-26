@@ -6,10 +6,11 @@ export const POPULAR_SEARCHES = [
   "Toyota Land Cruiser V8 Dubaï",
   "Kit Solaire Complet 5 kVA",
   "iPhone 15 Pro Max 256 Go",
+  "Jetour Dashing 1.5T 2024",
   "Climatiseur Inverter Gree 1.5 CV",
   "Groupe Électrogène Diesel 7 kW",
   "Robes & Tissus Dubaï Gold Souk",
-  "Outillage & Machines d'atelier",
+  "Toyota Hilux Double Cabine 4x4",
   "Panneaux Solaires 550W Jinko",
   "Motos & Tricycles de livraison",
   "Ordinateurs Portables & Écrans",
@@ -19,9 +20,9 @@ export const POPULAR_SEARCHES = [
 export const CORE_GUARANTEES = [
   {
     icon: "💳",
-    title: "Paiement à la livraison possible*",
+    title: "Paiement à la livraison*",
     badge: "Confiance",
-    summary: "Réglez un acompte logistique, payez le solde à réception chez vous.",
+    summary: "Réglez un acompte logistique, payez le solde après vérification chez vous.",
     detail:
       "Selon le type de marchandise et votre ville de destination, sécurisez votre commande avec un acompte logistique et réglez le solde en main propre à la livraison après vérification.",
   },
@@ -37,28 +38,30 @@ export const CORE_GUARANTEES = [
     icon: "📹",
     title: "Inspection vidéo en direct de Dubaï",
     badge: "Zéro surprise",
-    summary: "Vidéo et photos réelles de vos colis avant tout départ.",
+    summary: "Vidéo et photos réelles de vos colis au garage avant tout départ.",
     detail:
       "Notre équipe à Jebel Ali et Deira déballe, teste et filme vos articles avec votre nom et numéro de commande avant la fermeture du carton ou conteneur.",
   },
   {
     icon: "✈️",
-    title: "Transport Aérien Express & Maritime CBM",
-    badge: "Suivi pas-à-pas",
-    summary: "Express 3–6 jours ou Maritime groupé avec dédouanement inclus.",
+    title: "Fret Express & Maritime Dédouané",
+    badge: "Douane incluse",
+    summary: "Express 3–6 jours ou Maritime groupé sans aucun frais caché.",
     detail:
       "Deux modes logistiques transparents : Fret Aérien Express (3 à 6 jours) pour vos besoins urgents ou Maritime au m³ (45 à 50 jours) pour les gros volumes, sans frais cachés.",
   },
 ];
 
-// Live social proof ticker simulating real verified logistics activities
-export const LIVE_ACTIVITIES = [
-  { icon: "🚗", city: "Ouagadougou", text: "Toyota Hilux 2024 inspectée au showroom Dubaï & réservée", time: "il y a 2 min" },
-  { icon: "⚡", city: "Abidjan", text: "10 kits solaires 5 kVA Hybride expédiés en fret express", time: "il y a 6 min" },
-  { icon: "🚢", city: "Lomé", text: "Arrivage conteneur Jetour Dashing au port de transit", time: "il y a 12 min" },
-  { icon: "📹", city: "Bamako", text: "Inspection vidéo en direct validée pour un commerçant", time: "il y a 19 min" },
-  { icon: "📦", city: "Cotonou", text: "Colis électronique remis en main propre au destinataire", time: "il y a 31 min" },
-  { icon: "🛡️", city: "Niamey", text: "Devis proforma validé · Pièces détachées Toyota d'origine", time: "il y a 44 min" },
+// Combined stream of live social proof and key guarantees
+export const STREAM_FOCAL_POINTS = [
+  { icon: "🚗", city: "Ouagadougou", text: "Toyota Hilux inspectée au showroom Dubaï & validée", time: "il y a 2 min", tag: "LIVE" },
+  { icon: "🛡️", city: "Sécurité", text: "Paiement protégé · Solde réglé après vérification", time: "Garantie", tag: "CONFIANCE" },
+  { icon: "⚡", city: "Abidjan", text: "10 kits solaires 5 kVA Hybride expédiés en fret express", time: "il y a 5 min", tag: "LIVE" },
+  { icon: "📹", city: "Zéro surprise", text: "Inspection vidéo en direct de votre colis avant départ", time: "Audit", tag: "GARANTIE" },
+  { icon: "🚢", city: "Lomé", text: "Arrivage conteneur Jetour Dashing au port de transit", time: "il y a 11 min", tag: "LIVE" },
+  { icon: "📦", city: "Cotonou", text: "Colis électronique remis en main propre au destinataire", time: "il y a 28 min", tag: "LIVE" },
+  { icon: "✈️", city: "Douane 100% gérée", text: "Fret maritime & aérien régulier chaque semaine", time: "Transit", tag: "LOGISTIQUE" },
+  { icon: "🔧", city: "Bamako", text: "Commande confirmée · Pièces détachées Toyota d'origine", time: "il y a 39 min", tag: "LIVE" },
 ];
 
 function useRotation(count: number, intervalMs: number, paused: boolean) {
@@ -111,10 +114,10 @@ export function DiscoverySearch({
 
   useEffect(() => setDraft(search), [search]);
 
-  // Rotate every 2.6 seconds with smooth roll animation
+  // Rotate every 2.4 seconds with smooth roll animation
   const { index, running } = useRotation(
     POPULAR_SEARCHES.length,
-    2600,
+    2400,
     paused || focused || Boolean(draft),
   );
 
@@ -140,7 +143,7 @@ export function DiscoverySearch({
           onChange={(event) => setDraft(event.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder={focused ? "Rechercher parmi 5 700+ articles..." : ""}
+          placeholder={focused ? "Rechercher parmi nos sélections Dubaï..." : ""}
           aria-label="Rechercher une annonce à Dubaï"
           autoComplete="off"
         />
@@ -192,132 +195,156 @@ export function DiscoverySearch({
 }
 
 /**
- * Live Activity Stream Ticker (Real-Time Social Proof)
+ * Dynamic Trust Ribbon (Compact, Space-saving, High-Conversion Temu-inspired Motion)
+ * Replaces bulky stacked boxes with a single unified 42px interactive ribbon.
  */
-export function LiveActivityTicker({ paused }: { paused: boolean }) {
-  const { index, running } = useRotation(LIVE_ACTIVITIES.length, 3600, paused);
-  const current = LIVE_ACTIVITIES[index];
+export function DynamicTrustRibbon({
+  paused = false,
+}: {
+  paused?: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const { index, running } = useRotation(STREAM_FOCAL_POINTS.length, 3200, paused || expanded);
+  const current = STREAM_FOCAL_POINTS[index];
 
   return (
-    <div className="live-activity-stream" aria-label="Flux des commandes en direct">
-      <div className="stream-badge">
-        <span className="relative flex h-2 w-2 mr-1">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-        </span>
-        <span>EN DIRECT</span>
+    <div className="dynamic-trust-container mb-3">
+      {/* 1-Line Compact Rotating Ribbon */}
+      <div className="flex items-center justify-between gap-2.5 rounded-2xl bg-white border border-[#E2E8F0] px-3.5 py-2.5 shadow-[0_1px_3px_rgba(11,30,23,0.04)]">
+        {/* Radar green pulse badge */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+          </span>
+          <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-800 tracking-wider">
+            {current.tag}
+          </span>
+        </div>
+
+        {/* Rolling Focal Point (Temu slot-machine transition) */}
+        <div className="flex-1 min-w-0 overflow-hidden text-xs">
+          <div
+            key={`${index}-${running}`}
+            className={`flex items-center gap-1.5 whitespace-nowrap text-slate-800 ${
+              running ? "discovery-roll" : ""
+            }`}
+          >
+            <span className="text-sm shrink-0">{current.icon}</span>
+            <strong className="font-bold text-[#0B1E17] shrink-0">{current.city}</strong>
+            <span className="text-slate-400">·</span>
+            <span className="truncate text-slate-600 font-medium">{current.text}</span>
+            <span className="text-[10px] text-slate-400 shrink-0 ml-auto hidden sm:inline">
+              {current.time}
+            </span>
+          </div>
+        </div>
+
+        {/* Bouton d'extension des garanties complètes */}
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="shrink-0 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200/80 px-2 py-1 text-[11px] font-bold text-slate-700 transition-colors flex items-center gap-1"
+          aria-expanded={expanded}
+          aria-controls="baobab-trust-details"
+        >
+          <span>{expanded ? "Fermer ✕" : "4 Garanties ▾"}</span>
+        </button>
       </div>
-      <div className="stream-content" key={`${index}-${running}`}>
-        <span className="stream-icon">{current.icon}</span>
-        <strong className="stream-city">{current.city}</strong>
-        <span className="stream-sep">·</span>
-        <span className="stream-text">{current.text}</span>
-        <span className="stream-time">{current.time}</span>
-      </div>
+
+      {/* Accordéon déroulant à la demande (sans encombrer la page par défaut) */}
+      {expanded && (
+        <div id="baobab-trust-details" className="mt-2 rounded-2xl bg-white border border-[#E2E8F0] p-4 sm:p-5 shadow-lg animate-fade-in">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {CORE_GUARANTEES.map((g, i) => (
+              <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/70 border border-slate-100">
+                <span className="text-2xl shrink-0">{g.icon}</span>
+                <div className="text-xs">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-bold text-[#0B1E17] text-sm">{g.title}</span>
+                    <span className="rounded bg-emerald-100/70 px-1.5 py-0.2 text-[9px] font-bold text-emerald-800">
+                      {g.badge}
+                    </span>
+                  </div>
+                  <p className="text-slate-600 leading-relaxed font-normal">{g.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <span className="text-slate-500 text-[11px]">
+              * Contrôle certifié à Dubaï avant embarquement maritime ou aérien.
+            </span>
+            <Link to="/messages" className="text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1">
+              💬 Parler à un conseiller Baobab →
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 /**
- * High-Trust Reassurance Module: "Pourquoi choisir Baobab ?"
- * Features: Paiement à la livraison, Sécurité garantie, Inspection vidéo, Transport transparent
+ * Floating Social Proof Notification Toast (Temu-style live social proof)
+ * Appears subtly in bottom-left every 10-15s to inspire confidence.
  */
-export function BaobabPromises({
-  paused,
-  onPause,
-}: {
-  paused: boolean;
-  onPause: () => void;
-}) {
-  const [hovered, setHovered] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+export function LiveFloatingToast() {
+  const [visible, setVisible] = useState(false);
+  const [itemIdx, setItemIdx] = useState(0);
 
-  const { index, running } = useRotation(
-    CORE_GUARANTEES.length,
-    3000,
-    paused || hovered || expanded,
-  );
+  useEffect(() => {
+    // Show toast for 4.5 seconds every 14 seconds
+    const interval = setInterval(() => {
+      setItemIdx((prev) => (prev + 1) % STREAM_FOCAL_POINTS.length);
+      setVisible(true);
+      const timer = setTimeout(() => {
+        setVisible(false);
+      }, 4500);
+      return () => clearTimeout(timer);
+    }, 14000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!visible) return null;
+
+  const current = STREAM_FOCAL_POINTS[itemIdx];
 
   return (
-    <section
-      className="baobab-promises"
-      aria-label="Pourquoi choisir Baobab ?"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed bottom-20 left-4 z-40 max-w-sm rounded-2xl bg-[#0B1E17]/95 text-white p-3 shadow-2xl backdrop-blur-xl border border-white/10 flex items-center gap-3 transition-all duration-300 animate-slide-up"
     >
-      <div className="promise-bar">
-        <button
-          type="button"
-          className="promise-toggle"
-          aria-expanded={expanded}
-          aria-controls="baobab-promise-details"
-          onClick={() => setExpanded(!expanded)}
-          title="Cliquez pour voir toutes nos garanties certifiées"
-        >
-          <span className="promise-seal" aria-hidden="true">
-            🛡️
-          </span>
-          <div className="promise-title-block">
-            <strong>Pourquoi choisir Baobab ?</strong>
-            <small className="promise-subtitle">4 garanties certifiées Dubaï ❯</small>
-          </div>
-        </button>
-
-        <span className="promise-ticker" aria-hidden="true">
-          <span key={`${index}-${running}`} className={running ? "discovery-roll" : ""}>
-            <span className="ticker-badge">{CORE_GUARANTEES[index].badge}</span>
-            <span className="ticker-label">{CORE_GUARANTEES[index].title}</span>
-          </span>
-        </span>
-
-        <div className="promise-actions">
-          <button
-            type="button"
-            className="expand-guarantees-btn"
-            onClick={() => setExpanded(!expanded)}
-            aria-label={expanded ? "Réduire les garanties" : "Découvrir toutes les garanties"}
-          >
-            {expanded ? "Fermer ✕" : "Détails ▾"}
-          </button>
-          <button
-            type="button"
-            className="motion-toggle"
-            aria-label={paused ? "Reprendre les animations" : "Mettre les animations en pause"}
-            aria-pressed={paused}
-            onClick={onPause}
-            title={paused ? "Reprendre le défilement" : "Mettre en pause"}
-          >
-            {paused ? "▶" : "⏸"}
-          </button>
-        </div>
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-xl">
+        {current.icon}
       </div>
-
-      <div id="baobab-promise-details" className="promise-details" hidden={!expanded}>
-        <div className="promise-cards-grid">
-          {CORE_GUARANTEES.map((g, i) => (
-            <div key={i} className="promise-card">
-              <div className="promise-card-head">
-                <span className="card-icon">{g.icon}</span>
-                <div>
-                  <span className="card-badge">{g.badge}</span>
-                  <strong>{g.title}</strong>
-                </div>
-              </div>
-              <p className="card-summary">{g.summary}</p>
-              <p className="card-detail">{g.detail}</p>
-            </div>
-          ))}
+      <div className="text-xs min-w-0 pr-2">
+        <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+          </span>
+          <span>{current.city} · {current.time}</span>
         </div>
-
-        <div className="promise-footer">
-          <p className="promise-conditions">
-            * <strong>Paiement à la livraison :</strong> Sous réserve d'éligibilité selon la ville de livraison et la catégorie d'articles. Acompte de réservation logistique requis, solde à la remise en main propre.
-          </p>
-          <Link className="promise-cta-btn" to="/messages">
-            💬 Parler avec un conseiller Baobab →
-          </Link>
-        </div>
+        <p className="font-medium text-white/95 leading-tight line-clamp-1 mt-0.5">
+          {current.text}
+        </p>
       </div>
-    </section>
+      <button
+        type="button"
+        onClick={() => setVisible(false)}
+        className="text-white/40 hover:text-white text-xs ml-auto shrink-0"
+        aria-label="Fermer"
+      >
+        ✕
+      </button>
+    </div>
   );
 }
+
+// Backward-compatible exports
+export const LiveActivityTicker = DynamicTrustRibbon;
+export const BaobabPromises = () => null;
