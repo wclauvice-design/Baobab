@@ -147,22 +147,6 @@ export function DubizzleVehicleDetail({
           </div>
         </div>
 
-        {/* BANDEAU DE RÉASSURANCE & CONCIERGERIE VIP BAOBAB */}
-        <div className="mt-5 rounded-2xl bg-[#FBF0D8]/60 border border-[#E8A33D]/30 p-4 sm:p-5 flex items-start gap-3.5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0B1E17] text-white font-bold text-lg shadow-sm">
-            🛡️
-          </div>
-          <div className="text-xs leading-relaxed text-[#0B1E17]">
-            <div className="font-bold text-sm text-[#0B1E17] mb-0.5">
-              Pack Sérénité Conciergerie Dubaï inclus (+15%)
-            </div>
-            <p className="text-slate-700">
-              Inspection physique complète du véhicule chez le concessionnaire à Dubaï avant expédition.
-              Rapport d'audit technique, sécurisation des fonds et coordination logistique jusqu'à{' '}
-              <strong>{destination?.name || 'Afrique de l’Ouest'}</strong>.
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* 3. DESCRIPTION AVEC OPTION « VOIR PLUS... » */}

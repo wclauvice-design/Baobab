@@ -1248,20 +1248,6 @@ export function ListingDetail() {
             </div>
           </div>
 
-          {/* Bandeau Conciergerie Baobab */}
-          <div className="mt-5 rounded-2xl bg-[#FBF0D8]/60 border border-[#E8A33D]/30 p-4 sm:p-5 flex items-start gap-3.5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#173E32] text-[#FFF8E6] font-bold text-lg shadow-sm">
-              🛡️
-            </div>
-            <div className="text-xs leading-relaxed text-[#0B1E17]">
-              <div className="font-bold text-sm text-[#0B1E17] mb-0.5">
-                Conciergerie Baobab Dubaï & Contrôle Qualité Inclus (+15%)
-              </div>
-              <p className="text-slate-700">
-                Audit physique de la marchandise à Dubaï avant expédition, formalités de transit et garantie de livraison sécurisée vers <strong>{dest.name}</strong>.
-              </p>
-            </div>
-          </div>
         </div>
 
         <a className="product-detail-jump" href="#product-purchase">Aller au simulateur de livraison et devis →</a>
