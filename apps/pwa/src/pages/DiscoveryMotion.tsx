@@ -291,11 +291,10 @@ export function DynamicTrustRibbon({
  * Captivating, space-saving typography animation that cycles key value propositions.
  */
 export const HERO_DYNAMIC_HOOKS = [
-  "Garanti & livré chez vous.",
-  "Véhicules certifiés Dubaï.",
-  "Énergie solaire & batteries.",
-  "Inspection vidéo en direct.",
-  "Fret sécurisé & dédouané.",
+  "Auto & mobilité.",
+  "Solaire & énergie.",
+  "High-tech au quotidien.",
+  "Maison & électroménager.",
 ];
 
 export function HeroAnimatedHeadline() {
@@ -303,25 +302,23 @@ export function HeroAnimatedHeadline() {
   const [fade, setFade] = useState(true);
 
   useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let transition: ReturnType<typeof setTimeout> | undefined;
     const timer = setInterval(() => {
+      if (preference.matches || document.hidden) return;
       setFade(false);
-      setTimeout(() => {
+      transition = setTimeout(() => {
         setIndex((prev) => (prev + 1) % HERO_DYNAMIC_HOOKS.length);
         setFade(true);
       }, 220);
-    }, 3200);
-
-    return () => clearInterval(timer);
+    }, 4200);
+    return () => { clearInterval(timer); clearTimeout(transition); };
   }, []);
 
   return (
     <h1 className="bb-hero-title">
-      <span className="bb-hero-fixed">Achetez au prix source.</span>{" "}
-      <span
-        className={`bb-hero-rotating inline-block transition-all duration-300 ${
-          fade ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"
-        }`}
-      >
+      <span className="bb-hero-fixed">Le monde à votre portée.</span>{" "}
+      <span className={`bb-hero-rotating ${fade ? "is-visible" : "is-changing"}`}>
         <span className="bb-hero-gradient">{HERO_DYNAMIC_HOOKS[index]}</span>
       </span>
     </h1>

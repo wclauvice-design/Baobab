@@ -46,6 +46,7 @@ import "./marketplace.css";
 import "./marketplace-premium.css";
 import "./marketplace-motion.css";
 import "./marketplace-refined.css";
+import "./marketplace-identity.css";
 
 export function Icon({ name, size = 22 }: { name: string; size?: number }) {
   const paths: Record<string, React.ReactNode> = {
@@ -358,8 +359,9 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
       </header>
 
       {showDestBar && (
-        <div className="bb-dest-bar">
-          <span className="bb-flag" aria-hidden="true">{userDest.flag}</span>
+        <div className="bb-dest-bar bb-country-band" data-country={userDest.id}>
+          <span className="bb-country-emblem" aria-hidden="true" />
+          <div className="bb-country-control">
           <span className="bb-dest-label">Livraison vers</span>
           <select
             value={userDest.id}
@@ -373,6 +375,7 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
               </option>
             ))}
           </select>
+          </div>
           <span className="bb-dest-spacer" />
           <span className="bb-dest-transit">Express 3–6 j</span>
           <CurrencySelector />
@@ -726,15 +729,12 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
     <>
       {/* 1. Hero éditorial — un seul point focal */}
       {!search && !favorites && (
-        <section className="bb-hero">
-          <div className="bb-eyebrow-container flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            <span className="bb-eyebrow">Sourcing Direct Dubaï &amp; Asie</span>
-          </div>
+        <section className="bb-hero bb-hero-identity">
+          <div className="bb-identity-art" aria-hidden="true"><span /><span /><span /></div>
+          <div className="bb-identity-content">
+          <div className="bb-identity-kicker"><span className="bb-identity-mark" aria-hidden="true">✦</span><span>Dubaï &amp; Asie · Sélection Baobab</span></div>
           <HeroAnimatedHeadline />
+          <p className="bb-identity-caption">Vos envies d’ailleurs. Votre prochain coup de cœur.</p>
           <div className="bb-hero-actions mt-3">
             <button
               type="button"
@@ -748,8 +748,9 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
               Explorer les nouveautés <Icon name="arrow" size={14} />
             </button>
             <Link className="bb-link" to="/messages">
-              💬 Devis sur mesure
+              Devis sur mesure
             </Link>
+          </div>
           </div>
         </section>
       )}
