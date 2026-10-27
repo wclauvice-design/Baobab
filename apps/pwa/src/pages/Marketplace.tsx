@@ -333,22 +333,6 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
             {badge(unreadCount)}
           </NavLink>
           <NavLink
-            to="/favorites"
-            className={({ isActive }) => `bb-icon-btn ${isActive ? "active" : ""}`}
-            aria-label="Favoris"
-          >
-            <Icon name="heart" size={20} />
-            {badge(favoriteIds.length)}
-          </NavLink>
-          <NavLink
-            to="/orders"
-            className={({ isActive }) => `bb-icon-btn ${isActive ? "active" : ""}`}
-            aria-label="Mes commandes"
-          >
-            <Icon name="box" size={20} />
-            {badge(pending.total)}
-          </NavLink>
-          <NavLink
             to="/account"
             className={({ isActive }) => `bb-icon-btn bb-hide-sm ${isActive ? "active" : ""}`}
             aria-label="Mon espace"
