@@ -198,88 +198,26 @@ export function DiscoverySearch({
  * Dynamic Trust Ribbon (Compact, Space-saving, High-Conversion Temu-inspired Motion)
  * Replaces bulky stacked boxes with a single unified 42px interactive ribbon.
  */
-export function DynamicTrustRibbon({
-  paused = false,
-}: {
-  paused?: boolean;
-}) {
+export function DynamicTrustRibbon({ paused = false }: { paused?: boolean }) {
   const [expanded, setExpanded] = useState(false);
-  const { index, running } = useRotation(STREAM_FOCAL_POINTS.length, 3200, paused || expanded);
-  const current = STREAM_FOCAL_POINTS[index];
-
+  const [userPaused, setUserPaused] = useState(false);
+  const { index, running } = useRotation(CORE_GUARANTEES.length, 5500, paused || expanded || userPaused);
+  const current = CORE_GUARANTEES[index];
   return (
-    <div className="dynamic-trust-container mb-3">
-      {/* 1-Line Compact Rotating Ribbon */}
-      <div className="flex items-center justify-between gap-2.5 rounded-2xl bg-white border border-[#E2E8F0] px-3.5 py-2.5 shadow-[0_1px_3px_rgba(11,30,23,0.04)]">
-        {/* Radar green pulse badge */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-          </span>
-          <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-800 tracking-wider">
-            {current.tag}
-          </span>
+    <div className="bb-integrated-trust">
+      <div className="bb-trust-line">
+        <span className="bb-trust-dot" aria-hidden="true" />
+        <div className="bb-trust-message">
+          <span key={index} className={running ? "bb-trust-enter" : ""}>{current.title}</span>
         </div>
-
-        {/* Rolling Focal Point (Temu slot-machine transition) */}
-        <div className="flex-1 min-w-0 overflow-hidden text-xs">
-          <div
-            key={`${index}-${running}`}
-            className={`flex items-center gap-1.5 whitespace-nowrap text-slate-800 ${
-              running ? "discovery-roll" : ""
-            }`}
-          >
-            <span className="text-sm shrink-0">{current.icon}</span>
-            <strong className="font-bold text-[#0B1E17] shrink-0">{current.city}</strong>
-            <span className="text-slate-400">·</span>
-            <span className="truncate text-slate-600 font-medium">{current.text}</span>
-            <span className="text-[10px] text-slate-400 shrink-0 ml-auto hidden sm:inline">
-              {current.time}
-            </span>
-          </div>
-        </div>
-
-        {/* Bouton d'extension des garanties complètes */}
-        <button
-          type="button"
-          onClick={() => setExpanded(!expanded)}
-          className="shrink-0 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200/80 px-2 py-1 text-[11px] font-bold text-slate-700 transition-colors flex items-center gap-1"
-          aria-expanded={expanded}
-          aria-controls="baobab-trust-details"
-        >
-          <span>{expanded ? "Fermer ✕" : "4 Garanties ▾"}</span>
-        </button>
+        <button type="button" className="bb-trust-pause" onClick={() => setUserPaused(!userPaused)} aria-label={userPaused ? "Reprendre le défilement" : "Mettre le défilement en pause"} aria-pressed={userPaused}>{userPaused ? "▷" : "Ⅱ"}</button>
+        <button type="button" className="bb-trust-toggle" onClick={() => setExpanded(!expanded)} aria-expanded={expanded} aria-controls="baobab-trust-details">Pourquoi Baobab <span aria-hidden="true">{expanded ? "−" : "+"}</span></button>
       </div>
-
-      {/* Accordéon déroulant à la demande (sans encombrer la page par défaut) */}
+      <div className="bb-trust-steps" aria-hidden="true">{CORE_GUARANTEES.map((g, i) => <span key={g.title} className={i === index ? "active" : ""} />)}</div>
       {expanded && (
-        <div id="baobab-trust-details" className="mt-2 rounded-2xl bg-white border border-[#E2E8F0] p-4 sm:p-5 shadow-lg animate-fade-in">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {CORE_GUARANTEES.map((g, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/70 border border-slate-100">
-                <span className="text-2xl shrink-0">{g.icon}</span>
-                <div className="text-xs">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-bold text-[#0B1E17] text-sm">{g.title}</span>
-                    <span className="rounded bg-emerald-100/70 px-1.5 py-0.2 text-[9px] font-bold text-emerald-800">
-                      {g.badge}
-                    </span>
-                  </div>
-                  <p className="text-slate-600 leading-relaxed font-normal">{g.detail}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
-            <span className="text-slate-500 text-[11px]">
-              * Contrôle certifié à Dubaï avant embarquement maritime ou aérien.
-            </span>
-            <Link to="/messages" className="text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1">
-              💬 Parler à un conseiller Baobab →
-            </Link>
-          </div>
+        <div id="baobab-trust-details" className="bb-trust-details">
+          {CORE_GUARANTEES.map(g => <div key={g.title}><h3>{g.icon} {g.title}</h3><p>{g.detail}</p></div>)}
+          <Link to="/messages">Parler à un conseiller →</Link>
         </div>
       )}
     </div>

@@ -752,15 +752,14 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
             </Link>
           </div>
           </div>
+          <DynamicTrustRibbon paused={motionPaused} />
         </section>
       )}
 
       {/* 2. Réassurance & activité dynamique (Temu-inspired compact ribbon) */}
-      <DynamicTrustRibbon paused={motionPaused} />
-
       {/* 3. Catégories — chips sobres, sans emoji */}
-      <nav className="bb-cat-strip" aria-label="Catégories">
-        {STORY_CATEGORIES.map((cat) => {
+        <nav className="bb-cat-strip" aria-label="Catégories">
+          {STORY_CATEGORIES.map((cat) => {
           const isSelected =
             !cat.universe && !cat.categoryKey && !cat.subcategoryKey
               ? !universe && !categoryKey && !subcategoryKey
@@ -805,53 +804,33 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
 
       {/* 4. Fil */}
       <section className="listings" id="bb-feed">
-        <div className="bb-sec-head">
+        <div className="bb-sec-head bb-catalog-heading">
           <h2>
             {search
               ? `« ${search} »`
               : universe
                 ? universes.find((u) => u.id === universe)?.name || "Sélection"
-                : "Nouveautés"}
+                : favorites ? "Mes favoris" : "La sélection Baobab"}
           </h2>
           <span className="feed-counter">
             {loading ? "…" : `${shown.length} offres`}
           </span>
         </div>
-        <div className="app-feed-header">
-          <div className="app-feed-chips">
-            <button
-              type="button"
-              className={`feed-chip ${!params.get("sort") ? "active" : ""}`}
-              onClick={() => filter("sort", "")}
-            >
-              <span className="feed-chip-icon" aria-hidden="true">⚡</span>
-              <span>Nouveautés</span>
-            </button>
-            <button
-              type="button"
-              className={`feed-chip ${params.get("sort") === "price-asc" ? "active" : ""}`}
-              onClick={() => filter("sort", "price-asc")}
-            >
-              <span className="feed-chip-icon" aria-hidden="true">🏷️</span>
-              <span>Petits prix</span>
-            </button>
-            <button
-              type="button"
-              className={`feed-chip ${params.get("sort") === "price-desc" ? "active" : ""}`}
-              onClick={() => filter("sort", "price-desc")}
-            >
-              <span className="feed-chip-icon" aria-hidden="true">📈</span>
-              <span>Prix décroissants</span>
-            </button>
-          </div>
+        <div className="bb-catalog-sort">
+          <label htmlFor="bb-catalog-order">Trier</label>
+          <select id="bb-catalog-order" value={params.get("sort") || ""} onChange={e => filter("sort", e.target.value)}>
+            <option value="">Nouveautés</option>
+            <option value="price-asc">Prix croissants</option>
+            <option value="price-desc">Prix décroissants</option>
+          </select>
         </div>
         <details className="feed-filters">
         <summary>
-          <span className="summary-title">⚙️ Affiner la sélection</span>
+          <span className="summary-title">Filtres</span>
           {activeFilters.length > 0 ? (
             <span className="filter-badge-active">{activeFilters.length} actif{activeFilters.length > 1 ? "s" : ""}</span>
           ) : (
-            <span className="summary-desc">État, budget, catégorie</span>
+            <span className="summary-desc">État · Budget · Catégorie</span>
           )}
         </summary>
         <div className="filter-bar">
