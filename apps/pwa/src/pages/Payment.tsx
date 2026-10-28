@@ -12,7 +12,7 @@ export function Payment() {
   const { id } = useParams();
   const [status, setStatus] = useState<PaymentStatusResponse | null>(null);
   const initiation = id
-    ? JSON.parse(sessionStorage.getItem(`baobab_payment_${id}`) || 'null')
+    ? JSON.parse(sessionStorage.getItem(`westzone_payment_${id}`) || 'null')
     : null;
 
   useEffect(() => {

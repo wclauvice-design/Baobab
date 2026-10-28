@@ -72,39 +72,39 @@ export class CommercePublicController {
   }
   @Post("conversations") start(
     @Body() dto: StartConversationDto,
-    @Headers("x-baobab-access") token?: string,
+    @Headers("x-westzone-access") token?: string,
   ) {
     return this.service.startConversation(dto, token);
   }
   @Get("conversations/:id") conversation(
     @Param("id") id: string,
-    @Headers("x-baobab-access") token: string,
+    @Headers("x-westzone-access") token: string,
   ) {
     return this.service.readConversation(id, token);
   }
   @Post("conversations/:id/messages") message(
     @Param("id") id: string,
-    @Headers("x-baobab-access") token: string,
+    @Headers("x-westzone-access") token: string,
     @Body() dto: MessageDto,
   ) {
     return this.service.message(id, dto, "CLIENT", token);
   }
   @Get("tracking/:id") track(
     @Param("id") id: string,
-    @Headers("x-baobab-access") token: string,
+    @Headers("x-westzone-access") token: string,
   ) {
     return this.service.track(id, token);
   }
   @Post("tracking/:id/accept") accept(
     @Param("id") id: string,
-    @Headers("x-baobab-access") token: string,
+    @Headers("x-westzone-access") token: string,
     @Body() dto: AcceptQuoteDto,
   ) {
     return this.service.accept(id, token, dto);
   }
   @Post("tracking/:id/payment") payment(
     @Param("id") id: string,
-    @Headers("x-baobab-access") token: string,
+    @Headers("x-westzone-access") token: string,
     @Body() dto: PaymentDeclarationDto,
   ) {
     return this.service.declare(id, token, dto);
@@ -150,7 +150,7 @@ export class CommerceAdminController {
     @Param("id") id: string,
     @Body() dto: MessageDto,
   ) {
-    return this.service.message(id, dto, "BAOBAB");
+    return this.service.message(id, dto, "WESTZONE");
   }
   @Patch("conversations/:id/customer") link(
     @Param("id") id: string,

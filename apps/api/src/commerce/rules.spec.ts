@@ -19,7 +19,7 @@ const entry = (kind: string, value: string, state = "CONFIRMED") => ({
   amount: value,
   state,
 });
-describe("Baobab financial and wholesale rules", () => {
+describe("Westzone financial and wholesale rules", () => {
   it("keeps exact minor units and rejects ambiguous money", () => {
     expect(amount(minor("0.10") + minor("0.20"))).toBe("0.30");
     for (const value of ["-1", "1e3", "0.001", "NaN", "1,25", "10000000000"])

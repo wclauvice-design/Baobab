@@ -16,7 +16,7 @@ export class OrdersController {
   @UseGuards(RolesGuard)
   @Roles(Role.BUYER)
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateOrderDto) {
-    throw new GoneException('Contactez Baobab pour recevoir et accepter un devis définitif.');
+    throw new GoneException('Contactez Westzone pour recevoir et accepter un devis définitif.');
   }
 
   @Get()

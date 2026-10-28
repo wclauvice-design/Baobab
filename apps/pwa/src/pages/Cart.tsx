@@ -5,7 +5,7 @@ import { useCart } from '../lib/cart';
 import { useCurrency } from '../lib/currency';
 import { api } from '../lib/api';
 import { Product, ProductCard } from '../components/ProductCard';
-import { BaobabMark, IconBag, IconShop } from '../components/icons';
+import { WestzoneMark, IconBag, IconShop } from '../components/icons';
 
 export function Cart() {
   const { items, updateQuantity, removeItem, toggleSelected, setAllSelected, selectedTotal, selectedCount } =
@@ -39,7 +39,7 @@ export function Cart() {
   const allSelected = items.every((i) => i.selected);
   const groups = new Map<string, typeof items>();
   for (const item of items) {
-    const key = item.shopName || 'Baobab';
+    const key = item.shopName || 'Westzone';
     groups.set(key, [...(groups.get(key) ?? []), item]);
   }
 
@@ -87,7 +87,7 @@ export function Cart() {
                       {item.image ? (
                         <img src={item.image} alt={item.name} className="h-full w-full rounded-lg object-cover" />
                       ) : (
-                        <BaobabMark className="h-7 w-7 opacity-30" />
+                        <WestzoneMark className="h-7 w-7 opacity-30" />
                       )}
                     </div>
                     <div className="flex flex-1 flex-col">

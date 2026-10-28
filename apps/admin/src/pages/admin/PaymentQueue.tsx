@@ -30,7 +30,7 @@ export function PaymentQueue() {
     try {
       await api.post(`/admin/payments/${id}/${action}`);
       load();
-      window.dispatchEvent(new Event('baobab:refresh-counts'));
+      window.dispatchEvent(new Event('westzone:refresh-counts'));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Erreur réseau');
     }

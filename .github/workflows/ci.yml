@@ -1,4 +1,4 @@
-name: CI - Baobab Platform
+name: CI - Westzone Platform
 
 on:
   push:
@@ -26,7 +26,7 @@ jobs:
         run: npm run build -w packages/shared
 
       - name: Verify shared package loads in Node
-        run: node -e "const shared = require('@baobab/shared'); if (!shared.Role) process.exit(1)"
+        run: node -e "const shared = require('@westzone/shared'); if (!shared.Role) process.exit(1)"
 
       - name: Generate Prisma client
         run: npm run prisma:generate -w apps/api

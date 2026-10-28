@@ -160,7 +160,7 @@ export function SellerDetail() {
 
       let totalSalesVolume = 0;
       let totalSupplierRevenue = 0;
-      let totalBaobabCommission = 0;
+      let totalWestzoneCommission = 0;
 
       for (const v of ventes) {
         const quote =
@@ -168,10 +168,10 @@ export function SellerDetail() {
           v.quotes?.[0];
         const vol = Number(quote?.total || v.totalAmount || 0);
         const sup = Number(quote?.supplierTotal || v.sellerAmount || vol * 0.9);
-        const comm = Number(quote?.marginBaobab || vol - sup);
+        const comm = Number(quote?.marginWestzone || vol - sup);
         totalSalesVolume += vol;
         totalSupplierRevenue += sup;
-        totalBaobabCommission += comm;
+        totalWestzoneCommission += comm;
       }
 
       const totalPaidToSeller = 0;
@@ -187,7 +187,7 @@ export function SellerDetail() {
           conversionCommandToSale,
           totalSalesVolume,
           totalSupplierRevenue,
-          totalBaobabCommission,
+          totalWestzoneCommission,
           totalPaidToSeller,
           dueToSeller,
         },
@@ -217,7 +217,7 @@ export function SellerDetail() {
     try {
       await api.patch(`/admin/sellers/${id}/status`, { status });
       await load();
-      window.dispatchEvent(new Event('baobab:refresh-counts'));
+      window.dispatchEvent(new Event('westzone:refresh-counts'));
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -463,7 +463,7 @@ export function SellerDetail() {
 
       setModifyingProduct(null);
       await load();
-      window.dispatchEvent(new Event('baobab:refresh-counts'));
+      window.dispatchEvent(new Event('westzone:refresh-counts'));
     } catch (e: any) {
       alert("Erreur lors de la mise à jour : " + (e?.message || e));
     } finally {
@@ -718,7 +718,7 @@ export function SellerDetail() {
             <span className="text-xs font-semibold">FCFA</span>
           </div>
           <p className="mt-1 text-xs text-slate-500">
-            Commissions Baobab : {Number(metrics.totalBaobabCommission || 0).toLocaleString("fr-FR")} F
+            Commissions Westzone : {Number(metrics.totalWestzoneCommission || 0).toLocaleString("fr-FR")} F
           </p>
         </div>
 

@@ -15,7 +15,7 @@ export function BusinessSettings() {
     <div className="ops">
       <header>
         <div>
-          <p className="op-kicker">PARAMÈTRES BAOBAB</p>
+          <p className="op-kicker">PARAMÈTRES WESTZONE</p>
           <h1>Contacts & notifications</h1>
         </div>
       </header>
@@ -72,7 +72,7 @@ export function BusinessSettings() {
                 : "Prestataire non configuré. Les messages sont conservés en attente ; ils ne sont pas marqués envoyés."}
             </p>
             <p>
-              La messagerie Baobab et le lien privé de suivi restent
+              La messagerie Westzone et le lien privé de suivi restent
               disponibles.
             </p>
           </aside>

@@ -32,7 +32,7 @@ import {
   UNIVERSES,
 } from "./rules";
 import { buildRuntimeTaxonomy } from "../catalog/taxonomy";
-import { ListingVariant, variantLabel } from "@baobab/shared";
+import { ListingVariant, variantLabel } from "@westzone/shared";
 
 const hash = (token: string) =>
   createHash("sha256").update(token).digest("hex");
@@ -64,7 +64,7 @@ export class CommerceService {
       universes: UNIVERSES,
       taxonomy: buildRuntimeTaxonomy(categories),
       stages: STAGE_NAMES,
-      whatsapp: setting?.value || this.config.get("BAOBAB_WHATSAPP") || null,
+      whatsapp: setting?.value || this.config.get("WESTZONE_WHATSAPP") || null,
     };
   }
   async settings() {
@@ -148,7 +148,7 @@ export class CommerceService {
       data: {
         tokenHash: hash(createdToken),
         productId: product?.id,
-        subject: product?.name || "Demande à Baobab",
+        subject: product?.name || "Demande à Westzone",
         messages: {
           create: {
             role: "CLIENT",
@@ -167,7 +167,7 @@ export class CommerceService {
         await this.notifications.notifyUser(
           admin.id,
           admin.phone,
-          `[Baobab Concierge] Nouvelle demande de devis : "${dto.body.slice(0, 100)}..."`,
+          `[Westzone Concierge] Nouvelle demande de devis : "${dto.body.slice(0, 100)}..."`,
         );
       }
     } catch {
@@ -240,10 +240,10 @@ export class CommerceService {
             await this.notifications.notifyUser(
               admin.id,
               admin.phone,
-              `[Baobab Message] Nouveau message d'un client : "${dto.body.slice(0, 100)}..."`,
+              `[Westzone Message] Nouveau message d'un client : "${dto.body.slice(0, 100)}..."`,
             );
           }
-        } else if (role === "BAOBAB" && c.customerId) {
+        } else if (role === "WESTZONE" && c.customerId) {
           const cust = await tx.customer.findUnique({
             where: { id: c.customerId },
           });
@@ -251,7 +251,7 @@ export class CommerceService {
             await this.notifications.notifyUser(
               cust.userId || cust.id,
               cust.phone,
-              `[Baobab Dubaï] L'équipe vous a répondu : "${dto.body.slice(0, 100)}..."`,
+              `[WESTZONE] L'équipe vous a répondu : "${dto.body.slice(0, 100)}..."`,
             );
           }
         }
@@ -470,7 +470,7 @@ export class CommerceService {
           events: {
             create: {
               status: "DRAFT",
-              message: "Votre demande est prise en charge par Baobab.",
+              message: "Votre demande est prise en charge par Westzone.",
               createdBy: actor,
             },
           },
@@ -840,7 +840,7 @@ export class CommerceService {
         });
         if (!reserved.count) {
           throw new ConflictException(
-            "Stock indisponible : contactez Baobab pour actualiser le devis",
+            "Stock indisponible : contactez Westzone pour actualiser le devis",
           );
         }
       } else {
@@ -893,14 +893,14 @@ export class CommerceService {
         value > minor(f.cashReceived) - minor(f.refunded))
     )
       throw new BadRequestException(
-        "Remboursement supérieur aux fonds clients reçus par Baobab",
+        "Remboursement supérieur aux fonds clients reçus par Westzone",
       );
     if (dto.kind === "SUPPLIER_PAYMENT") {
       const q = o.quotes.find((q: any) => q.revision === o.acceptedRevision);
       const owed = q.lines
         .filter(
           (l: any) =>
-            (l.supplierId || "BAOBAB") === (dto.supplierId || "BAOBAB"),
+            (l.supplierId || "WESTZONE") === (dto.supplierId || "WESTZONE"),
         )
         .reduce(
           (s: number, l: any) => s + minor(l.supplierUnitPrice) * l.quantity,
@@ -911,7 +911,7 @@ export class CommerceService {
           (e: any) =>
             e.kind === dto.kind &&
             e.state === "CONFIRMED" &&
-            (e.supplierId || "BAOBAB") === (dto.supplierId || "BAOBAB"),
+            (e.supplierId || "WESTZONE") === (dto.supplierId || "WESTZONE"),
         )
         .reduce((s: number, e: any) => s + minor(e.amount), 0);
       if (o.status === "CANCELLED" || value > owed - paid)
@@ -1022,7 +1022,7 @@ export class CommerceService {
       const fresh = await tx.tradeOrder.findUnique({ where: { id }, include });
       const body = accepted
         ? `Paiement de ${e.amount} FCFA confirmé. Reste à payer : ${financials(fresh).due} FCFA.`
-        : `Votre déclaration de paiement n’a pas pu être validée. Contactez Baobab.`;
+        : `Votre déclaration de paiement n’a pas pu être validée. Contactez Westzone.`;
       await tx.tradeEvent.create({
         data: {
           orderId: id,
@@ -1073,7 +1073,7 @@ export class CommerceService {
       await tx.chatMessage.create({
         data: {
           conversationId: order.conversationId,
-          role: "BAOBAB",
+          role: "WESTZONE",
           body,
           requestKey: randomUUID(),
         },
@@ -1096,7 +1096,7 @@ export class CommerceService {
           "Aucun rappel : solde réglé, devis à confirmer ou paiement en vérification",
         );
       const q = o.quotes.find((q) => q.revision === o.acceptedRevision);
-      const body = `Bonjour ${o.customer.firstName}, commande ${o.reference} : reste à payer ${f.due} FCFA${q.paymentMode === "COD" ? " à la livraison" : ""}${q.dueDate ? `, échéance ${q.dueDate.toISOString().slice(0, 10)}` : ""}. Merci de contacter Baobab pour le règlement.`;
+      const body = `Bonjour ${o.customer.firstName}, commande ${o.reference} : reste à payer ${f.due} FCFA${q.paymentMode === "COD" ? " à la livraison" : ""}${q.dueDate ? `, échéance ${q.dueDate.toISOString().slice(0, 10)}` : ""}. Merci de contacter Westzone pour le règlement.`;
       if (
         channel === "EMAIL" &&
         (!o.customer.email || !o.customer.messagingOptIn)
@@ -1164,7 +1164,7 @@ export class CommerceService {
           body: JSON.stringify({
             from,
             to: [n.order.customer.email],
-            subject: `Baobab — ${n.order.reference}`,
+            subject: `Westzone — ${n.order.reference}`,
             text: n.body,
           }),
         });

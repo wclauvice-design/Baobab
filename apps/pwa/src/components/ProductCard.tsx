@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useCurrency } from '../lib/currency';
-import { BaobabMark, IconStar } from './icons';
+import { WestzoneMark, IconStar } from './icons';
 import { isVehicleProduct } from '../lib/vehicles';
 import { isVideoUrl } from '../lib/media';
 import { VehicleCard } from './VehicleCard';
@@ -64,7 +64,7 @@ export function ProductCard({ product }: { product: Product }) {
             />
           )
         ) : (
-          <BaobabMark className="h-10 w-10 text-slate-500 opacity-30" />
+          <WestzoneMark className="h-10 w-10 text-slate-500 opacity-30" />
         )}
         {discount && (
           <span className="absolute left-2 top-2 rounded-md bg-[#B85732] px-2 py-0.5 text-[10px] font-extrabold text-white shadow-sm">

@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'baobab_browsing_history';
+const STORAGE_KEY = 'westzone_browsing_history';
 const MAX_ENTRIES = 30;
 
 export function recordView(productId: string) {

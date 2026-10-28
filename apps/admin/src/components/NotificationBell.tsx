@@ -64,11 +64,11 @@ export function NotificationBell() {
     load();
     const id = setInterval(load, 12000);
     const onRefresh = () => load();
-    window.addEventListener('baobab:refresh-counts', onRefresh);
+    window.addEventListener('westzone:refresh-counts', onRefresh);
     return () => {
       active = false;
       clearInterval(id);
-      window.removeEventListener('baobab:refresh-counts', onRefresh);
+      window.removeEventListener('westzone:refresh-counts', onRefresh);
     };
   }, []);
 

@@ -1,21 +1,21 @@
 /* ==========================================================================
-   BAOBAB ADMIN & OPERATIONS — PRESTIGE LOGISTICS COMMAND CENTER
+   WESTZONE ADMIN & OPERATIONS — PRESTIGE LOGISTICS COMMAND CENTER
    Style professionnel, puissant et moderne pour l'espace d'opérations.
    ========================================================================== */
 
 :root {
-  --admin-bg-root: #080b11;
-  --admin-bg-nav: #0c111d;
-  --admin-bg-card: #0f1523;
-  --admin-bg-elevated: #151d30;
+  --admin-bg-root: #071522;
+  --admin-bg-nav: #0A1E2F;
+  --admin-bg-card: #0C2333;
+  --admin-bg-elevated: #112C40;
   --admin-border: rgba(255, 255, 255, 0.08);
-  --admin-gold: #f59e0b;
-  --admin-gold-light: #fde68a;
-  --admin-gold-gradient: linear-gradient(135deg, #fde68a 0%, #f59e0b 50%, #d97706 100%);
-  --admin-emerald: #10b981;
-  --admin-emerald-bg: rgba(16, 185, 129, 0.12);
-  --admin-text-main: #f8fafc;
-  --admin-text-muted: #94a3b8;
+  --admin-gold: #D9A441;
+  --admin-gold-light: #F2C46A;
+  --admin-gold-gradient: linear-gradient(135deg, #F2C46A 0%, #D9A441 50%, #B07C22 100%);
+  --admin-emerald: #2F8F6C;
+  --admin-emerald-bg: rgba(47, 143, 108, 0.12);
+  --admin-text-main: #F4F1EA;
+  --admin-text-muted: #9BA9B6;
 }
 
 body {
@@ -38,7 +38,7 @@ body {
   letter-spacing: -0.04em;
   line-height: 1.2;
   margin: 5px 0 12px;
-  color: #ffffff;
+  color: #FFFDF8;
 }
 
 .ops h2 {
@@ -47,7 +47,7 @@ body {
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 18px 0;
-  color: #ffffff;
+  color: #FFFDF8;
 }
 
 .ops header {
@@ -66,7 +66,7 @@ body {
 
 .ops small {
   display: block;
-  color: #64748b;
+  color: #7E8FA0;
   font-size: 11px;
   margin-top: 4px;
 }
@@ -92,25 +92,25 @@ body {
   font-size: 12px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+  box-shadow: 0 4px 16px rgba(217, 164, 65, 0.35);
   transition: all 0.2s ease;
 }
 
 .op-button:hover {
   filter: brightness(1.12);
-  box-shadow: 0 6px 22px rgba(245, 158, 11, 0.5);
+  box-shadow: 0 6px 22px rgba(217, 164, 65, 0.5);
 }
 
 .op-button.secondary {
   background: rgba(255, 255, 255, 0.04);
   color: var(--admin-gold-light) !important;
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  border: 1px solid rgba(217, 164, 65, 0.4);
   box-shadow: none;
 }
 
 .op-button.secondary:hover {
-  background: rgba(245, 158, 11, 0.12);
-  color: #ffffff !important;
+  background: rgba(217, 164, 65, 0.12);
+  color: #FFFDF8 !important;
   border-color: var(--admin-gold);
 }
 
@@ -126,11 +126,11 @@ body {
 }
 
 .op-alert {
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: rgba(217, 164, 65, 0.12);
+  border: 1px solid rgba(217, 164, 65, 0.35);
   padding: 14px 18px;
   border-radius: 12px;
-  color: #fde68a;
+  color: #F2C46A;
   margin: 16px 0;
   overflow-wrap: anywhere;
   font-weight: 500;
@@ -164,7 +164,7 @@ body {
 .op-metrics span {
   font-size: 11px;
   font-weight: 600;
-  color: #94a3b8;
+  color: #9BA9B6;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -174,7 +174,7 @@ body {
   font-size: 38px;
   font-weight: 700;
   line-height: 1;
-  color: #ffffff;
+  color: #FFFDF8;
 }
 
 .op-metrics b {
@@ -187,9 +187,9 @@ body {
 
 .op-pill {
   display: inline-block;
-  background: rgba(245, 158, 11, 0.15);
-  color: #fde68a;
-  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: rgba(217, 164, 65, 0.15);
+  color: #F2C46A;
+  border: 1px solid rgba(217, 164, 65, 0.35);
   padding: 5px 12px;
   border-radius: 20px;
   font-size: 11px;
@@ -216,7 +216,7 @@ body {
 .ops th {
   font-size: 10.5px;
   font-weight: 700;
-  color: #94a3b8;
+  color: #9BA9B6;
   background: rgba(255, 255, 255, 0.03);
   padding: 16px;
   white-space: nowrap;
@@ -229,7 +229,7 @@ body {
   padding: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   vertical-align: top;
-  color: #f8fafc;
+  color: #F4F1EA;
 }
 
 .ops td a {
@@ -246,17 +246,17 @@ body {
 .op-empty {
   padding: 45px;
   text-align: center;
-  color: #94a3b8;
+  color: #9BA9B6;
 }
 
 .ops input,
 .ops select,
 .ops textarea {
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: #121929;
+  background: #0E2739;
   border-radius: 9px;
   padding: 11px 14px;
-  color: #ffffff;
+  color: #FFFDF8;
   font: inherit;
   max-width: 100%;
   min-width: 0;
@@ -267,7 +267,7 @@ body {
 .ops textarea:focus {
   outline: 2px solid var(--admin-gold);
   border-color: var(--admin-gold);
-  box-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
+  box-shadow: 0 0 14px rgba(217, 164, 65, 0.25);
 }
 
 .ops label {
@@ -275,7 +275,7 @@ body {
   gap: 6px;
   font-size: 11.5px;
   font-weight: 500;
-  color: #cbd5e1;
+  color: #C4D2DE;
 }
 
 .ops summary {
@@ -394,18 +394,18 @@ body {
 
 .op-inbox aside > a:hover {
   background: rgba(255, 255, 255, 0.03);
-  color: #ffffff;
+  color: #FFFDF8;
 }
 
 .op-inbox aside > a.selected {
-  background: rgba(245, 158, 11, 0.14);
+  background: rgba(217, 164, 65, 0.14);
   border-left: 3px solid var(--admin-gold);
-  color: #ffffff;
+  color: #FFFDF8;
 }
 
 .op-inbox aside p {
   font-size: 10px;
-  color: #64748b;
+  color: #7E8FA0;
 }
 
 .op-inbox > section {
@@ -429,19 +429,19 @@ body {
   border: 1px solid var(--admin-border);
   max-width: 82%;
   align-self: flex-start;
-  color: #f8fafc;
+  color: #F4F1EA;
 }
 
 .op-chat > div.team {
-  background: rgba(245, 158, 11, 0.16);
-  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: rgba(217, 164, 65, 0.16);
+  border: 1px solid rgba(217, 164, 65, 0.35);
   align-self: flex-end;
 }
 
 .op-chat p {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  color: #f8fafc;
+  color: #F4F1EA;
 }
 
 .op-listings {
@@ -500,10 +500,10 @@ body {
 
 .backoffice-brand {
   font-family: "Space Grotesk", sans-serif;
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 700;
-  letter-spacing: -1.5px;
-  color: #ffffff;
+  letter-spacing: 0.04em;
+  color: #FFFDF8;
   margin-bottom: 32px;
 }
 
@@ -536,11 +536,11 @@ body {
 
 .backoffice-nav nav a:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
+  color: #FFFDF8;
 }
 
 .backoffice-nav nav a.active {
-  background: rgba(245, 158, 11, 0.16);
+  background: rgba(217, 164, 65, 0.16);
   color: var(--admin-gold-light);
   border-left: 3px solid var(--admin-gold);
   font-weight: 700;
@@ -551,7 +551,7 @@ body {
   margin-top: 30px;
   padding-top: 22px;
   font-size: 11px;
-  color: #64748b;
+  color: #7E8FA0;
   overflow-wrap: anywhere;
 }
 
@@ -560,7 +560,7 @@ body {
   margin-top: 15px;
   background: transparent;
   border: none;
-  color: #ef4444;
+  color: #E05A4E;
   cursor: pointer;
   font-weight: 600;
   padding: 0;

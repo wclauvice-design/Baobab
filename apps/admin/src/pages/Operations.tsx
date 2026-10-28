@@ -7,7 +7,7 @@ import {
   notifyNewClientMessage,
   requestNotificationPermission,
 } from "../lib/notifications";
-import { variantLabel } from "@baobab/shared";
+import { variantLabel } from "@westzone/shared";
 import "./operations.css";
 export const money = (v: any) =>
   `${Number(v || 0).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} FCFA`;
@@ -149,7 +149,7 @@ export function Overview() {
     <div className="ops">
       <header>
         <div>
-          <p className="op-kicker">BAOBAB · OPÉRATIONS</p>
+          <p className="op-kicker">WESTZONE · OPÉRATIONS</p>
           <h1>Votre activité, au même endroit.</h1>
         </div>
         <Link className="op-button" to="/customers">
@@ -176,7 +176,7 @@ export function Overview() {
           <h2>Trésorerie & engagements</h2>
           <div className="op-metrics">
             {[
-              ["cashReceived", "Fonds clients reçus par Baobab"],
+              ["cashReceived", "Fonds clients reçus par Westzone"],
               ["due", "Solde dû par les clients"],
               ["courierDue", "À reverser par les livreurs"],
               ["supplierDue", "À régler aux fournisseurs"],
@@ -394,7 +394,7 @@ export function OperationsInbox() {
     [text, setText] = useState("");
   const [showQuickOrderModal, setShowQuickOrderModal] = useState(false);
   const [guestFirstName, setGuestFirstName] = useState("Client");
-  const [guestLastName, setGuestLastName] = useState("Baobab");
+  const [guestLastName, setGuestLastName] = useState("Westzone");
   const [guestPhone, setGuestPhone] = useState("");
   const [guestCity, setGuestCity] = useState("Ouagadougou");
   const [guestCountry, setGuestCountry] = useState("Burkina Faso");
@@ -411,7 +411,7 @@ export function OperationsInbox() {
     const currentUrgent = list.data.filter((c: any) => c.needsReply).length;
     if (prevUrgentCountRef.current !== null && currentUrgent > prevUrgentCountRef.current) {
       const latest = list.data.find((c: any) => c.needsReply);
-      const name = latest?.customer ? `${latest.customer.firstName} ${latest.customer.lastName}` : "Client Baobab";
+      const name = latest?.customer ? `${latest.customer.firstName} ${latest.customer.lastName}` : "Client Westzone";
       const snippet = latest?.messages?.[0]?.body || "Nouveau message";
       notifyNewClientMessage(name, snippet);
     }
@@ -443,7 +443,7 @@ export function OperationsInbox() {
       await list.refresh();
       setMessage("");
       // Fait disparaître immédiatement la pastille rouge de la page concernée
-      window.dispatchEvent(new Event("baobab:refresh-counts"));
+      window.dispatchEvent(new Event("westzone:refresh-counts"));
     } catch (e: any) {
       setMessage(e.message);
     } finally {
@@ -471,7 +471,7 @@ export function OperationsInbox() {
     act(async () => {
       const cust = await api.post<any>(`${base}/customers`, {
         firstName: guestFirstName.trim() || "Client",
-        lastName: guestLastName.trim() || "Baobab",
+        lastName: guestLastName.trim() || "Westzone",
         phone: guestPhone.trim(),
         country: guestCountry.trim(),
         city: guestCity.trim(),
@@ -639,7 +639,7 @@ export function OperationsInbox() {
                     className={m.role === "CLIENT" ? "client" : "team"}
                   >
                     <small>
-                      {m.role === "CLIENT" ? "Client" : "Baobab"} ·{" "}
+                      {m.role === "CLIENT" ? "Client" : "Westzone"} ·{" "}
                       {date(m.createdAt)}
                     </small>
                     <p>{m.body}</p>
@@ -655,7 +655,7 @@ export function OperationsInbox() {
                   if (!replyText) return;
                   const optimisticMsg = {
                     id: `temp-${Date.now()}`,
-                    role: "BAOBAB",
+                    role: "WESTZONE",
                     body: replyText,
                     createdAt: new Date().toISOString(),
                   };
@@ -723,7 +723,7 @@ export function TradeDetail() {
       if (r?.whatsappUrl) setWhatsapp(r.whatsappUrl);
       setMessage("Enregistré.");
       await refresh();
-      window.dispatchEvent(new Event("baobab:refresh-counts"));
+      window.dispatchEvent(new Event("westzone:refresh-counts"));
       return true;
     } catch (e: any) {
       setMessage(e.message);
@@ -1209,7 +1209,7 @@ export function TradeDetail() {
                   <label>
                     Fournisseur (pour règlement)
                     <select name="supplierId">
-                      <option value="">Stock propre Baobab</option>
+                      <option value="">Stock propre Westzone</option>
                       {Array.from(
                         new Set(
                           o.quotes
@@ -1278,7 +1278,7 @@ export function TradeDetail() {
                   </button>
                   <a
                     href={`https://wa.me/${o.customer.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                      `Bonjour ${o.customer.firstName}, voici votre lien de suivi en direct pour votre commande Baobab (réf. ${o.reference}) :\n${url}`
+                      `Bonjour ${o.customer.firstName}, voici votre lien de suivi en direct pour votre commande Westzone (réf. ${o.reference}) :\n${url}`
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"

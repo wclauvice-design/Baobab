@@ -27,7 +27,7 @@ export async function call(
       headers: {
         "Content-Type": "application/json",
         ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
-        ...(access ? { "X-Baobab-Access": access } : {}),
+        ...(access ? { "X-Westzone-Access": access } : {}),
       },
       body: body ? JSON.stringify(body) : undefined,
     });
@@ -66,13 +66,13 @@ export interface ActiveConversation {
 }
 
 export function getDeviceActiveConversation(): ActiveConversation | null {
-  const active = saved<ActiveConversation | null>("baobab_active_conversation", null);
+  const active = saved<ActiveConversation | null>("westzone_active_conversation", null);
   if (active && active.id && active.token) return active;
-  const list = saved<any[]>("baobab_conversations", []);
+  const list = saved<any[]>("westzone_conversations", []);
   if (list && list.length > 0) {
     const last = list[list.length - 1];
     if (last && last.id && last.token) {
-      save("baobab_active_conversation", last);
+      save("westzone_active_conversation", last);
       return last;
     }
   }
@@ -80,10 +80,10 @@ export function getDeviceActiveConversation(): ActiveConversation | null {
 }
 
 export function setDeviceActiveConversation(c: ActiveConversation) {
-  save("baobab_active_conversation", c);
-  const list = saved<any[]>("baobab_conversations", []);
+  save("westzone_active_conversation", c);
+  const list = saved<any[]>("westzone_conversations", []);
   const filtered = list.filter((item) => item.id !== c.id);
-  save("baobab_conversations", [c, ...filtered].slice(0, 10));
+  save("westzone_conversations", [c, ...filtered].slice(0, 10));
 }
 export const universes = [
   { id: "motors", name: "Véhicules", subtitle: "Motors", icon: "car" },

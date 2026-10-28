@@ -1,6 +1,6 @@
 .market {
   --ink: #24372c;
-  --accent: #b85732;
+  --accent: #b04e28;
   --line: #e3e5dc;
   --muted: #748077;
   background: #fafbf7;
@@ -53,7 +53,7 @@
 }
 .market button:focus-visible,
 .market a:focus-visible {
-  outline: 3px solid #b85732;
+  outline: 3px solid #b04e28;
   outline-offset: 3px;
 }
 .market input,
@@ -348,7 +348,7 @@
   place-items: center;
 }
 .favorite.selected {
-  color: #b85732;
+  color: #b04e28;
 }
 .favorite.selected svg {
   fill: #f6e1d5;

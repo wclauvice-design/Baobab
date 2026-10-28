@@ -1,7 +1,7 @@
 import { compressImage } from './images';
 import { isVideoFile } from './media';
 
-const TOKEN_KEY = 'baobab_admin_token';
+const TOKEN_KEY = 'westzone_admin_token';
 const DEFAULT_API_RENDER_URL = 'https://baobab-api-7w7h.onrender.com';
 const SUPABASE_STORAGE_URL = 'https://jptymtzrfahlhjcqpttg.supabase.co';
 const SUPABASE_SERVICE_KEY =

@@ -28,12 +28,12 @@ export class CouponsService {
     });
 
     if (!coupon) {
-      if (cleanCode === 'BIENVENUE' || cleanCode === 'BAOBAB5000') {
+      if (cleanCode === 'BIENVENUE' || cleanCode === 'WESTZONE5000') {
         return {
           valid: true,
           code: cleanCode,
           discountAmount: 5000,
-          label: 'Code de Bienvenue Baobab (5 000 FCFA offerts)',
+          label: 'Code de Bienvenue Westzone (5 000 FCFA offerts)',
         };
       }
       throw new BadRequestException('Code promo ou parrainage invalide ou expiré');

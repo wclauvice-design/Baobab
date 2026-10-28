@@ -288,7 +288,7 @@ export function Catalog() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 shadow-sm">
           <h2 className="mb-2 text-sm font-semibold text-emerald-900">
-            Catégories gérées par la taxonomie Baobab
+            Catégories gérées par la taxonomie Westzone
           </h2>
           <p className="text-xs leading-relaxed text-emerald-800">
             Les {canonicalCategoryCount || '—'} catégories et leurs sous-catégories sont
@@ -305,7 +305,7 @@ export function Catalog() {
 
         <details className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <summary className="cursor-pointer text-sm font-semibold text-amber-700 hover:text-amber-800">
-            + Nouveau produit (vente directe Baobab)
+            + Nouveau produit (vente directe Westzone)
           </summary>
           <form onSubmit={createProduct} className="mt-4 space-y-2">
             <input
@@ -484,7 +484,7 @@ export function Catalog() {
                   <td className="px-4 py-3 text-slate-600">{p.category?.name || '—'}</td>
 
                   <td className="px-4 py-3 text-slate-600 text-xs">
-                    {p.seller?.shopName ?? 'Baobab (direct)'}
+                    {p.seller?.shopName ?? 'Westzone (direct)'}
                   </td>
 
                   <td className="px-4 py-3 font-semibold text-slate-900 whitespace-nowrap">

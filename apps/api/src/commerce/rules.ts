@@ -1,5 +1,5 @@
 import { BadRequestException } from "@nestjs/common";
-import { TAXONOMY } from "@baobab/shared";
+import { TAXONOMY } from "@westzone/shared";
 
 /**
  * Univers exposés aux interfaces. Ils sont générés depuis la taxonomie

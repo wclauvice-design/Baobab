@@ -1,5 +1,5 @@
 /**
- * Taxonomie canonique Baobab.
+ * Taxonomie canonique Westzone.
  *
  * Une seule source de vérité pour :
  * - les univers (Motors, Classifieds, Maison, Travaux) ;
@@ -1332,7 +1332,7 @@ export const TAXONOMY: TaxonomyUniverse[] = [
           'barbecue',
           'maison & jardin',
         ],
-        dbSlugs: ['cat-jardin-exterieur', 'cmvmjgsim000apykt1jnvcu4x', 'baobab-home'],
+        dbSlugs: ['cat-jardin-exterieur', 'cmvmjgsim000apykt1jnvcu4x', 'westzone-home'],
         dbPrefixes: [
           'jardin-exterieur',
           'jardin',
@@ -1547,7 +1547,7 @@ export const TAXONOMY: TaxonomyUniverse[] = [
         slug: 'services-artisans',
         label: 'Services & Artisans',
         aliases: ['services', 'artisans', 'services & artisans', 'plombier', 'electricien', 'menuisier'],
-        dbSlugs: ['baobab-trade'],
+        dbSlugs: ['westzone-trade'],
         dbPrefixes: ['services-artisans', 'services'],
         dbNames: ['services & artisans', 'travaux & artisans'],
         subcategories: [

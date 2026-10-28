@@ -54,7 +54,7 @@ async function main() {
     create: {
       id: 'seed-coupon-buyer-1',
       buyerId: buyer.id,
-      label: 'Bienvenue sur Baobab',
+      label: 'Bienvenue sur Westzone',
       discountAmount: 1000,
     },
   });

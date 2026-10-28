@@ -2,7 +2,7 @@ import {
   matchCategory,
   productCanonicalTaxonomy,
   resolveTopic,
-} from "@baobab/shared";
+} from "@westzone/shared";
 import { buildRuntimeTaxonomy } from "./taxonomy";
 
 describe("Taxonomie canonique", () => {

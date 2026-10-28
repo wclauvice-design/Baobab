@@ -1,49 +1,54 @@
 /* ==========================================================================
-   BAOBAB — DESIGN SYSTEM « IVOIRE & BAOBAB »
+   WESTZONE — DESIGN SYSTEM « SAHEL & ATLANTIQUE »
    Un seul header, un seul univers clair, une seule typographie.
-   L'ambre signale, le vert agit.
+   L'indigo structure, la terre cuite signale, l'or sahelien rehausse.
    ========================================================================== */
 
 .market {
-  --bb-bg: #F8FAFC;
-  --bb-surface: #FFFFFF;
-  --bb-surface-2: #F1F5F9;
+  --bb-bg: #FAF6ED;
+  --bb-surface: #FFFDF8;
+  --bb-surface-2: #F3EBDD;
   --bb-surface-3: #FFFFFF;
-  --bb-ink: #0B1E17;
-  --bb-ink-2: #1E293B;
-  --bb-muted: #64748B;
-  --bb-line: #E2E8F0;
-  --bb-line-strong: #CBD5E1;
-  --bb-brand: #059669;
-  --bb-brand-soft: #ECFDF5;
-  --bb-brand-ink: #065F46;
-  --bb-accent: #D97706;
-  --bb-accent-soft: #FEF3C7;
-  --bb-accent-ink: #92400E;
-  --bb-success: #059669;
-  --bb-success-soft: #ECFDF5;
-  --bb-danger: #DC2626;
-  --bb-danger-soft: #FEF2F2;
-  --bb-on-ink: #FFFFFF;
+  --bb-ink: #1B1A17;
+  --bb-ink-2: #2C2823;
+  --bb-muted: #6E675C;
+  --bb-line: #E7DCCB;
+  --bb-line-strong: #D5C6AF;
+  --bb-brand: #12304C;
+  --bb-brand-soft: #E8EEF6;
+  --bb-brand-ink: #0C2238;
+  --bb-accent: #B04E28;
+  --bb-accent-soft: #FBEDE4;
+  --bb-accent-ink: #7C3418;
+  --bb-gold: #D9A441;
+  --bb-gold-soft: #FBF0D2;
+  --bb-success: #1F7A5C;
+  --bb-success-soft: #E7F4EE;
+  --bb-danger: #B3261E;
+  --bb-danger-soft: #FBEAE8;
+  --bb-on-ink: #FFFDF8;
 
   /* Remappage des anciens tokens sombres vers la palette claire moderne. */
-  --ink: #0B1E17;
-  --ink-heading: #0B1E17;
-  --ink-muted: #64748B;
-  --ink-subtle: #94A3B8;
-  --muted: #64748B;
-  --line: #E2E8F0;
-  --accent: #D97706;
-  --bg-root: #F8FAFC;
-  --bg-surface: #FFFFFF;
-  --bg-surface-elevated: #FFFFFF;
-  --bg-surface-card: #FFFFFF;
-  --emerald: #059669;
-  --sky-transit: #059669;
-  --card-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
-  --card-shadow-hover: 0 14px 28px -12px rgba(11, 30, 23, 0.16);
+  --ink: #1B1A17;
+  --ink-heading: #1B1A17;
+  --ink-muted: #6E675C;
+  --ink-subtle: #8A8175;
+  --muted: #6E675C;
+  --line: #E7DCCB;
+  --accent: #B04E28;
+  --bg-root: #FAF6ED;
+  --bg-surface: #FFFDF8;
+  --bg-surface-elevated: #FFFDF8;
+  --bg-surface-card: #FFFDF8;
+  --emerald: #1F7A5C;
+  --sky-transit: #12304C;
+  --card-shadow: 0 1px 3px rgba(38, 30, 18, 0.06);
+  --card-shadow-hover: 0 14px 28px -12px rgba(28, 24, 18, 0.18);
 
-  background: var(--bb-bg);
+  background-color: var(--bb-bg);
+  background-image:
+    radial-gradient(circle at 10% -4%, rgba(217, 164, 65, 0.12), transparent 42%),
+    radial-gradient(circle at 92% 2%, rgba(18, 48, 76, 0.07), transparent 38%);
   color: var(--bb-ink);
   font-family: "Sora", system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 14px;
@@ -100,7 +105,7 @@
   border-radius: 9px;
   display: grid;
   place-items: center;
-  background: var(--bb-ink);
+  background: var(--bb-brand);
   color: var(--bb-on-ink);
   flex: 0 0 auto;
 }
@@ -109,20 +114,21 @@
   display: flex;
   flex-direction: column;
   font-family: "Space Grotesk", "Sora", sans-serif;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
-  letter-spacing: -0.045em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   line-height: 1;
   color: var(--bb-ink);
 }
 
 .bb-brand-sub {
   font-family: "Sora", sans-serif;
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--bb-brand-ink);
+  color: var(--bb-accent-ink);
   margin-top: 3px;
 }
 
@@ -345,7 +351,7 @@
   padding: 24px 2px 20px;
   border-bottom: 1px solid var(--bb-line);
   background:
-    radial-gradient(100% 120% at 100% 0%, rgba(16, 185, 129, 0.07) 0%, rgba(212, 175, 55, 0.04) 45%, transparent 75%), #FFFFFF;
+    radial-gradient(100% 120% at 100% 0%, rgba(47, 143, 108, 0.07) 0%, rgba(212, 175, 55, 0.04) 45%, transparent 75%), #FFFFFF;
   border-radius: 24px;
   margin-top: 10px;
   padding: 24px 20px 22px;
@@ -388,7 +394,7 @@
 }
 
 .bb-hero-gradient {
-  background: linear-gradient(135deg, #059669 0%, #047857 45%, #D97706 100%);
+  background: linear-gradient(135deg, #12304C 0%, #1D4E6B 45%, #B04E28 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 800;
@@ -470,11 +476,11 @@
   background: var(--bb-ink);
   color: var(--bb-on-ink);
   font-size: 11.5px;
-  box-shadow: 0 8px 18px -12px rgba(23, 62, 50, 0.7);
+  box-shadow: 0 8px 18px -12px rgba(27, 26, 23, 0.7);
 }
 
 .bb-btn-primary:hover {
-  background: #1F4D3E;
+  background: #12304c;
 }
 
 .bb-link {
@@ -695,7 +701,7 @@
   background: var(--bb-surface);
   border: 1px solid var(--bb-line);
   border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(23, 62, 50, 0.04);
+  box-shadow: 0 1px 2px rgba(27, 26, 23, 0.04);
   overflow: hidden;
 }
 
@@ -703,7 +709,7 @@
 .market .visual-product-card:hover {
   transform: translateY(-2px);
   border-color: var(--bb-line-strong);
-  box-shadow: 0 10px 24px -18px rgba(23, 62, 50, 0.45);
+  box-shadow: 0 10px 24px -18px rgba(27, 26, 23, 0.45);
 }
 
 .market .listing-grid .listing-picture {
@@ -951,7 +957,7 @@
    4. RÉASSURANCE, ACTIVITÉ, CONCIERGERIE
    ========================================================================== */
 
-.market .baobab-promises {
+.market .westzone-promises {
   margin: 12px 0 8px;
   border-radius: 12px;
   box-shadow: none;
@@ -964,7 +970,7 @@
   border: 1px solid var(--bb-line);
   border-radius: 12px;
   color: var(--bb-ink);
-  box-shadow: 0 1px 2px rgba(23, 62, 50, 0.04);
+  box-shadow: 0 1px 2px rgba(27, 26, 23, 0.04);
 }
 
 .market .promise-seal {
@@ -1092,9 +1098,9 @@
   border-radius: 16px;
   background:
     radial-gradient(120% 160% at 100% 0%, rgba(232, 163, 61, 0.22) 0%, rgba(232, 163, 61, 0) 58%),
-    linear-gradient(135deg, #173E32 0%, #1F4D3E 100%);
+    linear-gradient(135deg, #1b1a17 0%, #12304c 100%);
   color: var(--bb-on-ink);
-  box-shadow: 0 18px 34px -26px rgba(23, 62, 50, 0.6);
+  box-shadow: 0 18px 34px -26px rgba(27, 26, 23, 0.6);
   overflow: hidden;
 }
 
@@ -1175,7 +1181,7 @@
   background: rgba(255, 255, 255, 0.96);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
-  box-shadow: 0 10px 30px -18px rgba(23, 62, 50, 0.45);
+  box-shadow: 0 10px 30px -18px rgba(27, 26, 23, 0.45);
 }
 
 .market .mobile-nav a {
@@ -1280,7 +1286,7 @@
 }
 
 .market .product-detail-hero .bg-black\/75 {
-  background: rgba(23, 62, 50, 0.72);
+  background: rgba(27, 26, 23, 0.72);
   border: 0;
   border-radius: 999px;
   font-size: 10px;
@@ -1310,7 +1316,7 @@
 
 .market .product-detail-page .border-amber-400 {
   border-color: var(--bb-ink);
-  --tw-ring-color: rgba(23, 62, 50, 0.14);
+  --tw-ring-color: rgba(27, 26, 23, 0.14);
 }
 
 .market .product-detail-page .border-slate-800 {
@@ -1567,7 +1573,7 @@
 }
 
 .market #product-purchase .bg-amber-500:hover {
-  background: #1F4D3E;
+  background: #12304c;
 }
 
 .market #product-purchase .bg-emerald-600 {
@@ -1701,7 +1707,7 @@
   border-radius: 16px 16px 0 0;
   background:
     radial-gradient(120% 150% at 88% 0%, rgba(232, 163, 61, 0.42) 0%, rgba(232, 163, 61, 0) 55%),
-    linear-gradient(135deg, #173E32 0%, #1F4D3E 100%);
+    linear-gradient(135deg, #1b1a17 0%, #12304c 100%);
   overflow: hidden;
 }
 
@@ -1736,7 +1742,7 @@
   font-family: "Space Grotesk", "Sora", sans-serif;
   font-size: 20px;
   font-weight: 700;
-  box-shadow: 0 1px 2px rgba(23, 62, 50, 0.08);
+  box-shadow: 0 1px 2px rgba(27, 26, 23, 0.08);
 }
 
 .market .storefront-verified {
@@ -1750,7 +1756,7 @@
   place-items: center;
   background: var(--bb-surface);
   color: var(--bb-success);
-  box-shadow: 0 1px 2px rgba(23, 62, 50, 0.15);
+  box-shadow: 0 1px 2px rgba(27, 26, 23, 0.15);
 }
 
 .market .storefront-head h1 {
@@ -1862,7 +1868,7 @@
 }
 
 .market .storefront-btn-whatsapp:hover {
-  background: #1F4D3E;
+  background: #12304c;
   filter: none;
 }
 
@@ -1956,13 +1962,13 @@
   background: var(--bb-surface);
   border: 1px solid var(--bb-line);
   border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(23, 62, 50, 0.04);
+  box-shadow: 0 1px 2px rgba(27, 26, 23, 0.04);
 }
 
 .market .storefront-card:hover {
   transform: translateY(-2px);
   border-color: var(--bb-line-strong);
-  box-shadow: 0 10px 24px -18px rgba(23, 62, 50, 0.45);
+  box-shadow: 0 10px 24px -18px rgba(27, 26, 23, 0.45);
 }
 
 .market .storefront-card-img {
@@ -2033,7 +2039,7 @@
 
 .market .storefront-card:hover .card-action-btn {
   filter: none;
-  background: #1F4D3E;
+  background: #12304c;
 }
 
 /* ==========================================================================
@@ -2157,15 +2163,15 @@
 }
 
 .market .shadow-2xl {
-  box-shadow: 0 8px 24px -18px rgba(23, 62, 50, 0.35);
+  box-shadow: 0 8px 24px -18px rgba(27, 26, 23, 0.35);
 }
 
 .market .shadow-xl {
-  box-shadow: 0 4px 16px -12px rgba(23, 62, 50, 0.28);
+  box-shadow: 0 4px 16px -12px rgba(27, 26, 23, 0.28);
 }
 
 .market .shadow-lg {
-  box-shadow: 0 2px 10px -8px rgba(23, 62, 50, 0.25);
+  box-shadow: 0 2px 10px -8px rgba(27, 26, 23, 0.25);
 }
 
 .market .rounded-2xl {
@@ -2188,7 +2194,7 @@
   background-image: none;
   background-color: var(--bb-surface);
   border-color: var(--bb-line);
-  box-shadow: 0 1px 2px rgba(23, 62, 50, 0.04);
+  box-shadow: 0 1px 2px rgba(27, 26, 23, 0.04);
 }
 
 .market .input {
@@ -2486,7 +2492,7 @@
     border-radius: 14px;
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
-    box-shadow: 0 12px 30px -20px rgba(23, 62, 50, 0.5);
+    box-shadow: 0 12px 30px -20px rgba(27, 26, 23, 0.5);
   }
 
   .market .bb-detail-cta-price {

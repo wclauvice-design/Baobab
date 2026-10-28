@@ -1,5 +1,5 @@
 import { VariantPicker } from '../components/VariantPicker';
-import { ListingVariant, variantLabel, isInternalAttribute } from '@baobab/shared';
+import { ListingVariant, variantLabel, isInternalAttribute } from '@westzone/shared';
 import { FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   Link,
@@ -36,6 +36,7 @@ import {
 } from "../lib/notifications";
 import { isVehicleProduct } from "../lib/vehicles";
 import { isVideoUrl } from "../lib/media";
+import { applyListingSeo, resetSeo } from "../lib/seo";
 import {
   peekProduct,
   rememberProduct,
@@ -109,10 +110,10 @@ export function Icon({ name, size = 22 }: { name: string; size?: number }) {
         <path d="m7 12 3 3 7-7" />
       </>
     ),
-    tree: (
+    mark: (
       <>
-        <path d="M12 14v8m0-5-5 5m5-5 5 5" />
-        <path d="M7 14a4 4 0 0 1-2-7 5 5 0 0 1 10-3 5 5 0 0 1 3 10Z" />
+        <circle cx="12" cy="4.2" r="1.7" />
+        <path d="M3.5 8.5 8.5 19l3.5-7 3.5 7 5-10.5" />
       </>
     ),
     link: (
@@ -164,8 +165,8 @@ export const DESTINATIONS = [
   { id: "GA", flag: "🇬🇦", name: "Gabon (Libreville)", cbmRate: 220000, daysExpress: "3–6 j", daysCargo: "14–16 j", daysSea: "45–50 j" },
 ];
 
-const DEST_KEY = "baobab_selected_destination";
-const DEST_EVENT = "baobab:destination";
+const DEST_KEY = "westzone_selected_destination";
+const DEST_EVENT = "westzone:destination";
 export const DEFAULT_DEST_ID = "BF";
 
 export function useUserDestination() {
@@ -229,8 +230,8 @@ function findTaxonomySubcategory(config: any, key: string) {
   return null;
 }
 
-const FAVORITES_KEY = "baobab_favorites";
-const FAVORITES_EVENT = "baobab:favorites";
+const FAVORITES_KEY = "westzone_favorites";
+const FAVORITES_EVENT = "westzone:favorites";
 
 /** Favoris partagés entre l'accueil, la navigation et les fiches, synchronisés entre onglets. */
 function useFavorites() {
@@ -312,12 +313,12 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
           to="/"
           className="bb-brand"
           onClick={() => setParams(new URLSearchParams())}
-          aria-label="Baobab, retour à l'accueil"
+          aria-label="Westzone, retour à l'accueil"
         >
-          <span className="bb-brand-mark"><Icon name="tree" size={19} /></span>
+          <span className="bb-brand-mark"><Icon name="mark" size={19} /></span>
           <span className="bb-brand-name">
-            baobab
-            <span className="bb-brand-sub">Dubaï → Afrique</span>
+            WESTZONE
+            <span className="bb-brand-sub">Afrique de l'Ouest</span>
           </span>
         </Link>
 
@@ -374,15 +375,15 @@ export function MarketShell({ children }: { children: React.ReactNode }) {
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "16px", width: "100%", maxWidth: "1200px", margin: "0 auto" }}>
           <div>
             <Link to="/" className="brand">
-              <Icon name="tree" />
-              baobab
+              <Icon name="mark" />
+              WESTZONE
             </Link>
             <p style={{ margin: "4px 0 0", fontSize: "0.85rem", opacity: 0.85 }}>
-              Des découvertes à Dubaï. Un accompagnement de confiance jusqu’à votre destination.
+              Des marchés mondiaux à votre porte, un accompagnement de confiance partout en Afrique de l'Ouest.
             </p>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", fontSize: "0.85rem", alignItems: "center" }}>
-            <Link to="/messages" style={{ color: "inherit", textDecoration: "underline" }}>Contacter Baobab</Link>
+            <Link to="/messages" style={{ color: "inherit", textDecoration: "underline" }}>Contacter Westzone</Link>
             <Link to="/terms" style={{ color: "inherit", textDecoration: "underline" }}>Conditions Générales (CGUV)</Link>
             <Link to="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>Politique de Confidentialité</Link>
           </div>
@@ -746,7 +747,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
         <section className="bb-hero bb-hero-identity">
           <div className="bb-identity-art" aria-hidden="true"><span /><span /><span /></div>
           <div className="bb-identity-content">
-          <div className="bb-identity-kicker"><span className="bb-identity-mark" aria-hidden="true">✦</span><span>Dubaï &amp; Asie · Sélection Baobab</span></div>
+          <div className="bb-identity-kicker"><span className="bb-identity-mark" aria-hidden="true">✦</span><span>Dubaï &amp; Asie · Sélection Westzone</span></div>
           <HeroAnimatedHeadline />
           <p className="bb-identity-caption">Vos envies d’ailleurs. Votre prochain coup de cœur.</p>
           <div className="bb-hero-actions mt-3">
@@ -826,7 +827,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
               ? `« ${search} »`
               : universe
                 ? universes.find((u) => u.id === universe)?.name || "Sélection"
-                : favorites ? "Mes favoris" : "La sélection Baobab"}
+                : favorites ? "Mes favoris" : "La sélection Westzone"}
           </h2>
           <span className="feed-counter">
             {loading ? "…" : `${shown.length} offres`}
@@ -988,7 +989,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
                 : "Essayez une autre catégorie ou contactez-nous pour votre recherche."}
             </p>
             <Link className="market-button" to="/messages">
-              Parler à Baobab
+              Parler à Westzone
             </Link>
           </Empty>
         )}
@@ -1132,6 +1133,13 @@ export function ListingDetail() {
     };
   }, [id]);
 
+  // SEO : chaque fiche expose son propre titre, sa description et son image.
+  useEffect(() => {
+    if (!baseProduct) return;
+    applyListingSeo(baseProduct);
+    return resetSeo;
+  }, [baseProduct]);
+
   const [selectedVariant,setSelectedVariant]=useState<ListingVariant|null>(null);
   const variant=baseProduct?.variants?.find((v:ListingVariant)=>v.id===selectedVariant?.id&&v.active);
   const p=variant?{...baseProduct,price:variant.price,stock:variant.stock,weightKg:variant.weightKg??baseProduct.weightKg,images:variant.images.length?variant.images:baseProduct.images}:baseProduct;
@@ -1176,7 +1184,7 @@ export function ListingDetail() {
         : freight.mode === "CARGO"
           ? "Fret Aérien Cargo (14 à 16 jours, 8 600 F/kg)"
           : `Fret Maritime / Conteneur (45 à 50 jours, ${money(dest.cbmRate)}/m³)`;
-      const bodyText = `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} : ${p.name}${variant ? ` — ${variantLabel(variant)} (SKU ${variant.sku}, variante ${variant.id})` : ""}. Destination : ${dest.name} en ${modeDescription}. Poids estimé : ${totalWeight} kg. Total estimé : ${money(estimatedGrandTotal)}.`;
+      const bodyText = `Bonjour Westzone, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} : ${p.name}${variant ? ` — ${variantLabel(variant)} (SKU ${variant.sku}, variante ${variant.id})` : ""}. Destination : ${dest.name} en ${modeDescription}. Poids estimé : ${totalWeight} kg. Total estimé : ${money(estimatedGrandTotal)}.`;
       const active = getDeviceActiveConversation();
       if (active) {
         try {
@@ -1216,7 +1224,7 @@ export function ListingDetail() {
     }
     return <ListingSkeleton />;
   }
-  const message = `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} de "${p.name}"${variant ? ` — ${variantLabel(variant)} (SKU ${variant.sku}, variante ${variant.id})` : ""} vers ${dest.name} en ${freight.modeLabel}. Référence ${p.id}. ${window.location.href}`;
+  const message = `Bonjour Westzone, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} de "${p.name}"${variant ? ` — ${variantLabel(variant)} (SKU ${variant.sku}, variante ${variant.id})` : ""} vers ${dest.name} en ${freight.modeLabel}. Référence ${p.id}. ${window.location.href}`;
 
   if (isVehicleProduct(p)) {
     return (
@@ -1310,7 +1318,7 @@ export function ListingDetail() {
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-700">
             <div className="flex items-center gap-2">
               <Icon name="shield" size={14} />
-              <span>Vendu par <strong>{p.seller?.shopName || "Baobab Dubaï Officiel"}</strong></span>
+              <span>Vendu par <strong>{p.seller?.shopName || "WESTZONE Officiel"}</strong></span>
               <span className="rounded-full bg-[#E4F1EB] px-2 py-0.5 text-[10px] font-bold text-[#1F7A5C]">✓ Vérifié</span>
             </div>
             <div className="flex items-center gap-1 text-slate-500">
@@ -1325,7 +1333,7 @@ export function ListingDetail() {
         {needsVariant && !activeVariants(baseProduct).length && (
           <p className="bb-variant-soldout" role="status">
             Toutes les combinaisons de cet article sont épuisées. Contactez
-            Baobab pour connaître le prochain réapprovisionnement.
+            Westzone pour connaître le prochain réapprovisionnement.
           </p>
         )}
         <a className="product-detail-jump" href="#product-purchase">Aller au simulateur de livraison et devis →</a>
@@ -1544,7 +1552,7 @@ export function ListingDetail() {
         <div className="seller-showcase-section">
           <div className="seller-showcase-header">
             <h3>Autres articles de {p.seller?.shopName || "cette boutique"}</h3>
-            <Link to={`/shop/${p.sellerId || p.seller?.id || "seller-baobab-official"}`}>
+            <Link to={`/shop/${p.sellerId || p.seller?.id || "seller-westzone-official"}`}>
               Voir toute la boutique ({sellerProducts.length + 1}) →
             </Link>
           </div>
@@ -1620,7 +1628,7 @@ export function Inbox() {
     [text, setText] = useState(""),
     [busy, setBusy] = useState(false);
   const [notifState, setNotifState] = useState<NotificationPermission>(getNotificationPermission);
-  const contacts = saved<any[]>("baobab_conversations", []),
+  const contacts = saved<any[]>("westzone_conversations", []),
     selected = contacts.find((c) => c.id === id);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevMsgCountRef = useRef<number>(0);
@@ -1630,9 +1638,9 @@ export function Inbox() {
     const msgs = conversation?.messages || [];
     if (prevMsgCountRef.current > 0 && msgs.length > prevMsgCountRef.current) {
       const added = msgs.slice(prevMsgCountRef.current);
-      const incoming = added.find((m: any) => m.role === "BAOBAB");
+      const incoming = added.find((m: any) => m.role === "WESTZONE");
       if (incoming) {
-        notifyNewMessage("Équipe Baobab", incoming.body);
+        notifyNewMessage("Équipe Westzone", incoming.body);
       }
     }
     prevMsgCountRef.current = msgs.length;
@@ -1760,7 +1768,7 @@ export function Inbox() {
           <p className="eyebrow">VOTRE INTERLOCUTEUR</p>
           <h1>Parlons de votre projet.</h1>
         </div>
-        <span className="service-label">Équipe Baobab</span>
+        <span className="service-label">Équipe Westzone</span>
       </div>
       <div className="inbox-grid">
         <aside>
@@ -1772,7 +1780,7 @@ export function Inbox() {
               <Icon name="chat" />
               <div>
                 <strong>{c.subject}</strong>
-                <small>Conversation privée avec Baobab</small>
+                <small>Conversation privée avec Westzone</small>
               </div>
             </NavLink>
           ))}
@@ -1783,10 +1791,10 @@ export function Inbox() {
         </aside>
         <div className="chat-panel">
           <div className="chat-title">
-            <Icon name="tree" />
+            <Icon name="mark" />
             <div>
               <strong>
-                {conversation?.subject || "Bienvenue chez Baobab"}
+                {conversation?.subject || "Bienvenue chez Westzone"}
               </strong>
               <div className="chat-status-row">
                 <small className="chat-live-badge">
@@ -1827,7 +1835,7 @@ export function Inbox() {
                 key={m.id}
                 className={`chat-message ${m.role === "CLIENT" ? "mine" : ""}`}
               >
-                <small>{m.role === "CLIENT" ? "Vous" : "Baobab"}</small>
+                <small>{m.role === "CLIENT" ? "Vous" : "Westzone"}</small>
                 <p>
                   <MessageBody body={m.body} />
                 </p>
@@ -1843,7 +1851,7 @@ export function Inbox() {
               onChange={(e) => setText(e.target.value)}
               maxLength={4000}
               required
-              placeholder="Écrivez à Baobab…"
+              placeholder="Écrivez à Westzone…"
               aria-label="Votre message"
             />
             <button
@@ -1868,7 +1876,7 @@ export function Tracking({ account = false }: { account?: boolean }) {
     [paymentKey, setPaymentKey] = useState(() => requestKey());
   const token =
     window.location.hash.slice(1) ||
-    saved<Record<string, string>>("baobab_tracking", {})[id!];
+    saved<Record<string, string>>("westzone_tracking", {})[id!];
   const path = account ? `/concierge/mine/${id}` : `/concierge/tracking/${id}`;
   const refresh = () =>
     call(path, undefined, account ? undefined : token)
@@ -1879,9 +1887,9 @@ export function Tracking({ account = false }: { account?: boolean }) {
       .catch((e) => setError(e.message));
   useEffect(() => {
     if (!account && token) {
-      const links = saved<Record<string, string>>("baobab_tracking", {});
+      const links = saved<Record<string, string>>("westzone_tracking", {});
       links[id!] = token;
-      save("baobab_tracking", links);
+      save("westzone_tracking", links);
     }
     refresh();
     const timer = setInterval(refresh, 15000);
@@ -1934,7 +1942,7 @@ export function Tracking({ account = false }: { account?: boolean }) {
         <Empty
           title={error ? "Suivi inaccessible" : "Chargement de votre suivi…"}
         >
-          <p>Utilisez le lien privé transmis par Baobab.</p>
+          <p>Utilisez le lien privé transmis par Westzone.</p>
         </Empty>
       </>
     );
@@ -1966,7 +1974,7 @@ export function Tracking({ account = false }: { account?: boolean }) {
               <>
                 <p className="muted">
                   <span className="print-only">
-                    BAOBAB · FACTURE PROFORMA · Réf. {order.reference || id}
+                    WESTZONE · FACTURE PROFORMA · Réf. {order.reference || id}
                   </span>
                   Version {q.revision} ·{" "}
                   {order.acceptedRevision === q.revision
@@ -2057,7 +2065,7 @@ export function Tracking({ account = false }: { account?: boolean }) {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
                   <a
                     href={`https://wa.me/?text=${encodeURIComponent(
-                      `Bonjour ! Voici le lien de suivi en temps réel de ma commande Baobab (${order.reference || id}) :\n${window.location.origin}/tracking/${id}${token ? '#' + token : ''}`
+                      `Bonjour ! Voici le lien de suivi en temps réel de ma commande Westzone (${order.reference || id}) :\n${window.location.origin}/tracking/${id}${token ? '#' + token : ''}`
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -2099,7 +2107,7 @@ export function Tracking({ account = false }: { account?: boolean }) {
               </>
             ) : (
               <p>
-                Baobab prépare votre devis. Vous pourrez vérifier le montant
+                Westzone prépare votre devis. Vous pourrez vérifier le montant
                 définitif avant de confirmer.
               </p>
             )}
@@ -2154,7 +2162,7 @@ export function Tracking({ account = false }: { account?: boolean }) {
               <div className="tracking-card">
                 <h3>Vous avez effectué un paiement ?</h3>
                 <p className="muted">
-                  Déclarez sa référence. Baobab vérifiera la réception avant de
+                  Déclarez sa référence. Westzone vérifiera la réception avant de
                   mettre à jour votre solde.
                 </p>
                 <form
@@ -2218,17 +2226,17 @@ export function Tracking({ account = false }: { account?: boolean }) {
           <div className="tracking-card escrow-status-box" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", padding: "16px", marginTop: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#166534", fontWeight: 700 }}>
               <Icon name="shield" size={20} />
-              <span>Garantie Paiement Protégé Baobab</span>
+              <span>Garantie Paiement Protégé Westzone</span>
             </div>
             <p style={{ fontSize: "0.82rem", color: "#15803d", margin: "6px 0 0", lineHeight: 1.4 }}>
               {Number(f.paid) > 0 ? (
                 Number(f.supplierPaid || 0) > 0 ? (
                   <><strong>Fonds libérés au commerçant</strong> : l'inspection et la préparation de votre commande ont été validées à Dubaï.</>
                 ) : (
-                  <><strong>Fonds sécurisés par Baobab</strong> : vos paiements sont conservés sur notre compte protégé. Le commerçant n'est crédité qu'après vérification de votre marchandise.</>
+                  <><strong>Fonds sécurisés par Westzone</strong> : vos paiements sont conservés sur notre compte protégé. Le commerçant n'est crédité qu'après vérification de votre marchandise.</>
                 )
               ) : (
-                <>Vos règlements sont protégés et conservés par Baobab jusqu'à l'inspection de conformité de vos articles.</>
+                <>Vos règlements sont protégés et conservés par Westzone jusqu'à l'inspection de conformité de vos articles.</>
               )}
             </p>
           </div>
@@ -2238,7 +2246,7 @@ export function Tracking({ account = false }: { account?: boolean }) {
               <h3 style={{ margin: 0, fontSize: "0.95rem" }}>Besoin d'aide ou signaler un litige ?</h3>
             </div>
             <p className="muted" style={{ fontSize: "0.82rem" }}>
-              Une question sur la livraison ou un article non conforme ? Contactez l'équipe de conciergerie Baobab directement via votre messagerie ou WhatsApp.
+              Une question sur la livraison ou un article non conforme ? Contactez l'équipe de conciergerie Westzone directement via votre messagerie ou WhatsApp.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "12px" }}>
               <Link to={`/messages${order.conversationId ? '/' + order.conversationId : ''}`} className="market-button secondary full" style={{ fontSize: "0.85rem", textAlign: "center" }}>
@@ -2246,7 +2254,7 @@ export function Tracking({ account = false }: { account?: boolean }) {
               </Link>
               <a
                 href={`https://wa.me/22676950089?text=${encodeURIComponent(
-                  `Bonjour Baobab, j'ai une question/réclamation concernant ma commande réf: ${order.reference || id}`
+                  `Bonjour Westzone, j'ai une question/réclamation concernant ma commande réf: ${order.reference || id}`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -2279,7 +2287,7 @@ export function Purchases() {
         .then(setData)
         .catch((e) => setError(e.message));
   }, [user]);
-  const links = saved<Record<string, string>>("baobab_tracking", {});
+  const links = saved<Record<string, string>>("westzone_tracking", {});
   return (
     <section className="narrow-page">
       <p className="eyebrow">TOUJOURS À VOS CÔTÉS</p>
@@ -2318,7 +2326,7 @@ export function Purchases() {
         <Empty title="Votre prochain achat commence ici">
           <p>
             Votre suivi sera accessible depuis le lien privé transmis par
-            Baobab, même sans compte.
+            Westzone, même sans compte.
           </p>
           <Link className="market-button" to="/">
             Explorer les annonces
@@ -2348,7 +2356,7 @@ export function MarketAccount() {
         city: fd.get("city"),
       });
       setSuccess(
-        "Votre demande a été envoyée à Baobab. Vos annonces seront disponibles après approbation.",
+        "Votre demande a été envoyée à Westzone. Vos annonces seront disponibles après approbation.",
       );
     } catch (e: any) {
       setError(e.message);
@@ -2358,7 +2366,7 @@ export function MarketAccount() {
   }
   return (
     <section className="narrow-page">
-      <p className="eyebrow">BIENVENUE CHEZ BAOBAB</p>
+      <p className="eyebrow">BIENVENUE CHEZ WESTZONE</p>
       <h1>Votre espace</h1>
       <div className="tracking-card">
         {user ? (
@@ -2370,7 +2378,7 @@ export function MarketAccount() {
                 ? "client"
                 : user.role === "SELLER"
                   ? "commerçant"
-                  : "partenaire Baobab"}
+                  : "partenaire Westzone"}
             </p>
             <button className="market-button secondary" onClick={logout}>
               Se déconnecter
@@ -2380,7 +2388,7 @@ export function MarketAccount() {
           <>
             <h2>Explorez librement, avec ou sans compte.</h2>
             <p>
-              Un compte est facultatif pour discuter et commander avec Baobab.
+              Un compte est facultatif pour discuter et commander avec Westzone.
             </p>
             <Link className="market-button" to="/login">
               Se connecter
@@ -2395,13 +2403,13 @@ export function MarketAccount() {
       </Link>
       <Link className="tracking-card order-link" to="/messages">
         <Icon name="chat" />
-        <strong>Mes échanges avec Baobab</strong>
+        <strong>Mes échanges avec Westzone</strong>
         <Icon name="arrow" />
       </Link>
       <div className="tracking-card">
         <h2>Vous êtes commerçant ?</h2>
         <p>
-          Présentez vos produits. Baobab gère les échanges clients, les devis et
+          Présentez vos produits. Westzone gère les échanges clients, les devis et
           l’acheminement.
         </p>
         <Notice>{error || success}</Notice>
@@ -2460,10 +2468,10 @@ export function Storefront() {
         setProducts(matching);
         if (matching.length > 0 && matching[0].seller) {
           setSeller(matching[0].seller);
-        } else if (id === "seller-baobab-official" || !id) {
+        } else if (id === "seller-westzone-official" || !id) {
           setSeller({
-            id: "seller-baobab-official",
-            shopName: "Baobab Dubaï Officiel",
+            id: "seller-westzone-official",
+            shopName: "WESTZONE Officiel",
             city: "Dubaï",
           });
         } else {
@@ -2529,7 +2537,7 @@ export function Storefront() {
         </button>
         <a
           href={`https://wa.me/971568934905?text=${encodeURIComponent(
-            `Bonjour, je visite la vitrine de la boutique ${shopName} sur Baobab et je souhaite commander un article.`
+            `Bonjour, je visite la vitrine de la boutique ${shopName} sur Westzone et je souhaite commander un article.`
           )}`}
           target="_blank"
           rel="noreferrer"
@@ -2545,7 +2553,7 @@ export function Storefront() {
           <span>✓</span> Photos réelles & conformité garantie
         </div>
         <div className="reassurance-pill">
-          <span>✓</span> Paiement sécurisé via Baobab
+          <span>✓</span> Paiement sécurisé via Westzone
         </div>
         <div className="reassurance-pill">
           <span>✓</span> Expédition suivie Dubaï → Afrique

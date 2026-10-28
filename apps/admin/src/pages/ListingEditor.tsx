@@ -1,5 +1,5 @@
 import { ListingConfigurationEditor, ListingConfiguration } from '../components/ListingConfigurationEditor';
-import { inferProductType, validateListing } from '@baobab/shared';
+import { inferProductType, validateListing } from '@westzone/shared';
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { api, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -380,10 +380,10 @@ export function ListingEditor() {
       setEditing(null);
       setError(
         "Annonce enregistrée" +
-          (!admin ? " et transmise à Baobab pour validation." : "."),
+          (!admin ? " et transmise à Westzone pour validation." : "."),
       );
       await load();
-      window.dispatchEvent(new Event("baobab:refresh-counts"));
+      window.dispatchEvent(new Event("westzone:refresh-counts"));
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -398,7 +398,7 @@ export function ListingEditor() {
       await api.patch(`/products/${p.id}/moderation`, Object.fromEntries(fd));
       await load();
       setError("Modération enregistrée.");
-      window.dispatchEvent(new Event("baobab:refresh-counts"));
+      window.dispatchEvent(new Event("westzone:refresh-counts"));
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -419,7 +419,7 @@ export function ListingEditor() {
       <p>
         {admin
           ? "Fixez le prix public et validez les annonces des commerçants."
-          : "Indiquez votre prix net fournisseur. Baobab valide l’annonce, fixe son prix public et gère les échanges avec les clients."}
+          : "Indiquez votre prix net fournisseur. Westzone valide l’annonce, fixe son prix public et gère les échanges avec les clients."}
       </p>
       {!admin ? (
         <div style={{
@@ -432,7 +432,7 @@ export function ListingEditor() {
           color: "#fde68a",
           lineHeight: 1.4
         }}>
-          💡 <strong>Publication simplifiée :</strong> Renseignez le titre, la catégorie, le prix et les photos. La famille de produit et ses caractéristiques obligatoires sont proposées automatiquement. Le poids, les dimensions et les réglages de transport restent <em>facultatifs</em> : l'administrateur Baobab les complètera lors de la vérification.
+          💡 <strong>Publication simplifiée :</strong> Renseignez le titre, la catégorie, le prix et les photos. La famille de produit et ses caractéristiques obligatoires sont proposées automatiquement. Le poids, les dimensions et les réglages de transport restent <em>facultatifs</em> : l'administrateur Westzone les complètera lors de la vérification.
         </div>
       ) : (
         <div style={{
@@ -445,7 +445,7 @@ export function ListingEditor() {
           color: "#6ee7b7",
           lineHeight: 1.4
         }}>
-          ⚡ <strong>Mode Administrateur :</strong> Vos annonces sont publiées immédiatement sous la boutique <strong>« Baobab Dubaï Officiel »</strong>. Pour les annonces des commerçants, vous pouvez renseigner le poids (kg) et le cubage avant approbation.
+          ⚡ <strong>Mode Administrateur :</strong> Vos annonces sont publiées immédiatement sous la boutique <strong>« WESTZONE Officiel »</strong>. Pour les annonces des commerçants, vous pouvez renseigner le poids (kg) et le cubage avant approbation.
         </div>
       )}
       <Alert>{error}</Alert>
@@ -986,7 +986,7 @@ export function ListingEditor() {
                 ? "Enregistrement…"
                 : admin
                   ? "Enregistrer"
-                  : "Soumettre à Baobab"}
+                  : "Soumettre à Westzone"}
             </button>
           </form>
         </section>
@@ -1031,7 +1031,7 @@ export function ListingEditor() {
                 <div>
                   <h2>{p.name}</h2>
                   <p>
-                    {p.seller?.shopName || "Baobab"} · {p.category?.name}
+                    {p.seller?.shopName || "Westzone"} · {p.category?.name}
                   </p>
                   <span className="op-pill">
                     {(

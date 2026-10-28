@@ -1,5 +1,7 @@
 services:
   - type: web
+    # Le nom du service Render reste inchangé : il porte le domaine
+    # baobab-api-7w7h.onrender.com encore utilisé par les clients déployés.
     name: baobab-api
     runtime: node
     plan: free
@@ -24,4 +26,6 @@ services:
       - key: ORDER_EXPIRATION_MINUTES
         value: "45"
       - key: ORANGE_MONEY_MERCHANT_NUMBER
+        sync: false
+      - key: WESTZONE_WHATSAPP
         sync: false

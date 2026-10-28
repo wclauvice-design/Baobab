@@ -1,8 +1,8 @@
-// High-fidelity web and audio notification service for Baobab Admin
+// High-fidelity web and audio notification service for Westzone Admin
 
 let audioCtx: AudioContext | null = null;
 let titleFlashTimer: ReturnType<typeof setInterval> | null = null;
-let originalTitle = typeof document !== "undefined" ? document.title : "Baobab Admin";
+let originalTitle = typeof document !== "undefined" ? document.title : "Westzone Admin";
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -121,7 +121,7 @@ export function notifyNewClientMessage(clientName: string, bodyText: string) {
   playNotificationSound();
   showDesktopNotification(`Message de ${clientName}`, {
     body: bodyText,
-    tag: "baobab-admin-client-msg",
+    tag: "westzone-admin-client-msg",
   });
   flashTabTitle("Message client reçu !");
 }

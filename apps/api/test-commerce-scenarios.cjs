@@ -45,7 +45,7 @@ module.exports = async (db) => {
     price: 100,
     supplierPrice: 60,
     stock: 50,
-    categoryId: "baobab-classifieds",
+    categoryId: "westzone-classifieds",
     minimumOrder: 4,
     packSize: 2,
     subcategory: "Téléphones & tablettes",

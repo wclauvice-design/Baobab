@@ -21,8 +21,8 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const BACKUP_TOKEN_KEY = 'baobab_admin_backup_token';
-const IMPERSONATED_SHOP_KEY = 'baobab_admin_impersonated_shop';
+const BACKUP_TOKEN_KEY = 'westzone_admin_backup_token';
+const IMPERSONATED_SHOP_KEY = 'westzone_admin_impersonated_shop';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

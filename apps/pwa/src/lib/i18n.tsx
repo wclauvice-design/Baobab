@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 
 export type Language = 'fr' | 'en';
 
-const STORAGE_KEY = 'baobab_lang';
+const STORAGE_KEY = 'westzone_lang';
 
 export const TRANSLATIONS: Record<Language, Record<string, string>> = {
   fr: {
@@ -11,7 +11,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     messages: 'Messages',
     my_orders: 'Mes commandes',
     my_space: 'Mon espace',
-    contact_baobab: 'Contacter Baobab',
+    contact_westzone: 'Contacter Westzone',
     terms: 'Conditions Générales (CGUV)',
     privacy: 'Politique de Confidentialité',
     share_whatsapp: 'Partager WhatsApp',
@@ -32,7 +32,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     messages: 'Messages',
     my_orders: 'My Orders',
     my_space: 'My Space',
-    contact_baobab: 'Contact Baobab',
+    contact_westzone: 'Contact Westzone',
     terms: 'Terms & Conditions',
     privacy: 'Privacy Policy',
     share_whatsapp: 'Share on WhatsApp',

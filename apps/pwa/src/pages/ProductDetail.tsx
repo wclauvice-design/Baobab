@@ -7,7 +7,7 @@ import { useAuth } from '../lib/auth';
 import { recordView } from '../lib/history';
 import { isVideoUrl } from '../lib/media';
 import { PageLoader } from '../components/PageLoader';
-import { BaobabMark, IconHeart, IconStar } from '../components/icons';
+import { WestzoneMark, IconHeart, IconStar } from '../components/icons';
 
 interface Review {
   id: string;
@@ -45,7 +45,7 @@ function ImageGallery({ images, name }: { images: string[]; name: string }) {
   if (images.length === 0) {
     return (
       <div className="flex aspect-square items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-        <BaobabMark className="h-16 w-16 opacity-20" />
+        <WestzoneMark className="h-16 w-16 opacity-20" />
       </div>
     );
   }
@@ -172,7 +172,7 @@ export function ProductDetail() {
         price: Number(product!.price),
         image: product!.images[0],
         sellerId: product!.seller?.id ?? null,
-        shopName: product!.seller?.shopName ?? 'Baobab',
+        shopName: product!.seller?.shopName ?? 'Westzone',
       },
       quantity,
     );

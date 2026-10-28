@@ -16,7 +16,7 @@ export function LegalTerms() {
               Conditions Générales d'Utilisation et de Vente (CGUV)
             </h1>
             <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-              Dernière mise à jour : 25 Octobre 2026 · Plateforme Baobab Marketplace & Conciergerie
+              Dernière mise à jour : 25 Octobre 2026 · Plateforme Westzone Marketplace & Conciergerie
             </p>
           </div>
         </div>
@@ -26,10 +26,10 @@ export function LegalTerms() {
             1. Objet et Présentation de la Plateforme
           </h2>
           <p>
-            La plateforme <strong>Baobab</strong> est une marketplace et un service d'intermédiation commerciale et logistique facilitant les échanges entre des acheteurs situés en Afrique (notamment Burkina Faso, Côte d'Ivoire, Mali, Sénégal, Togo, Bénin, Niger, Guinée) et des commerçants et grossistes certifiés basés à Dubaï (Émirats Arabes Unis) et dans la sous-région.
+            La plateforme <strong>Westzone</strong> est une marketplace et un service d'intermédiation commerciale et logistique facilitant les échanges entre des acheteurs situés en Afrique (notamment Burkina Faso, Côte d'Ivoire, Mali, Sénégal, Togo, Bénin, Niger, Guinée) et des commerçants et grossistes certifiés basés à Dubaï (Émirats Arabes Unis) et dans la sous-région.
           </p>
           <p>
-            Baobab agit en qualité de <strong>tiers de confiance, intermédiaire technique et opérateur de conciergerie</strong> : réception des demandes, établissement de devis proforma transparents, sécurisation des paiements, inspection de conformité physique des colis avant expédition, et coordination du transport (fret maritime et aérien).
+            Westzone agit en qualité de <strong>tiers de confiance, intermédiaire technique et opérateur de conciergerie</strong> : réception des demandes, établissement de devis proforma transparents, sécurisation des paiements, inspection de conformité physique des colis avant expédition, et coordination du transport (fret maritime et aérien).
           </p>
         </section>
 
@@ -57,7 +57,7 @@ export function LegalTerms() {
           </p>
           <ul style={{ paddingLeft: '20px' }}>
             <li>
-              Les sommes versées par l'acheteur sont réceptionnées et tracées dans un journal d'écritures sécurisé (compte séquestre dédié Baobab).
+              Les sommes versées par l'acheteur sont réceptionnées et tracées dans un journal d'écritures sécurisé (compte séquestre dédié Westzone).
             </li>
             <li>
               <strong>Le commerçant vendeur n'est crédité</strong> qu'après vérification physique, contrôle de conformité et validation de la disponibilité de la marchandise à Dubaï.
@@ -81,7 +81,7 @@ export function LegalTerms() {
             <li><strong>Fret Maritime (Conteneur / Groupage) :</strong> 45 à 50 jours de port à port.</li>
           </ul>
           <p>
-            Baobab assure le suivi continu et transmet les jalons logistiques en temps réel sur l'espace privé de suivi de l'acheteur.
+            Westzone assure le suivi continu et transmet les jalons logistiques en temps réel sur l'espace privé de suivi de l'acheteur.
           </p>
         </section>
 
@@ -93,7 +93,7 @@ export function LegalTerms() {
             L'acheteur dispose d'un délai de <strong>48 heures</strong> à compter de la réception locale du colis pour signaler toute non-conformité majeure, casse ou manquant, photos et justificatifs à l'appui.
           </p>
           <p>
-            Les litiges sont traités en conciliation rapide via la messagerie Baobab ou notre ligne WhatsApp officielle (+226 76 95 00 89). En cas de non-conformité avérée imputable au vendeur ou au transport, Baobab prend en charge le remplacement ou le remboursement selon les modalités du dossier.
+            Les litiges sont traités en conciliation rapide via la messagerie Westzone ou notre ligne WhatsApp officielle (+226 76 95 00 89). En cas de non-conformité avérée imputable au vendeur ou au transport, Westzone prend en charge le remplacement ou le remboursement selon les modalités du dossier.
           </p>
         </section>
 

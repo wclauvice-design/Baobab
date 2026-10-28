@@ -1,4 +1,4 @@
-import { ListingVariant, variantLabel } from '@baobab/shared';
+import { ListingVariant, variantLabel } from '@westzone/shared';
 import { quantity } from '../commerce/rules';
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -231,7 +231,7 @@ export class OrdersService {
     if (!order) throw new NotFoundException('Commande introuvable');
 
     if (role === Role.BUYER && order.buyerId !== userId) throw new ForbiddenException();
-    if (role === Role.SELLER) throw new ForbiddenException('Les commandes clients sont gérées exclusivement par Baobab');
+    if (role === Role.SELLER) throw new ForbiddenException('Les commandes clients sont gérées exclusivement par Westzone');
 
 
     return order;
@@ -244,7 +244,7 @@ export class OrdersService {
     });
     if (!order) throw new NotFoundException('Commande introuvable');
 
-    if (role === Role.SELLER) throw new ForbiddenException('Les commandes clients sont gérées exclusivement par Baobab');
+    if (role === Role.SELLER) throw new ForbiddenException('Les commandes clients sont gérées exclusivement par Westzone');
 
     if (status === OrderStatus.CANCELLED) {
       return this.markCancelled(orderId);
@@ -296,7 +296,7 @@ export class OrdersService {
   }
 
   listForSeller(sellerId: string) {
-    throw new ForbiddenException('Les commandes clients sont gérées exclusivement par Baobab');
+    throw new ForbiddenException('Les commandes clients sont gérées exclusivement par Westzone');
   }
 
   listAllForAdmin() {

@@ -48,11 +48,11 @@ export function usePendingClientCounts(): PendingClientCounts {
     load();
     const timer = setInterval(load, 30000);
     const onRefresh = () => load();
-    window.addEventListener('baobab:refresh-client-counts', onRefresh);
+    window.addEventListener('westzone:refresh-client-counts', onRefresh);
     return () => {
       active = false;
       clearInterval(timer);
-      window.removeEventListener('baobab:refresh-client-counts', onRefresh);
+      window.removeEventListener('westzone:refresh-client-counts', onRefresh);
     };
   }, []);
 

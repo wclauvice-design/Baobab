@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        amber: { 500: '#f0930f', 600: '#d97e06' },
-        emerald: { 500: '#10b981' },
+        amber: { 500: '#D9A441', 600: '#B07C22' },
+        emerald: { 500: '#2F8F6C' },
       },
       fontFamily: {
         heading: ['"Space Grotesk"', 'sans-serif'],

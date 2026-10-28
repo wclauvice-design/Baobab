@@ -1,0 +1,27 @@
+# Refonte Westzone
+
+Catalogue public mobile, quatre univers, annonces modérées et minimums de commande. Westzone centralise les conversations : aucune donnée de contact client n'est exposée au commerçant. Les achats passent par un devis versionné et accepté, avec logistique manuelle. Les anciennes commandes sont conservées.
+
+Clients permanents distincts des comptes ; accès invité par jetons aléatoires, rattachement au compte après vérification réelle du téléphone seulement. La connexion de test ne prouve pas la possession du numéro.
+
+Comptabilité serveur : encaissement Westzone, encaissement livreur, reversement livreur, règlement fournisseur, coût logistique et remboursement. Écritures idempotentes, contrôles sous verrou et journal non supprimable. Livraison et paiement restent indépendants.
+
+Notifications persistées, chat actualisé par sondage ; email uniquement avec prestataire configuré et consentement. WhatsApp est un envoi manuel préparé, sans faux statut envoyé. Pas de déploiement avant vérification des migrations et parcours réels.
+
+## Reprise du 24 octobre 2026
+
+Le minimum est facultatif dans le formulaire d’annonce : vide signifie 1 en base. Le conditionnement reste obligatoire pour les devis, même sans minimum supplémentaire (un carton de 100 pièces exige 100, 200, etc.). Un minimum explicite supérieur à 1 doit être un multiple du conditionnement. Les quantités initiales du catalogue et du devis tiennent compte du carton entier. La fiche affiche le montant minimal des produits et distingue les frais de transport et d’importation.
+
+Vérification locale : 24 tests sur 6 suites réussis ; 26 vérifications PostgreSQL réussies dans le schéma isolé `westzone_refonte_test_20261023`. Compilation API, PWA et administration réussie. API locale : `/health` répond `ok`, catalogue public accessible. Après un délai de connexion du navigateur intégré, catalogue et fiche produit vérifiés sur ordinateur et à 390 px : prix par unité, quantité initiale, minimum, multiple et montant minimal de 400 FCFA pour 4 pièces à 100 FCFA. Lien WhatsApp configuré présent. Connexion administrateur de test, tableau de bord et formulaire de nouvelle annonce vérifiés : minimum vide et facultatif, conditionnement distinct. Aucun déploiement effectué lors de cette reprise.
+
+Sous Windows, lancer Jest avec `npm.cmd test -w apps/api -- --runInBand --cacheDirectory=<dossier accessible>` si le cache temporaire système provoque une erreur EPERM.
+
+## Identité WESTZONE (28 octobre 2026)
+
+La marque, le logo et les identifiants techniques portent désormais WESTZONE. Les URLs de production encore actives (`baobab-api-7w7h.onrender.com`, `baobab-kohl.vercel.app`, `baobab-admin-psi.vercel.app`) restent inchangées tant que les nouveaux domaines ne sont pas créés ; elles sont surchargeables par variables d'environnement (`VITE_API_URL`, `PUBLIC_APP_URL`, `CORS_ORIGINS`).
+
+Palette « Sahel & Atlantique » : indigo atlantique `#12304C` / `#0C2238`, terre cuite `#B04E28`, or sahélien `#D9A441`, sable `#FAF6ED`, encre `#1B1A17`. Typographies : Space Grotesk (titres) et Sora (texte). Logo : monogramme « W » sous un soleil sahélien, dégradé or → terre cuite ; wordmark `WEST` + `ZONE`.
+
+Renommages techniques : scope npm `@westzone/*`, clés `localStorage` et événements `westzone*`, en-tête `X-Westzone-Access`, rôle de message `WESTZONE`, commerçant `seller-westzone-official`, slugs de catégories `westzone-*`. La migration `20261028130000_westzone_brand` aligne les données existantes (commerçant officiel, catégories, rôles de messages, noms de boutique) sans réécrire l'historique des migrations.
+
+SEO : métadonnées statiques WESTZONE et JSON-LD `Organization` dans `apps/pwa/index.html`, `robots.txt`, et titre/description/Open Graph dynamiques par fiche produit (`apps/pwa/src/lib/seo.ts`). Le back-office est en `noindex,nofollow`.

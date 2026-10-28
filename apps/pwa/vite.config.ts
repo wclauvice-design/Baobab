@@ -9,16 +9,20 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Baobab',
-        short_name: 'Baobab',
-        description: 'Marketplace e-commerce indépendante — Afrique de l\'Ouest',
-        theme_color: '#263e2f',
-        background_color: '#fafbf7',
+        name: 'WESTZONE — Marketplace Afrique de l\'Ouest',
+        short_name: 'WESTZONE',
+        description:
+          'Marketplace et conciergerie d\'achat pour l\'Afrique de l\'Ouest : sourcing, devis transparents, fret et suivi.',
+        lang: 'fr',
+        categories: ['shopping', 'business'],
+        theme_color: '#0C2238',
+        background_color: '#FBF7EF',
         display: 'standalone',
         start_url: '/',
         icons: [
-          { src: 'icon-192.svg', sizes: '192x192', type: 'image/svg+xml' },
-          { src: 'icon-512.svg', sizes: '512x512', type: 'image/svg+xml' },
+          { src: 'icon-192.svg', sizes: '192x192', type: 'image/svg+xml', purpose: 'any' },
+          { src: 'icon-512.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'any' },
+          { src: 'icon-512.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'maskable' },
         ],
       },
       workbox: {
@@ -31,7 +35,7 @@ export default defineConfig({
               /\.(?:png|jpg|jpeg|svg|webp|gif)$/i.test(url.pathname),
             handler: 'CacheFirst',
             options: {
-              cacheName: 'baobab-images',
+              cacheName: 'westzone-images',
               expiration: {
                 maxEntries: 300,
                 maxAgeSeconds: 30 * 24 * 60 * 60, // 30 jours
@@ -49,7 +53,7 @@ export default defineConfig({
               url.pathname.startsWith('/api/concierge/home'),
             handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'baobab-catalog-api',
+              cacheName: 'westzone-catalog-api',
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 24 * 60 * 60, // 24 heures

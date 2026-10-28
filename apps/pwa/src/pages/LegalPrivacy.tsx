@@ -15,7 +15,7 @@ export function LegalPrivacy() {
               Politique de Confidentialité et Protection des Données
             </h1>
             <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-              Engagement de transparence et conformité réglementaire · Baobab
+              Engagement de transparence et conformité réglementaire · Westzone
             </p>
           </div>
         </div>
@@ -25,7 +25,7 @@ export function LegalPrivacy() {
             1. Principe de Minimisation des Données
           </h2>
           <p>
-            Baobab respecte strictement votre vie privée. Nous ne collectons que les informations strictement indispensables à la bonne exécution de vos commandes et livraisons :
+            Westzone respecte strictement votre vie privée. Nous ne collectons que les informations strictement indispensables à la bonne exécution de vos commandes et livraisons :
           </p>
           <ul style={{ paddingLeft: '20px' }}>
             <li><strong>Numéro de téléphone :</strong> utilisé pour l'identification sécurisée (code OTP SMS), le suivi WhatsApp et le contact avec le livreur.</li>

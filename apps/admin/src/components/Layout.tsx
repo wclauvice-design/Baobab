@@ -66,11 +66,11 @@ export function Layout() {
     const id = setInterval(load, 12000);
     // Rafraîchissement immédiat après traitement d'un élément
     const onRefresh = () => load();
-    window.addEventListener("baobab:refresh-counts", onRefresh);
+    window.addEventListener("westzone:refresh-counts", onRefresh);
     return () => {
       active = false;
       clearInterval(id);
-      window.removeEventListener("baobab:refresh-counts", onRefresh);
+      window.removeEventListener("westzone:refresh-counts", onRefresh);
     };
   }, [user?.role]);
 
@@ -92,11 +92,11 @@ export function Layout() {
     load();
     const id = setInterval(load, 20000);
     const onRefresh = () => load();
-    window.addEventListener("baobab:refresh-counts", onRefresh);
+    window.addEventListener("westzone:refresh-counts", onRefresh);
     return () => {
       active = false;
       clearInterval(id);
-      window.removeEventListener("baobab:refresh-counts", onRefresh);
+      window.removeEventListener("westzone:refresh-counts", onRefresh);
     };
   }, [user?.role]);
 
@@ -155,7 +155,7 @@ export function Layout() {
 
       <aside className="backoffice-nav">
         <div className="backoffice-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          baobab<small>ESPACE PROFESSIONNEL</small>
+          WESTZONE<small>ESPACE PROFESSIONNEL · AFRIQUE DE L'OUEST</small>
           <NotificationBell />
         </div>
         <nav>

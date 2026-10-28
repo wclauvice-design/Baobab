@@ -1,4 +1,4 @@
-import { matchCategory, TAXONOMY } from "@baobab/shared";
+import { matchCategory, TAXONOMY } from "@westzone/shared";
 
 export interface RuntimeCategory {
   id: string;

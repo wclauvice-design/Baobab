@@ -1,6 +1,6 @@
-# Baobab — MVP
+# Westzone — MVP
 
-Plateforme e-commerce indépendante pour l'Afrique de l'Ouest francophone (CI, Burkina Faso, Togo, Bénin, Mali, Niger), en franc CFA (XOF). Modèle hybride vente directe + vendeurs partenaires. Paiement Orange Money validé manuellement en back-office (voir `docs/baobab-app-spec.md` pour le cahier des charges complet).
+Plateforme e-commerce indépendante pour l'Afrique de l'Ouest francophone (CI, Burkina Faso, Togo, Bénin, Mali, Niger), en franc CFA (XOF). Modèle hybride vente directe + vendeurs partenaires. Paiement Orange Money validé manuellement en back-office (voir `docs/westzone-app-spec.md` pour le cahier des charges complet).
 
 ## Structure
 

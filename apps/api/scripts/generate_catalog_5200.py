@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Générateur de catalogue Baobab — 5 200+ Vrais Produits Vendables en Afrique de l'Ouest
+Générateur de catalogue WESTZONE — 5 200+ Vrais Produits Vendables en Afrique de l'Ouest
 Sources / Inspiration : Dubizzle Dubaï (Export Afrique) & Temu Wholesale
 Règle de prix : Prix Public = Prix Fournisseur + 15%
 Exclusions strictes : Pas d'immobilier, pas de jobs, pas de vêtements/chaussures, pas de bizarreries.
@@ -713,7 +713,7 @@ for p in products:
     u = p["universe"]
     stats[u] = stats.get(u, 0) + 1
 
-print("\n--- RÉPARTITION DU CATALOGUE BAOBAB ---")
+print("\n--- RÉPARTITION DU CATALOGUE WESTZONE ---")
 for u, c in stats.items():
     print(f"  • Univers '{u.upper()}' : {c} produits")
 print("---------------------------------------")

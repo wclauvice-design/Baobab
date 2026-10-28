@@ -3,13 +3,13 @@ const fs = require("fs"),
   path = require("path"),
   { spawnSync } = require("child_process");
 const { PrismaClient } = require("@prisma/client");
-const envPath = process.env.BAOBAB_SOURCE_ENV;
+const envPath = process.env.WESTZONE_SOURCE_ENV;
 if (!envPath)
   throw new Error(
-    "BAOBAB_SOURCE_ENV must point to the existing local API env file",
+    "WESTZONE_SOURCE_ENV must point to the existing local API env file",
   );
 const env = require("dotenv").parse(fs.readFileSync(envPath));
-const schema = "baobab_refonte_test_20261023";
+const schema = "westzone_refonte_test_20261023";
 const url = new URL(env.DATABASE_URL);
 url.searchParams.set("schema", schema);
 url.searchParams.set("connection_limit", "4");

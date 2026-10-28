@@ -44,7 +44,7 @@ describe("Permanent listing deletion", () => {
 
 describe("Wholesale listings", () => {
   const create = jest.fn(async ({ data }) => data);
-  const service = new ProductsService({ product: { create }, seller: { findFirst: jest.fn(async () => ({ id: "seller-baobab-official" })) } } as any, {} as any);
+  const service = new ProductsService({ product: { create }, seller: { findFirst: jest.fn(async () => ({ id: "seller-westzone-official" })) } } as any, {} as any);
   const listing = { name: "Carton", description: "100 pièces", price: 500, stock: 500, categoryId: "trade", packSize: 100 };
 
   it("allows whole cartons without an additional minimum", async () => {
@@ -71,7 +71,7 @@ describe("Listing publication and variants", () => {
     const prisma = {
       product: { create, updateMany, findUnique },
       seller: {
-        findFirst: jest.fn(async () => ({ id: "seller-baobab-official" })),
+        findFirst: jest.fn(async () => ({ id: "seller-westzone-official" })),
         findUnique: jest.fn(async () => ({ id: "s1", status: "APPROVED" })),
       },
     } as any;

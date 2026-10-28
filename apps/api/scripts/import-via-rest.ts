@@ -106,7 +106,7 @@ async function main() {
         stock: p.stock || 10,
         images: p.images || [],
         categoryId: catId,
-        sellerId: p.sellerId || 'seller-baobab-official',
+        sellerId: p.sellerId || 'seller-westzone-official',
         moderation: 'PUBLISHED',
         subcategory: p.subcategory || 'Autres',
         condition: p.condition || 'NEW',

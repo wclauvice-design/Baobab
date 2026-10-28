@@ -1,9 +1,9 @@
 import { useId } from 'react';
 
 /**
- * Système d'icônes Baobab — traits fins (1.75), angles arrondis, grille 24×24.
+ * Système d'icônes Westzone — traits fins (1.75), angles arrondis, grille 24×24.
  * Aucune icône ne vient d'une bibliothèque tierce : chaque tracé est dessiné
- * pour ce produit. IconFire et BaobabMark sont les deux seules formes pleines
+ * pour ce produit. IconFire et WestzoneMark sont les deux seules formes pleines
  * (dégradé "flame"), le reste reste en traits pour ne pas concurrencer le logo.
  */
 
@@ -19,51 +19,47 @@ const base = {
   strokeLinejoin: 'round' as const,
 };
 
-export function BaobabMark({ className = 'h-8 w-8' }: IconProps) {
+/**
+ * Monogramme WESTZONE : un « W » dessiné comme deux caps de la côte
+ * ouest-africaine, sous un soleil sahelien. Le dégradé or → terre cuite
+ * fonctionne aussi bien sur fond clair que sur fond indigo.
+ */
+export function WestzoneMark({ className = 'h-8 w-8' }: IconProps) {
   const uid = useId();
-  const gradientId = `flame-${uid}`;
+  const gradientId = `westzone-${uid}`;
   return (
     <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
       <defs>
-        <linearGradient id={gradientId} x1="6" y1="2" x2="38" y2="44" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#ffcf7d" />
-          <stop offset="45%" stopColor="#f5a623" />
-          <stop offset="100%" stopColor="#e2481c" />
+        <linearGradient id={gradientId} x1="8" y1="14" x2="40" y2="38" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#F2C46A" />
+          <stop offset="55%" stopColor="#D9A441" />
+          <stop offset="100%" stopColor="#C05A32" />
         </linearGradient>
       </defs>
-      <g fill={`url(#${gradientId})`}>
-        <circle cx="24" cy="16.5" r="8" />
-        <circle cx="15.5" cy="18.5" r="5.5" />
-        <circle cx="32.5" cy="18" r="6" />
-        <circle cx="25" cy="9.5" r="5" />
-        <path
-          d="M21 20
-             C20.3 24 20.6 28 21.5 32
-             C20 35 17.5 37 14.5 40
-             C16.2 41.6 18.5 41 20 39
-             C22 36.5 23 30 23 24
-             L25 24
-             C25 30 26 36.5 28 39
-             C29.5 41 31.8 41.6 33.5 40
-             C30.5 37 28 35 26.5 32
-             C27.4 28 27.7 24 27 20
-             Z"
-        />
-      </g>
+      <circle cx="24" cy="8.5" r="3" fill="#D9A441" />
+      <path
+        d="M6.5 16 15.5 36 24 20.5 32.5 36 41.5 16"
+        fill="none"
+        stroke={`url(#${gradientId})`}
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
-export function BaobabWordmark({ className = '', textClassName = 'text-3xl' }: IconProps & { textClassName?: string }) {
+export function WestzoneWordmark({ className = '', textClassName = 'text-3xl' }: IconProps & { textClassName?: string }) {
   return (
     <span className={`inline-flex flex-col ${className}`}>
-      <span className={`bg-flame bg-clip-text font-heading font-bold leading-none text-transparent ${textClassName}`}>
-        Baobab
+      <span className={`font-heading font-bold leading-none tracking-[0.14em] ${textClassName}`}>
+        WEST<span className="text-[#C05A32]">ZONE</span>
       </span>
-      <svg viewBox="0 0 120 12" className="mt-1.5 h-2.5 w-full text-amber-500/60" preserveAspectRatio="none" aria-hidden="true">
-        <path d="M2 2.5 C 26 2.5 42 8 60 8 C 78 8 94 2.5 118 2.5" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-        <path d="M60 8 L 55.5 10.5 M60 8 L 64.5 10.5 M60 8 L 60 11" stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-      </svg>
+      <span className="mt-2 flex items-center gap-2 text-[8px] font-semibold uppercase tracking-[0.3em] opacity-60">
+        <span className="h-px w-5 bg-current opacity-40" />
+        Afrique de l&apos;Ouest
+        <span className="h-px w-5 bg-current opacity-40" />
+      </span>
     </span>
   );
 }

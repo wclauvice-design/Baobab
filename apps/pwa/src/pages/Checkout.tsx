@@ -69,7 +69,7 @@ export function Checkout() {
         instructions: string;
         merchantNumber?: string;
       }>(`/orders/${order.id}/payment/initiate`, { provider });
-      sessionStorage.setItem(`baobab_payment_${order.id}`, JSON.stringify(initiation));
+      sessionStorage.setItem(`westzone_payment_${order.id}`, JSON.stringify(initiation));
       clearSelected();
       navigate(`/orders/${order.id}/payment`);
     } catch (err) {

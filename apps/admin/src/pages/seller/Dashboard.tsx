@@ -24,8 +24,8 @@ export function Dashboard() {
                 {d.seller.status === "APPROVED"
                   ? "Compte approuvé"
                   : d.seller.status === "PENDING"
-                    ? "Votre demande est en cours de validation par Baobab."
-                    : "Compte suspendu — contactez Baobab."}
+                    ? "Votre demande est en cours de validation par Westzone."
+                    : "Compte suspendu — contactez Westzone."}
               </p>
             </div>
             <Link className="op-button" to="/products">
@@ -37,7 +37,7 @@ export function Dashboard() {
               ["Annonces publiées", d.activeProducts],
               ["En modération", d.pendingListings],
               ["Règlements reçus", money(d.paid)],
-              ["À recevoir de Baobab", money(d.due)],
+              ["À recevoir de Westzone", money(d.due)],
             ].map(([label, value]) => (
               <div className="op-card" key={label}>
                 <span>{label}</span>
@@ -47,7 +47,7 @@ export function Dashboard() {
           </div>
           <h2>Mes ventes & règlements</h2>
           <p>
-            Baobab prend en charge la relation client. Retrouvez ici vos
+            Westzone prend en charge la relation client. Retrouvez ici vos
             produits vendus, vos prix nets et les règlements enregistrés.
           </p>
           {d.settlements.map((o: any) => (

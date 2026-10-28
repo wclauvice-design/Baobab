@@ -49,7 +49,7 @@ export function Login() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
-      <h1 className="mb-1 text-2xl font-bold">Baobab — Back-office</h1>
+      <h1 className="mb-1 text-2xl font-bold">Westzone — Back-office</h1>
       <p className="mb-8 text-sm text-slate-500">Accès réservé aux vendeurs et administrateurs.</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">

@@ -10,6 +10,6 @@ jobs:
   ping-render:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Baobab Render Backend
+      - name: Ping Westzone Render Backend
         run: |
           curl -f -s -m 30 https://baobab-api-7w7h.onrender.com/health || echo "Render wake ping sent"

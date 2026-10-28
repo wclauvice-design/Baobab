@@ -16,7 +16,7 @@ TAXONOMY.forEach((universe) => {
   });
 });
 
-const sql = `-- Taxonomie canonique Baobab.
+const sql = `-- Taxonomie canonique Westzone.
 -- Les catégories historiques restent intactes : elles sont rattachées aux
 -- catégories canoniques par le code (matchCategory) et continuent d'afficher
 -- leurs produits. Cette migration garantit simplement que chaque catégorie

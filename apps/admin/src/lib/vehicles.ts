@@ -130,7 +130,7 @@ export function parseVehicleData(p: any): VehicleSpecs {
     else if (/nissan/i.test(name)) brand = 'Nissan';
     else if (/suzuki/i.test(name)) brand = 'Suzuki';
     else if (/mitsubishi/i.test(name)) brand = 'Mitsubishi';
-    else brand = 'Baobab Motors';
+    else brand = 'WESTZONE Motors';
   }
 
   let model = attrs['Modèle'] || '';

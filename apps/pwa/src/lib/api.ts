@@ -1,6 +1,6 @@
 import { compressImage } from './images';
 
-const TOKEN_KEY = 'baobab_token';
+const TOKEN_KEY = 'westzone_token';
 const DEFAULT_API_RENDER_URL = 'https://baobab-api-7w7h.onrender.com';
 const SUPABASE_STORAGE_URL = 'https://jptymtzrfahlhjcqpttg.supabase.co';
 const SUPABASE_SERVICE_KEY =

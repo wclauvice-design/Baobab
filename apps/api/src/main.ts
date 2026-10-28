@@ -13,6 +13,6 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   const port = process.env.PORT ? Number(process.env.PORT) : 3000;
   await app.listen(port, '0.0.0.0');
-  console.log(`Baobab API listening on http://localhost:${port}`);
+  console.log(`Westzone API listening on http://localhost:${port}`);
 }
 bootstrap();

@@ -1,5 +1,5 @@
 /**
- * Taux de change fixes utilisés par Baobab (aucune API payante).
+ * Taux de change fixes utilisés par Westzone (aucune API payante).
  * Les prix sont TOUJOURS stockés en XOF (FCFA) en base.
  * Le commerçant peut saisir son prix dans sa devise (AED par défaut),
  * la conversion est faite ici, côté serveur, pour rester fiable.

@@ -10,7 +10,7 @@ import {
   suggestedValues,
   validateListing,
   variantLabel,
-} from '@baobab/shared';
+} from '@westzone/shared';
 import { formatInCurrency, fromXof, toXof } from '../lib/format';
 import './ListingConfiguration.css';
 

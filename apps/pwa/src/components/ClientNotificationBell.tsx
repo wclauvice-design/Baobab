@@ -135,8 +135,8 @@ export function ClientNotificationBell({
                 </div>
                 <p style={{ margin: '3px 0 0', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.35 }}>
                   {unreadCount > 0
-                    ? `Vous avez ${unreadCount} nouveau(x) message(s) de l'équipe Baobab.`
-                    : 'Discutez en direct avec votre conseiller Baobab.'}
+                    ? `Vous avez ${unreadCount} nouveau(x) message(s) de l'équipe Westzone.`
+                    : 'Discutez en direct avec votre conseiller Westzone.'}
                 </p>
               </div>
             </Link>
@@ -255,7 +255,7 @@ export function ClientNotificationBell({
 
           <div style={{ padding: '8px 16px', background: '#f8fafc', borderTop: '1px solid #f1f5f9', textAlign: 'center' }}>
             <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-              Service Conciergerie Baobab · Dubaï & Afrique
+              Service Conciergerie Westzone · Dubaï & Afrique
             </span>
           </div>
         </div>

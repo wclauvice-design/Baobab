@@ -3,7 +3,7 @@ import {
   ListingVariant,
   publicPriceFromMerchant,
   validateListing as validateListingConfiguration,
-} from '@baobab/shared';
+} from '@westzone/shared';
 import {
   BadRequestException,
   ConflictException,
@@ -27,7 +27,7 @@ import {
   productCanonicalTaxonomy,
   resolveTopic,
   subcategoryValues,
-} from "@baobab/shared";
+} from "@westzone/shared";
 
 /** Variantes de casse/accents pour retrouver les valeurs historiques en base. */
 function caseVariants(values: string[]): string[] {
@@ -896,9 +896,9 @@ export class ProductsService {
   ): Promise<string | null> {
     if (role === Role.ADMIN) {
       const official = await this.prisma.seller.findFirst({
-        where: { OR: [{ id: "seller-baobab-official" }, { userId }] },
+        where: { OR: [{ id: "seller-westzone-official" }, { userId }] },
       });
-      return official ? official.id : "seller-baobab-official";
+      return official ? official.id : "seller-westzone-official";
     }
     const seller = await this.prisma.seller.findUnique({ where: { userId } });
     if (!seller || seller.status !== "APPROVED")

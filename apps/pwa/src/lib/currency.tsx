@@ -5,9 +5,9 @@ import {
   CurrencyConfig,
   formatMultiCurrency,
   convertFromXof,
-} from '@baobab/shared';
+} from '@westzone/shared';
 
-const STORAGE_KEY = 'baobab_selected_currency';
+const STORAGE_KEY = 'westzone_selected_currency';
 
 export function getStoredCurrency(): SupportedCurrency {
   try {
@@ -24,7 +24,7 @@ export function getStoredCurrency(): SupportedCurrency {
 export function setStoredCurrency(currency: SupportedCurrency) {
   try {
     localStorage.setItem(STORAGE_KEY, currency);
-    window.dispatchEvent(new CustomEvent('baobab:currency-changed', { detail: currency }));
+    window.dispatchEvent(new CustomEvent('westzone:currency-changed', { detail: currency }));
   } catch {
     // ignore
   }
@@ -58,10 +58,10 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         setCurrencyState(getStoredCurrency());
       }
     }
-    window.addEventListener('baobab:currency-changed', handleChange);
+    window.addEventListener('westzone:currency-changed', handleChange);
     window.addEventListener('storage', handleChange);
     return () => {
-      window.removeEventListener('baobab:currency-changed', handleChange);
+      window.removeEventListener('westzone:currency-changed', handleChange);
       window.removeEventListener('storage', handleChange);
     };
   }, []);

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ListingVariant, VariantOption, variantLabel } from '@baobab/shared';
+import { ListingVariant, VariantOption, variantLabel } from '@westzone/shared';
 import { useCurrency } from '../lib/currency';
 
 type Props = {

@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { ApiError, warmUpBackend } from '../lib/api';
-import { BaobabMark, BaobabWordmark } from '../components/icons';
+import { WestzoneMark, WestzoneWordmark } from '../components/icons';
 
 export function Login() {
   const [phone, setPhone] = useState('');
@@ -51,8 +51,8 @@ export function Login() {
       <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-flame opacity-20 blur-[80px]" />
 
       <div className="relative mb-8 animate-fade-up">
-        <BaobabMark className="mb-3 h-14 w-14 drop-shadow-[0_8px_20px_rgba(240,147,15,0.35)]" />
-        <BaobabWordmark textClassName="text-4xl" />
+        <WestzoneMark className="mb-3 h-14 w-14 drop-shadow-[0_8px_20px_rgba(240,147,15,0.35)]" />
+        <WestzoneWordmark textClassName="text-4xl" />
         <p className="mt-3 text-sm text-slate-400">
           La marketplace indépendante d'Afrique de l'Ouest.
         </p>

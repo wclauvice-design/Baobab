@@ -13,7 +13,7 @@
  *   différée pour ne jamais bloquer le rendu.
  */
 
-const STORAGE_KEY = "baobab:product-cache:v1";
+const STORAGE_KEY = "westzone:product-cache:v1";
 const MEMORY_LIMIT = 400;
 const PERSIST_LIMIT = 40;
 const PERSIST_DELAY_MS = 250;

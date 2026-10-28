@@ -1,4 +1,4 @@
-# Reconstruction du catalogue Baobab
+# Reconstruction du catalogue Westzone
 
 Audit du 25 octobre 2026 : le générateur `generate_catalog_5200.py` crée des variantes, prix et stocks avec `random`, laisse `images` vide et ne conserve pas d'annonce fournisseur. Les liens du manifeste sont des recherches. L'ancien générateur `gen-catalog.py` choisit même le nom de la plateforme au hasard. Ce catalogue ne constitue pas un relevé d'offres fournisseur.
 

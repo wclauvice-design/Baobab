@@ -78,7 +78,7 @@ export function isInternalAttribute(key: string): boolean {
 }
 
 /**
- * Prix public Baobab à partir du prix net commerçant.
+ * Prix public Westzone à partir du prix net commerçant.
  * Arrondi au centime pour rester compatible avec les montants stockés.
  */
 export function publicPriceFromMerchant(merchantPrice: number): number {

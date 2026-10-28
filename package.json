@@ -1,5 +1,5 @@
 {
-  "name": "baobab",
+  "name": "westzone",
   "private": true,
   "workspaces": [
     "apps/*",

@@ -152,7 +152,7 @@ export function parseVehicleData(p: any): VehicleSpecs {
     else if (/suzuki/i.test(name)) brand = 'Suzuki';
     else if (/mitsubishi/i.test(name)) brand = 'Mitsubishi';
     else if (/jakarta/i.test(name)) brand = 'Jakarta';
-    else brand = 'Baobab Motors';
+    else brand = 'WESTZONE Motors';
   }
 
   // 5. Modèle & Trim
@@ -264,7 +264,7 @@ export function parseVehicleData(p: any): VehicleSpecs {
 
   const steeringSide = attrs['Direction'] || 'Volant à gauche (Left Hand - LHD conforme CEDEAO)';
   const regionalSpecs = attrs['Spécifications'] || 'GCC Specs (Tropicalisé Émirats/Sahel)';
-  const warranty = attrs['Garantie'] || '1 an constructeur / Assistance & Garantie Baobab';
+  const warranty = attrs['Garantie'] || '1 an constructeur / Assistance & Garantie Westzone';
   const targetMarket = 'Export Dubaï ➔ Burkina Faso & Afrique de l’Ouest';
 
   // 14. Équipements / Features (Sections Dubizzle)

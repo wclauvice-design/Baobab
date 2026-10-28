@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Product, ProductCard, ProductCardSkeleton } from '../components/ProductCard';
 import {
-  BaobabWordmark,
+  WestzoneWordmark,
   IconBeauty,
   IconCash,
   IconElectronics,
@@ -54,7 +54,7 @@ export function Catalog({ autoFocusSearch = false }: { autoFocusSearch?: boolean
   return (
     <div className="mx-auto max-w-md pb-24 pt-6">
       <div className="px-4">
-        <BaobabWordmark className="mb-4" textClassName="text-2xl" />
+        <WestzoneWordmark className="mb-4" textClassName="text-2xl" />
 
         <input
           autoFocus={autoFocusSearch}

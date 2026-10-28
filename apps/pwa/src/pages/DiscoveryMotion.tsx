@@ -32,7 +32,7 @@ export const CORE_GUARANTEES = [
     badge: "Paiement Protégé",
     summary: "Fonds sécurisés jusqu'à validation et réception conforme.",
     detail:
-      "Vos paiements restent protégés par Baobab. Le commerçant n'est crédité qu'une fois votre marchandise inspectée, vérifiée et validée conforme à votre commande.",
+      "Vos paiements restent protégés par Westzone. Le commerçant n'est crédité qu'une fois votre marchandise inspectée, vérifiée et validée conforme à votre commande.",
   },
   {
     icon: "📹",
@@ -211,11 +211,11 @@ export function DynamicTrustRibbon({ paused = false }: { paused?: boolean }) {
           <span key={index} className={running ? "bb-trust-enter" : ""}>{current.title}</span>
         </div>
         <button type="button" className="bb-trust-pause" onClick={() => setUserPaused(!userPaused)} aria-label={userPaused ? "Reprendre le défilement" : "Mettre le défilement en pause"} aria-pressed={userPaused}>{userPaused ? "▷" : "Ⅱ"}</button>
-        <button type="button" className="bb-trust-toggle" onClick={() => setExpanded(!expanded)} aria-expanded={expanded} aria-controls="baobab-trust-details">Pourquoi Baobab <span aria-hidden="true">{expanded ? "−" : "+"}</span></button>
+        <button type="button" className="bb-trust-toggle" onClick={() => setExpanded(!expanded)} aria-expanded={expanded} aria-controls="westzone-trust-details">Pourquoi Westzone <span aria-hidden="true">{expanded ? "−" : "+"}</span></button>
       </div>
       <div className="bb-trust-steps" aria-hidden="true">{CORE_GUARANTEES.map((g, i) => <span key={g.title} className={i === index ? "active" : ""} />)}</div>
       {expanded && (
-        <div id="baobab-trust-details" className="bb-trust-details">
+        <div id="westzone-trust-details" className="bb-trust-details">
           {CORE_GUARANTEES.map(g => <div key={g.title}><h3>{g.icon} {g.title}</h3><p>{g.detail}</p></div>)}
           <Link to="/messages">Parler à un conseiller →</Link>
         </div>
@@ -270,4 +270,4 @@ export function LiveFloatingToast() {
 
 // Backward-compatible exports
 export const LiveActivityTicker = DynamicTrustRibbon;
-export const BaobabPromises = () => null;
+export const WestzonePromises = () => null;

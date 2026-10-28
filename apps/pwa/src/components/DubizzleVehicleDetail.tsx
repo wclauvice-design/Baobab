@@ -42,7 +42,7 @@ export function DubizzleVehicleDetail({
   };
 
   const whatsappMessage = encodeURIComponent(
-    `Bonjour Baobab Conciergerie,\nJe souhaite réserver le véhicule suivant :\n*${product.name}*\nPrix : *${formatXof(
+    `Bonjour Westzone Conciergerie,\nJe souhaite réserver le véhicule suivant :\n*${product.name}*\nPrix : *${formatXof(
       price
     )}*\nAnnée : ${specs.year} | Kilométrage : ${specs.mileage} | Carburant : ${
       specs.fuelType
@@ -377,7 +377,7 @@ export function DubizzleVehicleDetail({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-sm text-[#0B1E17]">
-                {product.seller?.shopName || 'Baobab Dubaï Motors'}
+                {product.seller?.shopName || 'WESTZONE Motors'}
               </span>
               <span className="rounded-full bg-[#E4F1EB] px-2 py-0.5 text-[10px] font-bold text-[#1F7A5C]">
                 ✓ Concessionnaire Vérifié
@@ -390,7 +390,7 @@ export function DubizzleVehicleDetail({
         </div>
 
         <Link
-          to={`/shop/${product.sellerId || product.seller?.id || 'seller-baobab-official'}`}
+          to={`/shop/${product.sellerId || product.seller?.id || 'seller-westzone-official'}`}
           className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2 text-xs font-bold text-[#0B1E17] hover:bg-slate-50 transition-colors"
         >
           Vitrine →

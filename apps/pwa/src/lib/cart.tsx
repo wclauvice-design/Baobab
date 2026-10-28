@@ -30,14 +30,14 @@ interface CartContextValue {
 
 export const cartKey = (item: Pick<CartItem, 'productId' | 'variantId'>) => item.variantId ? `${item.productId}::${item.variantId}` : item.productId;
 
-const STORAGE_KEY = 'baobab_cart';
+const STORAGE_KEY = 'westzone_cart';
 const CartContext = createContext<CartContextValue | null>(null);
 
 function normalize(raw: unknown): CartItem[] {
   if (!Array.isArray(raw)) return [];
   return raw.map((item) => ({
     sellerId: null,
-    shopName: 'Baobab',
+    shopName: 'Westzone',
     selected: true,
     ...item,
   }));

@@ -137,7 +137,7 @@ export class SellersService {
     }
 
     const dueToSeller = Math.max(0, totalSupplierRevenue - totalPaidToSeller);
-    const totalBaobabCommission = Math.max(0, totalSalesVolume - totalSupplierRevenue);
+    const totalWestzoneCommission = Math.max(0, totalSalesVolume - totalSupplierRevenue);
 
     // Taux de conversion intelligents
     const totalInquiries = inquiries.length;
@@ -162,7 +162,7 @@ export class SellersService {
         conversionCommandToSale,
         totalSalesVolume: amount(totalSalesVolume),
         totalSupplierRevenue: amount(totalSupplierRevenue),
-        totalBaobabCommission: amount(totalBaobabCommission),
+        totalWestzoneCommission: amount(totalWestzoneCommission),
         totalPaidToSeller: amount(totalPaidToSeller),
         dueToSeller: amount(dueToSeller),
       },

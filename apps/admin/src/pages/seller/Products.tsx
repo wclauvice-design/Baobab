@@ -105,7 +105,7 @@ export function Products() {
       setPriceInput('');
       flashSuccess('Produit créé avec succès !');
       load();
-      window.dispatchEvent(new Event('baobab:refresh-counts'));
+      window.dispatchEvent(new Event('westzone:refresh-counts'));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Erreur réseau');
     }

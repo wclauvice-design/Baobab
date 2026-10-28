@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { call, getDeviceActiveConversation } from './concierge';
 
-const UNREAD_KEY = 'baobab_unread_messages_count';
-const LAST_SEEN_KEY = 'baobab_last_seen_msg_count';
+const UNREAD_KEY = 'westzone_unread_messages_count';
+const LAST_SEEN_KEY = 'westzone_last_seen_msg_count';
 
 export function useUnreadMessages() {
   const [unreadCount, setUnreadCount] = useState<number>(() => {
@@ -37,7 +37,7 @@ export function useUnreadMessages() {
     }
   }, [isViewingMessages]);
 
-  // Polling when not viewing messages to detect new incoming messages from Baobab staff
+  // Polling when not viewing messages to detect new incoming messages from Westzone staff
   useEffect(() => {
     if (isViewingMessages) return;
 
@@ -54,8 +54,8 @@ export function useUnreadMessages() {
         const lastSeen = Number(localStorage.getItem(LAST_SEEN_KEY) || 0);
 
         if (messages.length > lastSeen) {
-          const newBaobabMsgs = messages.slice(lastSeen).filter((m: any) => m.role === 'BAOBAB' || m.role === 'STAFF').length;
-          const count = newBaobabMsgs > 0 ? newBaobabMsgs : (messages.length > lastSeen ? 1 : 0);
+          const newWestzoneMsgs = messages.slice(lastSeen).filter((m: any) => m.role === 'WESTZONE' || m.role === 'STAFF').length;
+          const count = newWestzoneMsgs > 0 ? newWestzoneMsgs : (messages.length > lastSeen ? 1 : 0);
           if (count > 0) {
             setUnreadCount(count);
             localStorage.setItem(UNREAD_KEY, String(count));

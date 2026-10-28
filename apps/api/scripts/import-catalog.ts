@@ -23,7 +23,7 @@ async function main() {
   }
 
   const products: any[] = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-  console.log(`Chargement de ${products.length} produits du catalogue Baobab depuis ${path.basename(dataPath)}...`);
+  console.log(`Chargement de ${products.length} produits du catalogue Westzone depuis ${path.basename(dataPath)}...`);
 
   // 1. Recenser et synchroniser les catégories uniques
   const categoryMap = new Map<string, { name: string; universe: string; slug: string }>();

@@ -1,5 +1,5 @@
 {
-  "name": "@baobab/pwa",
+  "name": "@westzone/pwa",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@baobab/shared": "^0.1.0",
+    "@westzone/shared": "^0.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0"

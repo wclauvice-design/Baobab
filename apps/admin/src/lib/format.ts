@@ -3,7 +3,7 @@ export function formatXof(amount: number) {
 }
 
 /**
- * Taux fixes Baobab (aucune API payante).
+ * Taux fixes Westzone (aucune API payante).
  * Les prix sont stockés en XOF ; le commerçant saisit dans sa devise (AED par défaut).
  */
 export const FX_TO_XOF: Record<string, number> = {

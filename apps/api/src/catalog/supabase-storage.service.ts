@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-// Identifiants par défaut du projet Supabase Baobab pour assurer la continuité
+// Identifiants par défaut du projet Supabase Westzone pour assurer la continuité
 // immédiate de service même si les variables d'environnement manquent sur Render.
 const DEFAULT_SUPABASE_URL = 'https://jptymtzrfahlhjcqpttg.supabase.co';
 const DEFAULT_SUPABASE_SERVICE_KEY =

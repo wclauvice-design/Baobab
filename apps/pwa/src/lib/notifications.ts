@@ -1,8 +1,8 @@
-// High-fidelity web and audio notification service for Baobab
+// High-fidelity web and audio notification service for Westzone
 
 let audioCtx: AudioContext | null = null;
 let titleFlashTimer: ReturnType<typeof setInterval> | null = null;
-let originalTitle = typeof document !== "undefined" ? document.title : "Baobab";
+let originalTitle = typeof document !== "undefined" ? document.title : "Westzone";
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -136,7 +136,7 @@ export function notifyNewMessage(senderName: string, bodyText: string) {
   playNotificationSound();
   showDesktopNotification(senderName, {
     body: bodyText,
-    tag: "baobab-chat-message",
+    tag: "westzone-chat-message",
   });
   flashTabTitle("Nouveau message");
 }
