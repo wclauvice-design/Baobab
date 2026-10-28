@@ -4,6 +4,7 @@ import {
   ListingVariant,
   VariantOption,
   buildCombinations,
+  isInternalAttribute,
   profileById,
   publicPriceFromMerchant,
   suggestedValues,
@@ -29,9 +30,6 @@ type Props = {
   defaultSupplierPrice?: number;
   productName?: string;
 };
-
-const INTERNAL_ATTRIBUTE =
-  /^(sourceprice|sourcecurrency|sourcepublicprice|fxrate|supplierprice|margin|marge|commission|purchaseprice|costprice|prixachat)$/i;
 
 function skuPart(value: string): string {
   return value
@@ -105,8 +103,7 @@ export function ListingConfigurationEditor({
       Object.entries(value.attributes).filter(
         ([key]) =>
           !profile.fields.some((field) => field.key === key) &&
-          !INTERNAL_ATTRIBUTE.test(key) &&
-          !/fournisseur/i.test(key),
+          !isInternalAttribute(key),
       ),
     [value.attributes, profile.fields],
   );

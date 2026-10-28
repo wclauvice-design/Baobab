@@ -1,4 +1,5 @@
 import {
+  isInternalAttribute,
   ListingVariant,
   publicPriceFromMerchant,
   validateListing as validateListingConfiguration,
@@ -756,8 +757,20 @@ export class ProductsService {
     const canonical = productCanonicalTaxonomy(product);
     return {
       ...safe,
-      attributes: Object.fromEntries(Object.entries(safe.attributes||{}).filter(([k])=>!/^(sourceprice|sourcecurrency|sourcepublicprice|fxrate|supplierprice|margin|marge|commission|purchaseprice|costprice|prixachat)$/i.test(k)&&!/fournisseur/i.test(k))),
-      variants: ((safe.variants||[]) as ListingVariant[]).filter(v=>v.active).map(({supplierPrice,...v})=>v),
+      attributes: Object.fromEntries(Object.entries(safe.attributes||{}).filter(([k])=>!isInternalAttribute(k))),
+      // Liste blanche : aucun champ interne de la variante ne peut fuiter.
+      variants: ((safe.variants||[]) as ListingVariant[])
+        .filter((variant) => variant.active)
+        .map((variant) => ({
+          id: variant.id,
+          sku: variant.sku,
+          values: variant.values,
+          price: variant.price,
+          stock: variant.stock,
+          images: variant.images,
+          ...(variant.weightKg != null ? { weightKg: variant.weightKg } : {}),
+          active: true,
+        })),
       canonicalCategory: canonical.category,
       canonicalSubcategories: canonical.subcategories,
       seller: seller ? { id: seller.id, shopName: seller.shopName } : null,

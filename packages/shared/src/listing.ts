@@ -60,6 +60,24 @@ const choice = (
 export const PUBLIC_PRICE_MARKUP = 1.75;
 
 /**
+ * Caractéristiques strictement internes : elles ne doivent jamais être
+ * exposées à l’acheteur (prix d’achat, marge, devise et taux source).
+ */
+const INTERNAL_ATTRIBUTE_KEY =
+  /^(sourceprice|sourcecurrency|sourcepublicprice|fxrate|supplierprice|margin|marge|commission|purchaseprice|costprice|prixachat|prixfournisseur)$/i;
+const INTERNAL_ATTRIBUTE_FRAGMENT =
+  /fournisseur|supplier|marge|margin|commission|fxrate|sourceprice|sourcecurrency|purchaseprice|costprice|prix\s*d['’]?\s*achat|co[uû]t\s+de\s+revient/i;
+
+export function isInternalAttribute(key: string): boolean {
+  const value = String(key ?? '').trim();
+  if (!value) return false;
+  return (
+    INTERNAL_ATTRIBUTE_KEY.test(value) ||
+    INTERNAL_ATTRIBUTE_FRAGMENT.test(value)
+  );
+}
+
+/**
  * Prix public Baobab à partir du prix net commerçant.
  * Arrondi au centime pour rester compatible avec les montants stockés.
  */

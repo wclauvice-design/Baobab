@@ -286,6 +286,65 @@ describe("Listing publication and variants", () => {
     ).rejects.toThrow(/entre-temps/i);
   });
 
+  it("never exposes merchant prices or internal attributes publicly", () => {
+    const service = new ProductsService({} as any, {} as any);
+    const product = {
+      id: "p1",
+      name: "Écouteurs",
+      price: 5000,
+      supplierPrice: 3000,
+      attributes: {
+        Couleur: "Noir",
+        sourcePrice: "100",
+        sourceCurrency: "AED",
+        fxRate: "165",
+        "Prix fournisseur": "3000",
+        "Marge interne": "40",
+      },
+      variants: [
+        {
+          id: "v1",
+          sku: "BB-NOIR",
+          values: { Couleur: "Noir" },
+          price: 5000,
+          supplierPrice: 3000,
+          cost: 2800,
+          stock: 2,
+          images: [],
+          active: true,
+        },
+        {
+          id: "v2",
+          sku: "BB-BLANC",
+          values: { Couleur: "Blanc" },
+          price: 5000,
+          supplierPrice: 3000,
+          stock: 1,
+          images: [],
+          active: false,
+        },
+      ],
+      category: null,
+      seller: null,
+      reviews: [],
+    };
+
+    const result = (service as any).publicProduct(product);
+
+    expect(result.supplierPrice).toBeUndefined();
+    expect(result.attributes).toEqual({ Couleur: "Noir" });
+    expect(result.variants).toHaveLength(1);
+    expect(result.variants[0]).toMatchObject({
+      id: "v1",
+      sku: "BB-NOIR",
+      price: 5000,
+      stock: 2,
+      active: true,
+    });
+    expect(result.variants[0]).not.toHaveProperty("supplierPrice");
+    expect(result.variants[0]).not.toHaveProperty("cost");
+  });
+
   it("keeps the option values of an existing variant immutable", async () => {
     const existing = {
       id: "p1",

@@ -1,5 +1,5 @@
 import { VariantPicker } from '../components/VariantPicker';
-import { ListingVariant, variantLabel } from '@baobab/shared';
+import { ListingVariant, variantLabel, isInternalAttribute } from '@baobab/shared';
 import { FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   Link,
@@ -492,10 +492,9 @@ function publicAttributes(attributes: any): Record<string, string> {
   if (!attributes || typeof attributes !== "object" || Array.isArray(attributes)) {
     return {};
   }
-  const hidden = /^(sourceprice|sourcecurrency|sourcepublicprice|fxrate|supplierprice|margin|marge|commission|purchaseprice|costprice|prixachat)$/i;
   return Object.fromEntries(
     Object.entries(attributes)
-      .filter(([key]) => !hidden.test(key) && !/fournisseur/i.test(key))
+      .filter(([key]) => !isInternalAttribute(key))
       .map(([key, value]) => [key, String(value)]),
   );
 }
