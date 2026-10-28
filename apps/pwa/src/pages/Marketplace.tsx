@@ -1,3 +1,5 @@
+import { VariantPicker } from '../components/VariantPicker';
+import { ListingVariant, variantLabel } from '@baobab/shared';
 import { FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   Link,
@@ -470,6 +472,34 @@ function defaultQuantity(product: any): number {
   return Math.ceil((product?.minimumOrder || 1) / pack) * pack;
 }
 
+/** Variantes réellement vendables d'une annonce. */
+function activeVariants(product: any): ListingVariant[] {
+  return Array.isArray(product?.variants)
+    ? product.variants.filter((variant: ListingVariant) => variant?.active)
+    : [];
+}
+
+/** Prix d'appel : la variante la moins chère, sinon le prix de la fiche. */
+function startingPrice(product: any): number {
+  const variants = activeVariants(product);
+  return variants.length
+    ? Math.min(...variants.map((variant) => Number(variant.price || 0)))
+    : Number(product?.price || 0);
+}
+
+/** Les caractéristiques internes (marge, devise source) ne sont jamais publiques. */
+function publicAttributes(attributes: any): Record<string, string> {
+  if (!attributes || typeof attributes !== "object" || Array.isArray(attributes)) {
+    return {};
+  }
+  const hidden = /^(sourceprice|sourcecurrency|sourcepublicprice|fxrate|supplierprice|margin|marge|commission|purchaseprice|costprice|prixachat)$/i;
+  return Object.fromEntries(
+    Object.entries(attributes)
+      .filter(([key]) => !hidden.test(key) && !/fournisseur/i.test(key))
+      .map(([key, value]) => [key, String(value)]),
+  );
+}
+
 function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
   const [imageFailed, setImageFailed] = useState(false);
   const { ids, toggle } = useFavorites();
@@ -542,7 +572,8 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
           <h3 title={p.name}>{p.name}</h3>
         </Link>
         <strong>
-          {money(p.price)} <small>/ {p.unit || "pièce"}</small>
+          {activeVariants(p).length > 0 && <small>Dès </small>}
+          {money(startingPrice(p))} <small>/ {p.unit || "pièce"}</small>
         </strong>
         <span className="listing-meta">
           <Icon name="pin" size={11} />
@@ -742,6 +773,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
 
       {/* 2. Réassurance & activité dynamique (Temu-inspired compact ribbon) */}
       {/* 3. Catégories — chips sobres, sans emoji */}
+      {!favorites && (
         <nav className="bb-cat-strip" aria-label="Catégories">
           {STORY_CATEGORIES.map((cat) => {
           const isSelected =
@@ -785,6 +817,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
           );
         })}
       </nav>
+      )}
 
       {/* 4. Fil */}
       <section className="listings" id="bb-feed">
@@ -1035,7 +1068,7 @@ export function ListingDetail() {
   const navigate = useNavigate();
   const { current: dest, select: selectDest } = useUserDestination();
   const seed = (location.state as { product?: any } | null)?.product;
-  const [p, setP] = useState<any>(() => {
+  const [baseProduct, setP] = useState<any>(() => {
     const cached = peekProduct(id);
     if (cached) return cached;
     return seed && String(seed.id) === String(id) ? seed : null;
@@ -1100,6 +1133,22 @@ export function ListingDetail() {
     };
   }, [id]);
 
+  const [selectedVariant,setSelectedVariant]=useState<ListingVariant|null>(null);
+  const variant=baseProduct?.variants?.find((v:ListingVariant)=>v.id===selectedVariant?.id&&v.active);
+  const p=variant?{...baseProduct,price:variant.price,stock:variant.stock,weightKg:variant.weightKg??baseProduct.weightKg,images:variant.images.length?variant.images:baseProduct.images}:baseProduct;
+  const needsVariant=Boolean(baseProduct?.variantOptions?.length);
+  const variantReady=!needsVariant||Boolean(variant&&variant.stock>=qty);
+  const availableStock=Math.max(0, Number(variant ? variant.stock : p?.stock) || 0);
+  const packSize=Math.max(1, Number(p?.packSize) || 1);
+  const maxOrderQuantity=availableStock
+    ? Math.max(packSize, Math.floor(availableStock / packSize) * packSize)
+    : packSize;
+  useEffect(() => {
+    if (!availableStock) return;
+    setQty((current) =>
+      Math.min(Math.max(current, packSize), maxOrderQuantity),
+    );
+  }, [variant?.id, availableStock, maxOrderQuantity, packSize]);
   const freight = estimateFreight({
     mode: shippingMode,
     destination: dest,
@@ -1120,6 +1169,7 @@ export function ListingDetail() {
   }, [freight.availableModes, shippingMode]);
 
   async function discuss() {
+    if(!variantReady){setError('Choisissez une combinaison disponible et une quantité en stock.');return;}
     setBusy(true);
     try {
       const modeDescription = freight.mode === "EXPRESS"
@@ -1127,7 +1177,7 @@ export function ListingDetail() {
         : freight.mode === "CARGO"
           ? "Fret Aérien Cargo (14 à 16 jours, 8 600 F/kg)"
           : `Fret Maritime / Conteneur (45 à 50 jours, ${money(dest.cbmRate)}/m³)`;
-      const bodyText = `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} : ${p.name}. Destination : ${dest.name} en ${modeDescription}. Poids estimé : ${totalWeight} kg. Total estimé : ${money(estimatedGrandTotal)}.`;
+      const bodyText = `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} : ${p.name}${variant ? ` — ${variantLabel(variant)} (SKU ${variant.sku}, variante ${variant.id})` : ""}. Destination : ${dest.name} en ${modeDescription}. Poids estimé : ${totalWeight} kg. Total estimé : ${money(estimatedGrandTotal)}.`;
       const active = getDeviceActiveConversation();
       if (active) {
         try {
@@ -1167,7 +1217,7 @@ export function ListingDetail() {
     }
     return <ListingSkeleton />;
   }
-  const message = `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} de "${p.name}" vers ${dest.name} en ${freight.modeLabel}. Référence ${p.id}. ${window.location.href}`;
+  const message = `Bonjour Baobab, je souhaite un devis pour ${qty} ${p.unit || "pièce(s)"} de "${p.name}"${variant ? ` — ${variantLabel(variant)} (SKU ${variant.sku}, variante ${variant.id})` : ""} vers ${dest.name} en ${freight.modeLabel}. Référence ${p.id}. ${window.location.href}`;
 
   if (isVehicleProduct(p)) {
     return (
@@ -1225,6 +1275,11 @@ export function ListingDetail() {
 
           <div className="mt-3 flex flex-wrap items-baseline gap-3">
             <div className="font-heading text-3xl sm:text-4xl font-extrabold text-[#0B1E17] tracking-tight">
+              {needsVariant && !variant && (
+                <small className="text-sm font-semibold text-slate-500 mr-2">
+                  Dès
+                </small>
+              )}
               {money(p.price)}
               <small className="text-xs font-normal text-slate-500 ml-2">par {p.unit || "pièce"}</small>
             </div>
@@ -1234,6 +1289,23 @@ export function ListingDetail() {
               </span>
             )}
           </div>
+          <p className="mt-2 text-xs font-medium text-slate-600">
+            {variant ? (
+              <>
+                Variante sélectionnée : <strong>{variantLabel(variant)}</strong>
+                {variant.sku ? ` · Réf. ${variant.sku}` : ""} ·{" "}
+                {variant.stock > 0
+                  ? `${variant.stock} disponible${variant.stock > 1 ? "s" : ""}`
+                  : "Rupture de stock"}
+              </>
+            ) : needsVariant ? (
+              "Sélectionnez une combinaison disponible pour connaître le prix exact."
+            ) : p.stock > 0 ? (
+              `${p.stock} disponible${p.stock > 1 ? "s" : ""}`
+            ) : (
+              "Rupture de stock"
+            )}
+          </p>
 
           {/* Vendeur & Localisation */}
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-700">
@@ -1250,6 +1322,13 @@ export function ListingDetail() {
 
         </div>
 
+        <VariantPicker product={baseProduct} onSelect={setSelectedVariant} />
+        {needsVariant && !activeVariants(baseProduct).length && (
+          <p className="bb-variant-soldout" role="status">
+            Toutes les combinaisons de cet article sont épuisées. Contactez
+            Baobab pour connaître le prochain réapprovisionnement.
+          </p>
+        )}
         <a className="product-detail-jump" href="#product-purchase">Aller au simulateur de livraison et devis →</a>
 
         {/* 3. DESCRIPTION AVEC OPTION « VOIR PLUS... » */}
@@ -1286,7 +1365,13 @@ export function ListingDetail() {
               Conditionnement: `${p.packSize || 1} ${p.unit || "pièce"}`,
               ...(p.weightKg ? { "Poids unitaire": `${p.weightKg} kg` } : {}),
               ...(p.dimensions ? { "Dimensions": p.dimensions } : {}),
-              ...p.attributes,
+              ...(variant
+                ? {
+                    Variante: variantLabel(variant),
+                    ...(variant.sku ? { "Référence SKU": variant.sku } : {}),
+                  }
+                : {}),
+              ...publicAttributes(p.attributes),
             }).map(([k, v]) => (
               <div key={k} className="flex justify-between items-baseline border-b border-slate-100 pb-2">
                 <span className="text-slate-500">{k}</span>
@@ -1303,14 +1388,30 @@ export function ListingDetail() {
               <span>Quantité souhaitée :</span>
               <input
                 type="number"
-                min={p.packSize || 1}
-                step={p.packSize || 1}
+                min={packSize}
+                max={Math.max(packSize, maxOrderQuantity)}
+                step={packSize}
                 value={qty}
-                onChange={(e) => setQty(Math.max(1, Number(e.target.value)))}
+                onChange={(e) => {
+                  const next = Math.max(packSize, Number(e.target.value) || packSize);
+                  setQty(
+                    availableStock
+                      ? Math.min(next, Math.max(packSize, maxOrderQuantity))
+                      : next,
+                  );
+                }}
                 className="w-24 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-sm font-bold text-[#0B1E17] text-center"
               />
             </label>
             <span className="text-xs text-slate-500">
+              {availableStock > 0 ? (
+                <>
+                  En stock : <strong className="text-[#0B1E17]">{availableStock}</strong>
+                  {" · "}
+                </>
+              ) : (
+                <span className="text-red-600 font-semibold">Rupture de stock · </span>
+              )}
               Total marchandise : <strong className="text-[#0B1E17] font-bold text-sm">{money(Math.round(Number(p.price) * qty))}</strong>
             </span>
           </div>
@@ -1404,7 +1505,7 @@ export function ListingDetail() {
               type="button"
               className="flex-1 rounded-2xl bg-[#173E32] py-3.5 px-4 text-center text-sm font-bold text-[#FFF8E6] hover:bg-[#1f4d3e] transition-colors shadow-lg shadow-[#173E32]/20"
               onClick={discuss}
-              disabled={busy}
+              disabled={busy || !variantReady}
             >
               {busy ? "Ouverture…" : "Discuter & Demander un devis"}
             </button>
@@ -1412,6 +1513,8 @@ export function ListingDetail() {
             {config?.whatsapp && (
               <a
                 className="flex-1 rounded-2xl bg-[#25D366] py-3.5 px-4 text-center text-sm font-bold text-white hover:bg-[#20bd5a] transition-colors shadow-lg shadow-[#25D366]/20 flex items-center justify-center gap-2"
+                onClick={e=>{if(!variantReady){e.preventDefault();setError("Choisissez une variante disponible.");}}}
+                aria-disabled={!variantReady}
                 href={`https://wa.me/${config.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`}
                 target="_blank"
                 rel="noreferrer"
@@ -1481,7 +1584,7 @@ export function ListingDetail() {
           <strong>{money(p.price)}</strong>
           <small>{p.shippingIncluded ? "Douane & livraison incluses" : "Hors fret · devis immédiat"}</small>
         </div>
-        <button type="button" onClick={discuss} disabled={busy}>
+        <button type="button" onClick={discuss} disabled={busy || !variantReady}>
           {busy ? "Ouverture…" : "Demander un devis"}
           <Icon name="arrow" size={14} />
         </button>
@@ -1872,9 +1975,15 @@ export function Tracking({ account = false }: { account?: boolean }) {
                     : `Valable jusqu’au ${date(q.expiresAt)}`}
                 </p>
                 {q.lines.map((l: any) => (
-                  <div className="order-line" key={l.productId}>
+                  <div className="order-line" key={`${l.productId}:${l.variantId || ""}`}>
                     <div>
                       <strong>{l.name}</strong>
+                      {l.variantLabel && (
+                        <small>
+                          {l.variantLabel}
+                          {l.variantSku ? ` · ${l.variantSku}` : ""}
+                        </small>
+                      )}
                       <small>
                         {l.quantity} × {money(l.unitPrice)}
                       </small>

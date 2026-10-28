@@ -1,5 +1,6 @@
+import { ListingVariant, variantLabel } from '@baobab/shared';
 import { quantity } from '../commerce/rules';
-import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import { OrderStatus, PaymentProviderType, PaymentStatus, Role } from '@prisma/client';
@@ -18,61 +19,196 @@ export class OrdersService {
   ) {}
 
   async create(buyerId: string, dto: CreateOrderDto) {
-    const products = await this.prisma.product.findMany({
-      where: { id: { in: dto.items.map((i) => i.productId) } },
-    });
-
-    for (const item of dto.items) {
-      const product = products.find((p) => p.id === item.productId);
-      if (!product) throw new NotFoundException(`Produit ${item.productId} introuvable`);
-      if (product.moderation !== 'PUBLISHED') throw new BadRequestException('Annonce indisponible');
-      quantity(item.quantity, product.minimumOrder, product.packSize);
-      if (product.stock < item.quantity) {
-        throw new BadRequestException(`Stock insuffisant pour ${product.name}`);
-      }
-    }
-
-    const itemsTotal = dto.items.reduce((sum, item) => {
-      const product = products.find((p) => p.id === item.productId)!;
-      return sum + Number(product.price) * item.quantity;
-    }, 0);
-
-    const deliveryFee = dto.provider === PaymentProviderType.CASH_ON_DELIVERY ? CASH_ON_DELIVERY_FEE : 0;
-    const totalAmount = itemsTotal + deliveryFee;
-
-    const expirationMinutes = Number(this.config.get('ORDER_EXPIRATION_MINUTES') ?? 45);
-    const expiresAt = new Date(Date.now() + expirationMinutes * 60_000);
-
     return this.prisma.$transaction(async (tx) => {
+      const grouped = new Map<
+        string,
+        { productId: string; variantId?: string; quantity: number }
+      >();
+      for (const item of dto.items) {
+        const key = JSON.stringify([item.productId, item.variantId || null]);
+        const previous = grouped.get(key);
+        grouped.set(key, {
+          ...item,
+          quantity: (previous?.quantity || 0) + item.quantity,
+        });
+      }
+      const lines = [...grouped.values()];
+      const productIds = [...new Set(lines.map((line) => line.productId))];
+      const products = await tx.product.findMany({
+        where: { id: { in: productIds } },
+        include: { seller: true },
+      });
+      if (products.length !== productIds.length) {
+        throw new NotFoundException('Un produit est introuvable');
+      }
+
+      const snapshots: any[] = [];
+      let cents = 0;
+
+      for (const product of products) {
+        if (
+          product.moderation !== 'PUBLISHED' ||
+          (product.seller && product.seller.status !== 'APPROVED')
+        ) {
+          throw new BadRequestException('Annonce indisponible');
+        }
+        const variants = this.variantList(product);
+        const activeVariants = variants.filter((variant) => variant.active);
+        let stock = Number(product.stock);
+
+        for (const item of lines.filter((line) => line.productId === product.id)) {
+          quantity(item.quantity, product.minimumOrder, product.packSize);
+
+          let variant: ListingVariant | undefined;
+          if (activeVariants.length) {
+            if (!item.variantId) {
+              throw new BadRequestException(
+                `Choisissez une variante disponible pour ${product.name}.`,
+              );
+            }
+            variant = activeVariants.find(
+              (candidate) => candidate.id === item.variantId,
+            );
+            if (!variant) {
+              throw new BadRequestException(
+                'Variante indisponible pour cet article.',
+              );
+            }
+          } else if (item.variantId) {
+            throw new BadRequestException(
+              'Cet article ne possède pas de variante.',
+            );
+          }
+
+          const available = variant ? variant.stock : stock;
+          if (available < item.quantity) {
+            throw new BadRequestException(
+              `Stock insuffisant pour ${product.name}${
+                variant ? ` (${variantLabel(variant)})` : ''
+              }.`,
+            );
+          }
+
+          const price = variant ? Number(variant.price) : Number(product.price);
+          if (!Number.isFinite(price) || price <= 0) {
+            throw new BadRequestException(
+              `Prix indisponible pour ${product.name}.`,
+            );
+          }
+
+          cents += Math.round(price * 100) * item.quantity;
+          snapshots.push({
+            productId: product.id,
+            quantity: item.quantity,
+            unitPrice: price,
+            ...(variant
+              ? {
+                  variantId: variant.id,
+                  variantLabel: variantLabel(variant),
+                  variantSku: variant.sku,
+                }
+              : {}),
+          });
+
+          if (variant) variant.stock -= item.quantity;
+          stock -= item.quantity;
+        }
+
+        const reserved = await tx.product.updateMany({
+          where: {
+            id: product.id,
+            catalogVersion: product.catalogVersion,
+            moderation: 'PUBLISHED',
+          },
+          data: {
+            stock,
+            variants: variants as any,
+            catalogVersion: { increment: 1 },
+          },
+        });
+        if (!reserved.count) {
+          throw new BadRequestException(
+            'Le stock ou le prix vient de changer. Actualisez puis réessayez.',
+          );
+        }
+      }
+
+      if (snapshots.length !== lines.length) {
+        throw new NotFoundException('Un produit est introuvable');
+      }
+      const deliveryFee =
+        dto.provider === PaymentProviderType.CASH_ON_DELIVERY
+          ? CASH_ON_DELIVERY_FEE
+          : 0;
+      const expirationMinutes = Number(
+        this.config.get('ORDER_EXPIRATION_MINUTES') ?? 45,
+      );
       const order = await tx.order.create({
         data: {
           buyerId,
-          totalAmount,
+          totalAmount: cents / 100 + deliveryFee,
           deliveryFee,
           deliveryAddress: dto.deliveryAddress,
           deliveryMode: dto.deliveryMode,
-          expiresAt,
-          items: {
-            create: dto.items.map((item) => {
-              const product = products.find((p) => p.id === item.productId)!;
-              return { productId: item.productId, quantity: item.quantity, unitPrice: product.price };
-            }),
-          },
+          expiresAt: new Date(Date.now() + expirationMinutes * 60000),
+          items: { create: snapshots },
         },
         include: { items: true },
       });
-
-      await tx.deliveryEvent.create({ data: { orderId: order.id, status: order.status } });
-
-      for (const item of dto.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
-        });
-      }
-
+      await tx.deliveryEvent.create({
+        data: { orderId: order.id, status: order.status },
+      });
       return order;
     });
+  }
+
+  /** Copie sûre des variantes stockées en JSON. */
+  private variantList(product: any): ListingVariant[] {
+    const raw = Array.isArray(product?.variants) ? product.variants : [];
+    return raw.map((variant: any) => ({
+      ...variant,
+      values: variant?.values || {},
+      images: Array.isArray(variant?.images) ? variant.images : [],
+      active: Boolean(variant?.active),
+    }));
+  }
+
+  /**
+   * Restitue le stock réservé par une commande annulée ou expirée.
+   * Le verrou optimiste évite d’écraser un stock modifié entre-temps.
+   */
+  private async releaseReservedStock(tx: any, order: any) {
+    for (const item of order.items || []) {
+      const product = await tx.product.findUnique({
+        where: { id: item.productId },
+      });
+      if (!product) continue;
+      const variants = this.variantList(product);
+      if (item.variantId) {
+        const variant = variants.find(
+          (candidate) => candidate.id === item.variantId,
+        );
+        if (variant) variant.stock += item.quantity;
+        else {
+          this.logger.warn(
+            `Variante ${item.variantId} introuvable pour la commande ${order.id}`,
+          );
+        }
+      }
+      const released = await tx.product.updateMany({
+        where: { id: product.id, catalogVersion: product.catalogVersion },
+        data: {
+          stock: { increment: item.quantity },
+          variants: variants as any,
+          catalogVersion: { increment: 1 },
+        },
+      });
+      if (!released.count) {
+        throw new ConflictException(
+          'Stock modifié pendant la restitution. Une nouvelle tentative sera faite.',
+        );
+      }
+    }
   }
 
   findMine(buyerId: string) {
@@ -110,6 +246,9 @@ export class OrdersService {
 
     if (role === Role.SELLER) throw new ForbiddenException('Les commandes clients sont gérées exclusivement par Baobab');
 
+    if (status === OrderStatus.CANCELLED) {
+      return this.markCancelled(orderId);
+    }
 
     const updated = await this.prisma.order.update({ where: { id: orderId }, data: { status } });
     await this.prisma.deliveryEvent.create({ data: { orderId, status } });
@@ -129,12 +268,30 @@ export class OrdersService {
 
   async markCancelled(orderId: string) {
     return this.prisma.$transaction(async (tx) => {
-      const order = await tx.order.update({
+      const order = await tx.order.findUnique({
+        where: { id: orderId },
+        include: { items: true, payment: true },
+      });
+      if (!order) throw new NotFoundException('Commande introuvable');
+      if (
+        order.status === OrderStatus.CANCELLED ||
+        order.status === OrderStatus.EXPIRED
+      ) {
+        return order;
+      }
+      await this.releaseReservedStock(tx, order);
+      const updated = await tx.order.update({
         where: { id: orderId },
         data: { status: OrderStatus.CANCELLED },
       });
       await tx.deliveryEvent.create({ data: { orderId, status: OrderStatus.CANCELLED } });
-      return order;
+      if (order.payment && order.payment.status === PaymentStatus.PENDING) {
+        await tx.payment.update({
+          where: { id: order.payment.id },
+          data: { status: PaymentStatus.FAILED },
+        });
+      }
+      return updated;
     });
   }
 
@@ -157,23 +314,35 @@ export class OrdersService {
     });
 
     for (const order of expired) {
-      await this.prisma.$transaction(async (tx) => {
-        await tx.order.update({ where: { id: order.id }, data: { status: OrderStatus.EXPIRED } });
-        await tx.deliveryEvent.create({ data: { orderId: order.id, status: OrderStatus.EXPIRED } });
-        for (const item of order.items) {
-          await tx.product.update({
-            where: { id: item.productId },
-            data: { stock: { increment: item.quantity } },
+      try {
+        const expiredNow = await this.prisma.$transaction(async (tx) => {
+          const claimed = await tx.order.updateMany({
+            where: { id: order.id, status: OrderStatus.PENDING_PAYMENT },
+            data: { status: OrderStatus.EXPIRED },
           });
-        }
-        if (order.payment && order.payment.status === PaymentStatus.PENDING) {
-          await tx.payment.update({
-            where: { id: order.payment.id },
-            data: { status: PaymentStatus.EXPIRED },
+          if (!claimed.count) return false;
+          await tx.deliveryEvent.create({
+            data: { orderId: order.id, status: OrderStatus.EXPIRED },
           });
+          await this.releaseReservedStock(tx, order);
+          if (order.payment && order.payment.status === PaymentStatus.PENDING) {
+            await tx.payment.update({
+              where: { id: order.payment.id },
+              data: { status: PaymentStatus.EXPIRED },
+            });
+          }
+          return true;
+        });
+        if (expiredNow) {
+          this.logger.log(`Commande ${order.id} expirée, stock libéré`);
         }
-      });
-      this.logger.log(`Commande ${order.id} expirée, stock libéré`);
+      } catch (error) {
+        this.logger.error(
+          `Libération du stock impossible pour la commande ${order.id}: ${
+            (error as Error).message
+          }`,
+        );
+      }
     }
   }
 }

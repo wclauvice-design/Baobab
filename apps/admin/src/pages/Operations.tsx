@@ -7,6 +7,7 @@ import {
   notifyNewClientMessage,
   requestNotificationPermission,
 } from "../lib/notifications";
+import { variantLabel } from "@baobab/shared";
 import "./operations.css";
 export const money = (v: any) =>
   `${Number(v || 0).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} FCFA`;
@@ -709,7 +710,7 @@ export function TradeDetail() {
     [whatsapp, setWhatsapp] = useState(""),
     [entryKey, setEntryKey] = useState(() => crypto.randomUUID()),
     [lines, setLines] = useState<any[]>([
-      { productId: "", quantity: 1, unitPrice: "0", minimumException: "" },
+      { productId: "", variantId: "", quantity: 1, unitPrice: "0", minimumException: "" },
     ]);
   async function act(suffix: string, body?: any) {
     setBusy(true);
@@ -801,9 +802,15 @@ export function TradeDetail() {
                   </thead>
                   <tbody>
                     {q.lines.map((l: any) => (
-                      <tr key={l.productId}>
+                      <tr key={`${l.productId}:${l.variantId || ""}`}>
                         <td>
                           {l.name}
+                          {l.variantLabel && (
+                            <small>
+                              {l.variantLabel}
+                              {l.variantSku ? ` · ${l.variantSku}` : ""}
+                            </small>
+                          )}
                           <small>
                             Net fournisseur : {money(l.supplierUnitPrice)}
                             {l.minimumException &&
@@ -877,14 +884,20 @@ export function TradeDetail() {
                             const p = products.data.find(
                               (p: any) => p.id === e.target.value,
                             );
+                            if (!p) return;
+                            const activeVariants = (p.variants || []).filter(
+                              (variant: any) => variant.active,
+                            );
+                            const firstVariant = activeVariants[0];
                             setLines(
                               lines.map((x, j) =>
                                 j === i
                                   ? {
                                       ...x,
                                       productId: p.id,
+                                      variantId: firstVariant?.id || "",
                                       quantity: Math.ceil((p.minimumOrder || 1) / (p.packSize || 1)) * (p.packSize || 1),
-                                      unitPrice: String(p.price),
+                                      unitPrice: String(firstVariant?.price ?? p.price),
                                     }
                                   : x,
                               ),
@@ -901,6 +914,50 @@ export function TradeDetail() {
                             ))}
                         </select>
                       </label>
+                      {(() => {
+                        const selected = products.data?.find(
+                          (p: any) => p.id === l.productId,
+                        );
+                        const activeVariants = (selected?.variants || []).filter(
+                          (variant: any) => variant.active,
+                        );
+                        if (!activeVariants.length) return null;
+                        return (
+                          <label>
+                            Variante vendue
+                            <select
+                              required
+                              value={l.variantId || ""}
+                              onChange={(e) => {
+                                const variant = activeVariants.find(
+                                  (candidate: any) =>
+                                    candidate.id === e.target.value,
+                                );
+                                setLines(
+                                  lines.map((x, j) =>
+                                    j === i
+                                      ? {
+                                          ...x,
+                                          variantId: e.target.value,
+                                          unitPrice: String(
+                                            variant?.price ?? x.unitPrice,
+                                          ),
+                                        }
+                                      : x,
+                                  ),
+                                );
+                              }}
+                            >
+                              <option value="">Choisir…</option>
+                              {activeVariants.map((variant: any) => (
+                                <option key={variant.id} value={variant.id}>
+                                  {variantLabel(variant)} · {variant.stock} en stock
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        );
+                      })()}
                       <label>
                         Quantité
                         <input
@@ -974,6 +1031,7 @@ export function TradeDetail() {
                         ...lines,
                         {
                           productId: "",
+                          variantId: "",
                           quantity: 1,
                           unitPrice: "0",
                           minimumException: "",

@@ -1,3 +1,4 @@
+import { cartKey } from '../lib/cart';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../lib/cart';
@@ -65,7 +66,7 @@ export function Cart() {
                   type="checkbox"
                   checked={groupSelected}
                   onChange={() => shopItems.forEach((i) => {
-                    if (i.selected === groupSelected) toggleSelected(i.productId);
+                    if (i.selected === groupSelected) toggleSelected(cartKey(i));
                   })}
                   className="accent-amber-500"
                 />
@@ -75,11 +76,11 @@ export function Cart() {
               </div>
               <ul className="flex flex-col gap-3">
                 {shopItems.map((item) => (
-                  <li key={item.productId} className="flex gap-3">
+                  <li key={cartKey(item)} className="flex gap-3">
                     <input
                       type="checkbox"
                       checked={item.selected}
-                      onChange={() => toggleSelected(item.productId)}
+                      onChange={() => toggleSelected(cartKey(item))}
                       className="mt-6 accent-amber-500"
                     />
                     <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-base-700">
@@ -90,26 +91,26 @@ export function Cart() {
                       )}
                     </div>
                     <div className="flex flex-1 flex-col">
-                      <p className="text-sm font-medium">{item.name}</p>
+                      <p className="text-sm font-medium">{item.name}</p>{item.variantLabel && <p className="text-xs">{item.variantLabel} · {item.variantSku}</p>}
                       <p className="text-sm text-amber-400">{format(item.price)}</p>
                       <div className="mt-auto flex items-center justify-between">
                         <div className="flex items-center rounded-lg border border-base-700">
                           <button
-                            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                            onClick={() => updateQuantity(cartKey(item), item.quantity - 1)}
                             className="px-2 py-1 text-slate-300"
                           >
                             −
                           </button>
                           <span className="w-6 text-center text-sm">{item.quantity}</span>
                           <button
-                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                            onClick={() => updateQuantity(cartKey(item), item.quantity + 1)}
                             className="px-2 py-1 text-slate-300"
                           >
                             +
                           </button>
                         </div>
                         <button
-                          onClick={() => removeItem(item.productId)}
+                          onClick={() => removeItem(cartKey(item))}
                           className="text-xs text-slate-500 underline"
                         >
                           Retirer

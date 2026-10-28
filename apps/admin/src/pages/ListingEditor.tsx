@@ -1,5 +1,6 @@
-import { FormEvent, useEffect, useState } from "react";
-import { isVehicleProduct } from "../lib/vehicles";
+import { ListingConfigurationEditor, ListingConfiguration } from '../components/ListingConfigurationEditor';
+import { inferProductType, validateListing } from '@baobab/shared';
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { api, replaceProductImage, addProductImages, removeProductImage, setProductMainImage } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { toXof, fromXof, formatXof, MERCHANT_DEFAULT_CURRENCY, PRICING_CURRENCIES } from "../lib/format";
@@ -8,6 +9,7 @@ import { CategoryMultiSelect } from "../components/CategoryMultiSelect";
 import {
   canonicalCategoryIds,
   canonicalSubcategoryLabels,
+  categoryLabelForId,
   isVehicleSelection,
   subcategoryOptionsForCategory,
   taxonomyCategoryOptions,
@@ -16,6 +18,40 @@ import {
 } from "../lib/taxonomy";
 import { MEDIA_ACCEPT, isVideoUrl } from "../lib/media";
 import { Alert, money } from "./Operations";
+
+/** Copie profonde d'une configuration pour ne jamais muter la fiche source. */
+function cloneListingConfig(product?: any): ListingConfiguration {
+  const attributes =
+    product?.attributes &&
+    typeof product.attributes === "object" &&
+    !Array.isArray(product.attributes)
+      ? { ...product.attributes }
+      : {};
+  return {
+    productType: product?.productType || "general",
+    attributes,
+    variantOptions: Array.isArray(product?.variantOptions)
+      ? product.variantOptions.map((option: any) => ({
+          name: String(option?.name || ""),
+          values: Array.isArray(option?.values)
+            ? option.values.map(String)
+            : [],
+        }))
+      : [],
+    variants: Array.isArray(product?.variants)
+      ? product.variants.map((variant: any) => ({
+          ...variant,
+          sku: String(variant?.sku || ""),
+          values: { ...(variant?.values || {}) },
+          images: Array.isArray(variant?.images)
+            ? variant.images.map(String)
+            : [],
+          active: Boolean(variant?.active),
+        }))
+      : [],
+  };
+}
+
 export function ListingEditor() {
   const { user } = useAuth(),
     admin = user?.role === "ADMIN";
@@ -33,6 +69,8 @@ export function ListingEditor() {
   const [supplierAmount, setSupplierAmount] = useState<string>("");
   const [publicAmount, setPublicAmount] = useState<string>("");
   const [formFiles, setFormFiles] = useState<File[]>([]);
+  const [formName, setFormName] = useState("");
+  const [listingConfig,setListingConfig]=useState<ListingConfiguration>(()=>cloneListingConfig());
 
   async function deleteListing(product: any) {
     if (!admin || deletingId) return;
@@ -50,36 +88,21 @@ export function ListingEditor() {
     }
   }
 
-  // Smart Automotive Form State
   const [formCategoryIds, setFormCategoryIds] = useState<string[]>([]);
   const [formSubcategories, setFormSubcategories] = useState<string[]>([]);
-  const [formCondition, setFormCondition] = useState<string>("NEW");
-
-  const [vehBrand, setVehBrand] = useState("");
-  const [vehModel, setVehModel] = useState("");
-  const [vehTrim, setVehTrim] = useState("");
-  const [vehYear, setVehYear] = useState("2024");
-  const [vehMileage, setVehMileage] = useState("0 km");
-  const [vehFuel, setVehFuel] = useState("Essence (Petrol)");
-  const [vehTransmission, setVehTransmission] = useState("Automatique");
-  const [vehDrivetrain, setVehDrivetrain] = useState("4x4 Tout-Terrain");
-  const [vehEngine, setVehEngine] = useState("");
-  const [vehSeats, setVehSeats] = useState("7 Places");
-  const [vehExtColor, setVehExtColor] = useState("");
-  const [vehIntColor, setVehIntColor] = useState("Cuir Beige");
-  const [vehRegionalSpecs, setVehRegionalSpecs] = useState("GCC Specs (Dubaï)");
-  const [vehSteering, setVehSteering] = useState("Volant à gauche (LHD)");
-  const [vehEquipments, setVehEquipments] = useState<string[]>([]);
-
+  const [formCondition, setFormCondition] = useState<string>('NEW');
   // Update vehicle states when editing changes
   useEffect(() => {
     setFormFiles([]);
+    setListingConfig(cloneListingConfig(editing));
+    setFormName(editing?.name || "");
     if (!editing) {
       setPriceCurrency(admin ? "XOF" : MERCHANT_DEFAULT_CURRENCY);
       setSupplierAmount("");
       setPublicAmount("");
       setFormCategoryIds([]);
       setFormSubcategories([]);
+      setFormCondition("NEW");
       return;
     }
     const initialCategoryIds =
@@ -97,26 +120,6 @@ export function ListingEditor() {
     setFormCondition(editing.condition || "NEW");
 
     const attrs = editing.attributes || {};
-    setVehBrand(attrs["Marque"] || (/toyota/i.test(editing.name) ? "Toyota" : /jetour/i.test(editing.name) ? "Jetour" : ""));
-    setVehModel(attrs["Modèle"] || "");
-    setVehTrim(attrs["Trim"] || attrs["Finition"] || "");
-    setVehYear(attrs["Année"] ? String(attrs["Année"]).match(/\b(201\d|202\d)\b/)?.[1] || attrs["Année"] : "2024");
-    setVehMileage(attrs["Kilométrage"] || (editing.condition === "USED" ? "25 000 km" : "0 km"));
-    setVehFuel(attrs["Carburant"] || (editing.name?.includes("Diesel") ? "Diesel" : "Essence (Petrol)"));
-    setVehTransmission(attrs["Boîte"] || (editing.name?.includes("Manuelle") ? "Manuelle" : "Automatique"));
-    setVehDrivetrain(attrs["Motricité"] || "4x4 Tout-Terrain");
-    setVehEngine(attrs["Moteur"] || "");
-    setVehSeats(attrs["Places"] || (editing.name?.includes("7 Places") ? "7 Places" : "5 Places"));
-    setVehExtColor(attrs["Couleur extérieure"] || "");
-    setVehIntColor(attrs["Couleur intérieure"] || "Cuir Beige");
-    setVehRegionalSpecs(attrs["Spécifications"] || "GCC Specs (Dubaï)");
-    setVehSteering(attrs["Direction"] || "Volant à gauche (LHD)");
-    setVehEquipments(
-      attrs["Équipements"]
-        ? String(attrs["Équipements"]).split(",").map((s: string) => s.trim())
-        : ["Climatisation Tropicalisée", "Écran Tactile & Apple CarPlay", "Caméra de recul", "4x4 Sélecteur de terrain"]
-    );
-
     const storedCurrency = attrs["sourceCurrency"] || (admin ? "XOF" : MERCHANT_DEFAULT_CURRENCY);
     setPriceCurrency(storedCurrency);
     setSupplierAmount(
@@ -130,6 +133,49 @@ export function ListingEditor() {
   const isVehCategory =
     isVehicleSelection(config?.taxonomy, formCategoryIds, formSubcategories) &&
     !formSubcategories.some((sub) => /pièce|piece|accessoire/i.test(sub));
+
+  // Suggestion de famille à partir des catégories, uniquement pour une
+  // nouvelle annonce et tant que le commerçant n'a pas choisi lui-même.
+  useEffect(() => {
+    if (editing?.id) return;
+    setListingConfig((current) => {
+      if (current.variants.length || current.productType !== "general") {
+        return current;
+      }
+      const labels = [
+        ...formCategoryIds.map((id) =>
+          categoryLabelForId(config?.taxonomy, id),
+        ),
+        ...formSubcategories,
+      ];
+      const inferred = inferProductType(labels.join(" "));
+      return inferred && inferred !== "general"
+        ? { ...current, productType: inferred }
+        : current;
+    });
+  }, [formCategoryIds, formSubcategories, config, editing?.id]);
+
+  const activeListingVariants = useMemo(
+    () => listingConfig.variants.filter((variant) => variant.active),
+    [listingConfig.variants],
+  );
+  const hasVariants = activeListingVariants.length > 0;
+  const variantStock = activeListingVariants.reduce(
+    (total, variant) => total + Number(variant.stock || 0),
+    0,
+  );
+  const variantSupplierXof = activeListingVariants.length
+    ? Math.min(
+        ...activeListingVariants.map((variant) =>
+          Number(variant.supplierPrice ?? variant.price ?? 0),
+        ),
+      )
+    : 0;
+  const variantPublicXof = activeListingVariants.length
+    ? Math.min(
+        ...activeListingVariants.map((variant) => Number(variant.price || 0)),
+      )
+    : 0;
 
   const categoryOptions = (() => {
     const canonical = taxonomyCategoryOptions(config?.taxonomy);
@@ -160,26 +206,6 @@ export function ListingEditor() {
     }
     return Array.from(map.values());
   })();
-
-  function handleAutoFillVehicleDetails() {
-    const brand = vehBrand || "Toyota";
-    const model = vehModel || "Land Cruiser Prado";
-    const trim = vehTrim ? ` ${vehTrim}` : "";
-    const year = vehYear || "2024";
-    const engine = vehEngine || "V6 4.0L";
-    const fuel = vehFuel || "Essence";
-    const seats = vehSeats || "7 Places";
-
-    const autoTitle = `${brand} ${model}${trim} ${year} — ${engine} ${fuel} ${seats} (${vehRegionalSpecs})`;
-    const autoDesc = `Véhicule d'exception importé directement de Dubaï. Spécifications GCC tropicalisées avec système de refroidissement renforcé pour les fortes chaleurs d'Afrique de l'Ouest.\n\nCaractéristiques principales :\n- Marque : ${brand}\n- Modèle : ${model}${trim}\n- Année : ${year}\n- Kilométrage : ${vehMileage}\n- Boîte de vitesses : ${vehTransmission}\n- Carburant : ${fuel}\n- Motricité : ${vehDrivetrain}\n- Nombre de places : ${seats}\n- Conduite : ${vehSteering}\n- Équipements inclus : ${vehEquipments.join(", ")}.\n\nExpédition sécurisée par Baobab : fret maritime Dubaï Port Jebel Ali vers Cotonou/Lomé/Abidjan puis convoyage sous douane vers Ouagadougou. Assistance dédouanement et immatriculation incluse.`;
-
-    // Update form elements
-    const nameInput = document.querySelector('input[name="name"]') as HTMLInputElement;
-    if (nameInput) nameInput.value = autoTitle;
-
-    const descTextarea = document.querySelector('textarea[name="description"]') as HTMLTextAreaElement;
-    if (descTextarea) descTextarea.value = autoDesc;
-  }
 
   async function handleRowReplace(productId: string, oldUrl: string, file: File) {
     if (!file) return;
@@ -311,61 +337,39 @@ export function ListingEditor() {
       // Prix saisis dans la devise du commerçant (AED par défaut), convertis en XOF côté serveur
       const supplierInput = Number(fd.get("supplierPrice") || 0);
       const publicInput = Number(fd.get("price") || 0);
-      body.supplierPrice = toXof(supplierInput, priceCurrency);
-      body.price = admin ? toXof(publicInput, priceCurrency) : body.supplierPrice;
-      body.sourcePrice = supplierInput;
+      const configErrors = validateListing(
+        listingConfig.productType,
+        listingConfig.attributes,
+        listingConfig.variantOptions,
+        listingConfig.variants,
+      );
+      if (configErrors.length) throw new Error(configErrors.join(" "));
+      if (hasVariants) {
+        // Les prix et le stock de la fiche sont la synthèse des variantes
+        // actives : le serveur les recalcule de toute façon.
+        body.supplierPrice = variantSupplierXof;
+        body.price = variantPublicXof;
+        body.sourcePrice = fromXof(variantSupplierXof, priceCurrency);
+        if (admin) body.sourcePublicPrice = fromXof(variantPublicXof, priceCurrency);
+        body.stock = variantStock;
+      } else {
+        body.supplierPrice = toXof(supplierInput, priceCurrency);
+        body.price = admin ? toXof(publicInput, priceCurrency) : body.supplierPrice;
+        body.sourcePrice = supplierInput;
+        if (admin) body.sourcePublicPrice = publicInput;
+        body.stock = Number(fd.get("stock") || 0);
+      }
       body.sourceCurrency = priceCurrency;
-      if (admin) body.sourcePublicPrice = publicInput;
       body.shippingIncluded = fd.get("shippingIncluded") === "on";
 
-      // If category is a vehicle, enrich with smart automotive specs
-      if (isVehCategory) {
-        body.condition = formCondition;
-        body.unit = "véhicule";
-        if (!body.weightKg) {
-          body.weightKg = vehModel.toLowerCase().includes("prado") || vehModel.toLowerCase().includes("cruiser") ? 2200 : 1850;
-        }
-        body.attributes = {
-          "Marque": vehBrand || "Toyota",
-          "Modèle": vehModel || "Véhicule",
-          "Trim": vehTrim || "Standard",
-          "Année": vehYear,
-          "Kilométrage": vehMileage,
-          "Carburant": vehFuel,
-          "Boîte": vehTransmission,
-          "Motricité": vehDrivetrain,
-          "Moteur": vehEngine || "Moteur Tropicalisé",
-          "Places": vehSeats,
-          "Couleur extérieure": vehExtColor || "Origine",
-          "Couleur intérieure": vehIntColor || "Cuir Beige",
-          "Spécifications": vehRegionalSpecs,
-          "Direction": vehSteering,
-          "Garantie": "1 an constructeur / Assistance Baobab",
-          "Équipements": vehEquipments.join(", "),
-          "Marge Baobab": "+15% appliquée",
-          "Source": "Temu / Dubizzle Export",
-          "Expédition": "Fret maritime (25-35j) vers Cotonou/Lomé/Abidjan + convoi Ouagadougou",
-          ...(body.attributes || {}),
-        };
-      }
+      body.condition = formCondition;
+      Object.assign(body, listingConfig);
+      if (editing?.id) body.catalogVersion = editing.catalogVersion;
       body.images = String(fd.get("images") || "")
         .split("\n")
         .map((s) => s.trim())
         .filter(Boolean);
       if (fd.get("weightKg")) body.weightKg = Number(fd.get("weightKg"));
-      body.attributes = Object.fromEntries(
-        String(fd.get("attributes") || "")
-          .split("\n")
-          .filter((s) => s.trim())
-          .map((s) => {
-            const i = s.indexOf(":");
-            if (i < 1)
-              throw new Error(
-                "Caractéristiques : une ligne « Nom : valeur » par caractéristique.",
-              );
-            return [s.slice(0, i).trim(), s.slice(i + 1).trim()];
-          }),
-      );
       const saved = editing?.id
         ? await api.patch<any>(`/products/${editing.id}`, body)
         : await api.post<any>("/products", body);
@@ -428,7 +432,7 @@ export function ListingEditor() {
           color: "#fde68a",
           lineHeight: 1.4
         }}>
-          💡 <strong>Publication simplifiée :</strong> Renseignez simplement le titre, l'univers, le prix et les photos. Le poids, les dimensions et les réglages de transport sont <em>facultatifs</em> : l'administrateur Baobab les complètera pour vous lors de la vérification !
+          💡 <strong>Publication simplifiée :</strong> Renseignez le titre, la catégorie, le prix et les photos. La famille de produit et ses caractéristiques obligatoires sont proposées automatiquement. Le poids, les dimensions et les réglages de transport restent <em>facultatifs</em> : l'administrateur Baobab les complètera lors de la vérification.
         </div>
       ) : (
         <div style={{
@@ -458,7 +462,8 @@ export function ListingEditor() {
                 name="name"
                 required
                 minLength={2}
-                defaultValue={editing.name}
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
               />
             </label>
             <div className="op-span">
@@ -500,7 +505,7 @@ export function ListingEditor() {
                   type="button"
                   onClick={() => {
                     setFormCondition("NEW");
-                    if (isVehCategory) setVehMileage("0 km");
+
                   }}
                   style={{
                     padding: "8px 16px",
@@ -517,14 +522,14 @@ export function ListingEditor() {
                   }}
                 >
                   <span>🟢</span>
-                  <span>{isVehCategory ? "Neuf (Brand New / 0 km)" : "Neuf (Brand New)"}</span>
+                  <span>{isVehCategory ? "Neuf" : "Neuf"}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => {
                     setFormCondition("USED");
-                    if (isVehCategory && vehMileage === "0 km") setVehMileage("35 000 km");
+
                   }}
                   style={{
                     padding: "8px 16px",
@@ -541,14 +546,14 @@ export function ListingEditor() {
                   }}
                 >
                   <span>🔵</span>
-                  <span>Occasion certifiée (Used)</span>
+                  <span>Occasion</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => {
                     setFormCondition("REFURBISHED");
-                    if (isVehCategory && vehMileage === "0 km") setVehMileage("15 000 km");
+
                   }}
                   style={{
                     padding: "8px 16px",
@@ -571,231 +576,17 @@ export function ListingEditor() {
               <input type="hidden" name="condition" value={formCondition} />
             </div>
 
-            {/* FORMULAIRE INTELLIGENT AUTOMOBILE (Si catégorie Véhicule) */}
-            {isVehCategory && (
-              <div
-                className="op-span"
-                style={{
-                  background: "linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(15, 23, 42, 0.6) 100%)",
-                  border: "1.5px solid rgba(245, 158, 11, 0.35)",
-                  borderRadius: "14px",
-                  padding: "18px",
-                  margin: "12px 0 20px 0",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", borderBottom: "1px solid rgba(245,158,11,0.2)", paddingBottom: "10px" }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 800, color: "#fbbf24", display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span>🏎️</span> Formulaire Intelligent Véhicule (Spécifications Dubizzle Motors UAE)
-                    </h3>
-                    <p style={{ margin: "4px 0 0 0", fontSize: "11.5px", color: "#94a3b8" }}>
-                      Remplissez rapidement les caractéristiques clés du véhicule pour générer l'affichage Dubizzle professionnel.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleAutoFillVehicleDetails}
-                    style={{
-                      background: "#f59e0b",
-                      color: "#0f172a",
-                      fontWeight: 800,
-                      fontSize: "11.5px",
-                      padding: "8px 14px",
-                      borderRadius: "8px",
-                      border: "none",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      boxShadow: "0 4px 12px rgba(245, 158, 11, 0.25)",
-                    }}
-                  >
-                    <span>⚡</span>
-                    <span>Remplir Titre & Description</span>
-                  </button>
-                </div>
-
-                {/* Marques rapides */}
-                <div style={{ marginBottom: "14px" }}>
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "#cbd5e1", textTransform: "uppercase" }}>
-                    Marque (Sélection rapide) :
-                  </span>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "6px" }}>
-                    {["Toyota", "Jetour", "Lexus", "Mercedes-Benz", "Hyundai", "Nissan", "Mitsubishi", "Kia", "Land Rover", "Suzuki"].map((m) => (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => setVehBrand(m)}
-                        style={{
-                          padding: "5px 10px",
-                          borderRadius: "6px",
-                          border: vehBrand === m ? "1.5px solid #f59e0b" : "1px solid rgba(255,255,255,0.12)",
-                          background: vehBrand === m ? "rgba(245, 158, 11, 0.2)" : "rgba(255,255,255,0.03)",
-                          color: vehBrand === m ? "#fbbf24" : "#cbd5e1",
-                          fontSize: "11.5px",
-                          fontWeight: vehBrand === m ? 700 : 500,
-                          cursor: "pointer",
-                        }}
-                      >
-                        {m}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Grille de champs automobiles */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
-                  <label>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Modèle</span>
-                    <input
-                      type="text"
-                      placeholder="Ex: Land Cruiser Prado, T2, Hilux"
-                      value={vehModel}
-                      onChange={(e) => setVehModel(e.target.value)}
-                    />
-                  </label>
-
-                  <label>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Finition / Trim</span>
-                    <input
-                      type="text"
-                      placeholder="Ex: TX-L, GXR, Traveller 4x4, Flagship"
-                      value={vehTrim}
-                      onChange={(e) => setVehTrim(e.target.value)}
-                    />
-                  </label>
-
-                  <label>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Année du modèle</span>
-                    <select value={vehYear} onChange={(e) => setVehYear(e.target.value)}>
-                      {["2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2015-2017", "Avant 2015"].map((y) => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Kilométrage</span>
-                    <input
-                      type="text"
-                      placeholder="Ex: 0 km, 25 000 km"
-                      value={vehMileage}
-                      onChange={(e) => setVehMileage(e.target.value)}
-                    />
-                  </label>
-
-                  <label>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Carburant</span>
-                    <select value={vehFuel} onChange={(e) => setVehFuel(e.target.value)}>
-                      <option value="Essence (Petrol)">Essence (Petrol)</option>
-                      <option value="Diesel">Diesel</option>
-                      <option value="Hybride">Hybride</option>
-                      <option value="100% Électrique">100% Électrique</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Boîte de vitesses</span>
-                    <select value={vehTransmission} onChange={(e) => setVehTransmission(e.target.value)}>
-                      <option value="Automatique">Automatique</option>
-                      <option value="Manuelle">Manuelle</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Motricité</span>
-                    <select value={vehDrivetrain} onChange={(e) => setVehDrivetrain(e.target.value)}>
-                      <option value="4x4 Tout-Terrain">4x4 Tout-Terrain Sélectif</option>
-                      <option value="Traction Intégrale (AWD)">Traction Intégrale (AWD)</option>
-                      <option value="Propulsion (RWD)">Propulsion (RWD)</option>
-                      <option value="Traction (FWD)">Traction (FWD)</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Moteur & Cylindrée</span>
-                    <input
-                      type="text"
-                      placeholder="Ex: 4.0L V6 (271 ch), 2.0T (254 ch)"
-                      value={vehEngine}
-                      onChange={(e) => setVehEngine(e.target.value)}
-                    />
-                  </label>
-
-                  <label>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Nombre de places</span>
-                    <select value={vehSeats} onChange={(e) => setVehSeats(e.target.value)}>
-                      <option value="7 Places">7 Places (5 portes)</option>
-                      <option value="5 Places">5 Places (5 portes)</option>
-                      <option value="8 Places">8 Places (Grand SUV)</option>
-                      <option value="2-3 Places">2-3 Places (Pick-up simple cabine)</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Couleur extérieure</span>
-                    <input
-                      type="text"
-                      placeholder="Ex: Sable Sahara, Blanc Arctique, Noir"
-                      value={vehExtColor}
-                      onChange={(e) => setVehExtColor(e.target.value)}
-                    />
-                  </label>
-
-                  <label>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Couleur intérieure</span>
-                    <input
-                      type="text"
-                      placeholder="Ex: Cuir Beige, Cuir Brun Cognac, Noir"
-                      value={vehIntColor}
-                      onChange={(e) => setVehIntColor(e.target.value)}
-                    />
-                  </label>
-
-                  <label>
-                    <span style={{ fontSize: "11px", color: "#cbd5e1" }}>Spécifications régionales</span>
-                    <select value={vehRegionalSpecs} onChange={(e) => setVehRegionalSpecs(e.target.value)}>
-                      <option value="GCC Specs (Dubaï - Climat chaud)">GCC Specs (Dubaï / Émirats)</option>
-                      <option value="Tropicalisé Sahel / Afrique">Tropicalisé Sahel / Afrique</option>
-                      <option value="Euro Specs">Euro Specs</option>
-                    </select>
-                  </label>
-                </div>
-
-                {/* Options rapides (Checklist en 1 clic) */}
-                <div style={{ marginTop: "14px", paddingTop: "10px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-                  <span style={{ fontSize: "11.5px", fontWeight: 700, color: "#cbd5e1" }}>
-                    Options & Équipements inclus (Dubizzle Features) :
-                  </span>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "8px", marginTop: "8px" }}>
-                    {[
-                      "Climatisation Tropicalisée",
-                      "Écran Tactile & Apple CarPlay",
-                      "Caméra 360° / Recul",
-                      "Toit Panoramique / Ouvrant",
-                      "Sièges Cuir Ergonomiques",
-                      "Démarrage Sans Clé (Push Start)",
-                      "4x4 Sélecteur de terrain",
-                      "Double Réservoir Carburant",
-                      "Phares Full LED & Feux Diurnes",
-                      "Snorkel & Treuil Tout-Terrain"
-                    ].map((opt) => (
-                      <label key={opt} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11.5px", cursor: "pointer", color: "#e2e8f0" }}>
-                        <input
-                          type="checkbox"
-                          checked={vehEquipments.includes(opt)}
-                          onChange={(e) => {
-                            if (e.target.checked) setVehEquipments([...vehEquipments, opt]);
-                            else setVehEquipments(vehEquipments.filter((x) => x !== opt));
-                          }}
-                        />
-                        <span>{opt}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+            <ListingConfigurationEditor
+              value={listingConfig}
+              onChange={setListingConfig}
+              admin={admin}
+              currency={priceCurrency}
+              defaultSupplierPrice={toXof(
+                Number(supplierAmount || 0),
+                priceCurrency,
+              )}
+              productName={formName}
+            />
             <label>
               Localisation
               <input
@@ -818,49 +609,70 @@ export function ListingEditor() {
                 ))}
               </select>
             </label>
-            <label>
-              Prix net fournisseur par unité ({priceCurrency})
-              <input
-                name="supplierPrice"
-                type="number"
-                min="0"
-                step="0.01"
-                required
-                value={supplierAmount}
-                onChange={(e) => setSupplierAmount(e.target.value)}
-              />
-              <small style={{ display: "block", fontSize: "11px", opacity: 0.75, marginTop: 2 }}>
-                Soit {formatXof(toXof(Number(supplierAmount || 0), priceCurrency))} en FCFA
-                {priceCurrency !== "XOF" && ` · 1 ${priceCurrency} = ${formatXof(toXof(1, priceCurrency))}`}
-              </small>
-            </label>
-            {admin && (
-              <label>
-                Prix public par unité ({priceCurrency})
-                <input
-                  name="price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  required
-                  value={publicAmount}
-                  onChange={(e) => setPublicAmount(e.target.value)}
-                />
-                <small style={{ display: "block", fontSize: "11px", opacity: 0.75, marginTop: 2 }}>
-                  Soit {formatXof(toXof(Number(publicAmount || 0), priceCurrency))} en FCFA
+            {hasVariants ? (
+              <div className="op-span listing-derived">
+                <strong>
+                  Prix et stock calculés depuis les variantes actives
+                </strong>
+                <p>
+                  Prix net commerçant dès{" "}
+                  <b>{formatXof(variantSupplierXof)}</b> · Prix public dès{" "}
+                  <b>{formatXof(variantPublicXof)}</b> · Stock total{" "}
+                  <b>{variantStock}</b>
+                </p>
+                <small>
+                  Modifiez les prix, le stock et les SKU directement dans le
+                  tableau des variantes. La fiche reprend automatiquement la
+                  variante la moins chère.
                 </small>
-              </label>
+              </div>
+            ) : (
+              <>
+                <label>
+                  Prix net fournisseur par unité ({priceCurrency})
+                  <input
+                    name="supplierPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    required
+                    value={supplierAmount}
+                    onChange={(e) => setSupplierAmount(e.target.value)}
+                  />
+                  <small style={{ display: "block", fontSize: "11px", opacity: 0.75, marginTop: 2 }}>
+                    Soit {formatXof(toXof(Number(supplierAmount || 0), priceCurrency))} en FCFA
+                    {priceCurrency !== "XOF" && ` · 1 ${priceCurrency} = ${formatXof(toXof(1, priceCurrency))}`}
+                  </small>
+                </label>
+                {admin && (
+                  <label>
+                    Prix public par unité ({priceCurrency})
+                    <input
+                      name="price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      required
+                      value={publicAmount}
+                      onChange={(e) => setPublicAmount(e.target.value)}
+                    />
+                    <small style={{ display: "block", fontSize: "11px", opacity: 0.75, marginTop: 2 }}>
+                      Soit {formatXof(toXof(Number(publicAmount || 0), priceCurrency))} en FCFA
+                    </small>
+                  </label>
+                )}
+                <label>
+                  Stock global
+                  <input
+                    name="stock"
+                    type="number"
+                    min="0"
+                    required
+                    defaultValue={editing.stock ?? 0}
+                  />
+                </label>
+              </>
             )}
-            <label>
-              Stock en unités
-              <input
-                name="stock"
-                type="number"
-                min="0"
-                required
-                defaultValue={editing.stock ?? 0}
-              />
-            </label>
             <label>
               Unité de vente
               <input
@@ -930,16 +742,6 @@ export function ListingEditor() {
                 required
                 rows={4}
                 defaultValue={editing.description}
-              />
-            </label>
-            <label>
-              Caractéristiques (une par ligne, « Marque : Samsung »)
-              <textarea
-                name="attributes"
-                rows={4}
-                defaultValue={Object.entries(editing.attributes || {})
-                  .map(([k, v]) => `${k} : ${v}`)
-                  .join("\n")}
               />
             </label>
             {editing.id && (
@@ -1487,6 +1289,18 @@ export function ListingEditor() {
                 {p.unit}
                 <br />
                 Prix public : {money(p.price)}
+                {Array.isArray(p.variants) &&
+                  p.variants.some((variant: any) => variant.active) && (
+                    <>
+                      {" "}
+                      ·{" "}
+                      {
+                        p.variants.filter((variant: any) => variant.active)
+                          .length
+                      }{" "}
+                      variante(s)
+                    </>
+                  )}
                 <br />
                 Minimum : {p.minimumOrder} · Multiple : {p.packSize} · Stock :{" "}
                 {p.stock}
@@ -1528,17 +1342,24 @@ export function ListingEditor() {
                         ))}
                       </select>
                     </label>
-                    <label>
-                      Prix public FCFA
-                      <input
-                        type="number"
-                        min={p.supplierPrice ?? p.price}
-                        step="0.01"
-                        name="publicPrice"
-                        defaultValue={p.price}
-                        required
-                      />
-                    </label>
+                    {p.variants?.some((variant: any) => variant.active) ? (
+                      <p className="op-empty">
+                        Prix public piloté par le tableau des variantes. Modifiez
+                        la fiche pour ajuster chaque combinaison.
+                      </p>
+                    ) : (
+                      <label>
+                        Prix public FCFA
+                        <input
+                          type="number"
+                          min={p.supplierPrice ?? p.price}
+                          step="0.01"
+                          name="publicPrice"
+                          defaultValue={p.price}
+                          required
+                        />
+                      </label>
+                    )}
                     <label>
                       Note pour le commerçant
                       <textarea

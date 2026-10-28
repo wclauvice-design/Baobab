@@ -2,6 +2,11 @@ import { IsBoolean, IsIn, IsObject, Max, MaxLength, IsUrl } from 'class-validato
 import { IsArray, IsInt, IsNumber, IsOptional, IsString, Min, MinLength } from 'class-validator';
 
 export class CreateProductDto {
+  @IsOptional() @IsString() @MaxLength(40) productType?: string;
+  @IsOptional() @IsArray() variantOptions?: any[];
+  @IsOptional() @IsArray() variants?: any[];
+  @IsOptional() @IsInt() @Min(0) catalogVersion?: number;
+
   @IsString()
   @MinLength(2)
   name: string;

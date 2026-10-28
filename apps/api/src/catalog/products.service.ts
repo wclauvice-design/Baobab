@@ -1,4 +1,9 @@
 import {
+  ListingVariant,
+  publicPriceFromMerchant,
+  validateListing as validateListingConfiguration,
+} from '@baobab/shared';
+import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
@@ -348,7 +353,10 @@ export class ProductsService {
 
   async create(userId: string, role: Role, dto: CreateProductDto) {
     const sellerId = (role === Role.ADMIN && dto.sellerId) ? dto.sellerId : await this.resolveSellerId(userId, role);
-    const normalized = this.normalizeCategories(this.normalizePricing(dto));
+    let prepared: any = this.normalizePricing(dto);
+    if (role !== Role.ADMIN) prepared = this.applyMerchantMarkup(prepared);
+    const normalized = this.normalizeVariantListing(this.normalizeCategories(prepared));
+    delete normalized.catalogVersion;
     this.validateListing(normalized);
     return this.prisma.product.create({
       data: {
@@ -368,29 +376,197 @@ export class ProductsService {
     dto: UpdateProductDto,
   ) {
     const product = await this.assertOwnership(userId, role, productId);
-    const merged = this.normalizeCategories(
-      this.normalizePricing({ ...product, ...dto }),
+    const hasVariants =
+      Array.isArray(product.variants) && product.variants.length > 0;
+    const touchesStock =
+      dto.stock != null || dto.variants != null || dto.variantOptions != null;
+    if ((hasVariants || touchesStock) && dto.catalogVersion == null) {
+      throw new ConflictException(
+        "Rechargez la fiche avant de modifier le stock ou les variantes.",
+      );
+    }
+    if (
+      dto.catalogVersion != null &&
+      dto.catalogVersion !== product.catalogVersion
+    ) {
+      throw new ConflictException(
+        "Cette fiche a changé. Rechargez-la pour conserver le stock actuel.",
+      );
+    }
+
+    let mergedInput: any = this.normalizePricing({ ...product, ...dto });
+    const changesPrice =
+      role !== Role.ADMIN &&
+      (dto.sourcePrice != null ||
+        dto.supplierPrice != null ||
+        dto.price != null ||
+        dto.variants != null);
+    if (changesPrice) mergedInput = this.applyMerchantMarkup(mergedInput);
+
+    const merged = this.normalizeVariantListing(
+      this.normalizeCategories(mergedInput),
     );
     this.validateListing(merged);
-    const patch = this.normalizeCategories(
-      this.normalizePricing({ ...(dto as Record<string, any>) }),
-    );
-    return this.prisma.product.update({
-      where: { id: productId },
+
+    const prior = (product.variants || []) as unknown as ListingVariant[];
+    const next = merged.variants as ListingVariant[];
+    for (const old of prior) {
+      const current = next.find((variant) => variant.id === old.id);
+      if (!current) next.push({ ...old, active: false });
+      else if (JSON.stringify(current.values) !== JSON.stringify(old.values)) {
+        throw new BadRequestException(
+          "Une variante existante conserve ses options. Désactivez-la et créez une nouvelle combinaison.",
+        );
+      }
+    }
+
+    const patch: any = this.normalizeCategories(this.normalizePricing({ ...dto }));
+    delete patch.catalogVersion;
+    Object.assign(patch, {
+      productType: merged.productType,
+      variants: next,
+      variantOptions: merged.variantOptions,
+      stock: merged.stock,
+      price: merged.price,
+      supplierPrice: merged.supplierPrice,
+    });
+    const updated = await this.prisma.product.updateMany({
+      where: { id: productId, catalogVersion: product.catalogVersion },
       data: {
         ...patch,
-        ...(role === Role.SELLER
-          ? {
-              moderation: "PENDING",
-              supplierPrice:
-                patch.supplierPrice ??
-                patch.price ??
-                product.supplierPrice ??
-                product.price,
-            }
-          : {}),
+        catalogVersion: { increment: 1 },
+        ...(role === Role.SELLER ? { moderation: "PENDING" } : {}),
       },
     });
+    if (!updated.count) {
+      throw new ConflictException(
+        "Stock ou fiche modifié entre-temps. Rechargez puis réessayez.",
+      );
+    }
+    return this.prisma.product.findUnique({ where: { id: productId } });
+  }
+
+  /**
+   * Applique la marge publique au prix net commerçant. Le prix public n’est
+   * jamais imposé par le client : il est recalculé côté serveur.
+   */
+  private applyMerchantMarkup<T extends Record<string, any>>(input: T): T {
+    const clean: any = { ...input };
+    const baseSupplier = Number(clean.supplierPrice ?? clean.price ?? 0);
+    if (Number.isFinite(baseSupplier) && baseSupplier >= 0) {
+      clean.supplierPrice = baseSupplier;
+      clean.price = publicPriceFromMerchant(baseSupplier);
+    }
+    if (Array.isArray(clean.variants)) {
+      clean.variants = clean.variants.map((variant: any) => {
+        const supplier = Number(variant?.supplierPrice ?? variant?.price ?? 0);
+        const valid = Number.isFinite(supplier) && supplier >= 0;
+        return {
+          ...variant,
+          supplierPrice: valid ? supplier : 0,
+          price: valid ? publicPriceFromMerchant(supplier) : 0,
+        };
+      });
+    }
+    return clean as T;
+  }
+
+  private normalizeVariantListing(input: any): any {
+    // Les caractéristiques sont toujours stockées sous forme de texte plat :
+    // les anciennes fiches pouvaient contenir des nombres ou des objets.
+    const rawAttributes =
+      input.attributes &&
+      typeof input.attributes === "object" &&
+      !Array.isArray(input.attributes)
+        ? input.attributes
+        : {};
+    const attributes = Object.fromEntries(
+      Object.entries(rawAttributes)
+        .filter(([key, value]) => key.length <= 80 && value != null)
+        .filter(([, value]) => typeof value !== "object")
+        .map(([key, value]) => [key, String(value)]),
+    );
+
+    const clean: any = {
+      ...input,
+      productType: input.productType || "general",
+      attributes,
+      variantOptions: Array.isArray(input.variantOptions)
+        ? input.variantOptions
+        : [],
+      variants: Array.isArray(input.variants) ? input.variants : [],
+    };
+
+    let errors: string[];
+    try {
+      errors = validateListingConfiguration(
+        clean.productType,
+        clean.attributes,
+        clean.variantOptions,
+        clean.variants,
+      );
+    } catch {
+      throw new BadRequestException("Structure de variantes invalide.");
+    }
+    if (errors.length) throw new BadRequestException(errors.join(" "));
+
+    clean.variantOptions = clean.variantOptions.map((option: any) => ({
+      name: String(option.name).trim(),
+      values: Array.from(
+        new Map(
+          option.values.map((value: any) => {
+            const cleanValue = String(value).trim();
+            return [cleanValue.toLowerCase(), cleanValue];
+          }),
+        ).values(),
+      ),
+    }));
+
+    clean.variants = clean.variants.map((variant: any) => ({
+      id: String(variant.id).trim(),
+      sku: String(variant.sku ?? "").trim(),
+      values: Object.fromEntries(
+        Object.entries(variant.values || {}).map(([key, value]) => [
+          String(key),
+          String(value),
+        ]),
+      ),
+      price: Number.isFinite(Number(variant.price))
+        ? Number(variant.price)
+        : 0,
+      supplierPrice: Number.isFinite(Number(variant.supplierPrice))
+        ? Number(variant.supplierPrice)
+        : Number.isFinite(Number(variant.price))
+          ? Number(variant.price)
+          : 0,
+      stock: Number.isFinite(Number(variant.stock))
+        ? Math.max(0, Math.trunc(Number(variant.stock)))
+        : 0,
+      images: Array.isArray(variant.images) ? variant.images.map(String) : [],
+      active: Boolean(variant.active),
+      ...(variant.weightKg != null && Number.isFinite(Number(variant.weightKg))
+        ? { weightKg: Number(variant.weightKg) }
+        : {}),
+    }));
+
+    this.syncVariantAggregates(clean);
+    return clean;
+  }
+
+  /** Le stock et le prix de la fiche reflètent les variantes actives. */
+  private syncVariantAggregates(listing: any) {
+    const active = (listing.variants as ListingVariant[]).filter(
+      (variant) => variant.active,
+    );
+    if (!active.length) return;
+    listing.stock = active.reduce(
+      (total, variant) => total + Math.max(0, Math.trunc(variant.stock)),
+      0,
+    );
+    listing.price = Math.min(...active.map((variant) => variant.price));
+    listing.supplierPrice = Math.min(
+      ...active.map((variant) => variant.supplierPrice ?? variant.price),
+    );
   }
 
   /**
@@ -580,6 +756,8 @@ export class ProductsService {
     const canonical = productCanonicalTaxonomy(product);
     return {
       ...safe,
+      attributes: Object.fromEntries(Object.entries(safe.attributes||{}).filter(([k])=>!/^(sourceprice|sourcecurrency|sourcepublicprice|fxrate|supplierprice|margin|marge|commission|purchaseprice|costprice|prixachat)$/i.test(k)&&!/fournisseur/i.test(k))),
+      variants: ((safe.variants||[]) as ListingVariant[]).filter(v=>v.active).map(({supplierPrice,...v})=>v),
       canonicalCategory: canonical.category,
       canonicalSubcategories: canonical.subcategories,
       seller: seller ? { id: seller.id, shopName: seller.shopName } : null,
@@ -609,15 +787,41 @@ export class ProductsService {
       throw new BadRequestException(
         "Approuvez le commerçant avant publication",
       );
-    const price = dto.publicPrice ? amount(minor(dto.publicPrice)) : p.price;
-    if (minor(price) < minor(p.supplierPrice ?? p.price))
+    const normalized = this.normalizeVariantListing(p);
+    if (
+      (normalized.variants as ListingVariant[]).some((variant) => variant.active) &&
+      dto.publicPrice
+    ) {
+      throw new BadRequestException(
+        "Modifiez les prix dans le tableau des variantes.",
+      );
+    }
+    const price = dto.publicPrice
+      ? amount(minor(dto.publicPrice))
+      : normalized.price;
+    if (minor(price) < minor(normalized.supplierPrice ?? normalized.price))
       throw new BadRequestException(
         "Le prix public doit couvrir le prix fournisseur",
       );
-    return this.prisma.product.update({
-      where: { id },
-      data: { moderation: dto.moderation, moderationNote: dto.note, price },
+    const updated = await this.prisma.product.updateMany({
+      where: { id, catalogVersion: p.catalogVersion },
+      data: {
+        moderation: dto.moderation,
+        moderationNote: dto.note,
+        price,
+        stock: normalized.stock,
+        variants: normalized.variants as any,
+        variantOptions: normalized.variantOptions as any,
+        productType: normalized.productType,
+        catalogVersion: { increment: 1 },
+      },
     });
+    if (!updated.count) {
+      throw new ConflictException(
+        "La fiche a changé pendant la validation. Rechargez puis réessayez.",
+      );
+    }
+    return this.prisma.product.findUnique({ where: { id } });
   }
 
   /** Ajoute soldCount (unités livrées) et avgRating/reviewCount à une liste de produits. */

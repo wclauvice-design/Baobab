@@ -160,6 +160,10 @@ model Product {
   category    Category @relation(fields: [categoryId], references: [id])
   /// Catégories supplémentaires (l'article reste rattaché à `categoryId` comme catégorie principale).
   categoryIds String[] @default([])
+  productType String @default("general")
+  variantOptions Json @default("[]")
+  variants Json @default("[]")
+  catalogVersion Int @default(0)
   name           String
   description    String
   price          Decimal  @db.Decimal(12, 2)
@@ -215,6 +219,9 @@ model OrderItem {
   product    Product @relation(fields: [productId], references: [id])
   quantity   Int
   unitPrice  Decimal @db.Decimal(12, 2)
+  variantId String?
+  variantLabel String?
+  variantSku String?
 }
 
 model Payment {

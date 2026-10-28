@@ -42,6 +42,7 @@ export class CreateTradeDto {
 }
 export class QuoteLineDto {
   @IsString() productId: string;
+  @IsOptional() @IsString() @MaxLength(100) variantId?: string;
   @IsInt() @Min(1) quantity: number;
   @IsString() unitPrice: string;
   @IsOptional() @IsString() @MaxLength(500) minimumException?: string;

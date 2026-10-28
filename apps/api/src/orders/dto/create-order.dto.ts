@@ -1,8 +1,9 @@
 import { Type } from 'class-transformer';
-import { ArrayMinSize, IsArray, IsEnum, IsInt, IsString, Min, ValidateNested } from 'class-validator';
+import { ArrayMinSize, IsArray, IsEnum, IsInt, IsString, IsOptional, Min, ValidateNested } from 'class-validator';
 import { DeliveryMode, PaymentProviderType } from '@prisma/client';
 
 class OrderItemInputDto {
+  @IsOptional() @IsString() variantId?: string;
   @IsString()
   productId: string;
 

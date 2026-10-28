@@ -1,0 +1,2 @@
+ALTER TABLE "Product" ADD COLUMN "productType" TEXT NOT NULL DEFAULT 'general', ADD COLUMN "variantOptions" JSONB NOT NULL DEFAULT '[]', ADD COLUMN "variants" JSONB NOT NULL DEFAULT '[]', ADD COLUMN "catalogVersion" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "OrderItem" ADD COLUMN "variantId" TEXT, ADD COLUMN "variantLabel" TEXT, ADD COLUMN "variantSku" TEXT;

@@ -121,3 +121,22 @@
   .market .bb-cat-strip{margin-top:8px;padding-bottom:6px}
   .market #bb-feed>.bb-catalog-heading{padding:8px 0 4px}
 }
+.bb-variant-picker{border:1px solid #dce5df;border-radius:16px;padding:16px;margin:16px 0;display:grid;gap:14px;background:#fffdf7;box-shadow:0 2px 14px rgba(23,62,50,.05)}
+.bb-variant-picker legend{font-size:13px;font-weight:700;padding:0 6px;color:#0B1E17;letter-spacing:.01em}
+.bb-variant-group{display:grid;gap:8px}
+.bb-variant-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#52665a}
+.bb-variant-values{display:flex;flex-wrap:wrap;gap:8px}
+.bb-variant-value{min-width:44px;padding:9px 14px;border:1.5px solid #cad8cf;border-radius:10px;background:#fff;color:#143b2b;font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .15s ease}
+.bb-variant-value:hover:not(:disabled){border-color:#173E32;background:#f1f7f3}
+.bb-variant-value:active:not(:disabled){transform:translateY(1px)}
+.bb-variant-value.is-selected{border-color:#0B1E17;background:#0B1E17;color:#FFF8E6;box-shadow:0 4px 12px rgba(11,30,23,.18)}
+.bb-variant-value.is-unavailable,.bb-variant-value:disabled{border-style:dashed;border-color:#e2e8e4;background:#f7f8f6;color:#a6b3ac;cursor:not-allowed;text-decoration:line-through}
+.bb-variant-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:12px;border-top:1px solid #e6ece8}
+.bb-variant-summary>div{display:grid;gap:2px;min-width:0}
+.bb-variant-summary strong{font-size:20px;font-weight:800;color:#0B1E17;letter-spacing:-.02em}
+.bb-variant-summary small{font-size:11.5px;line-height:1.45;color:#52665a}
+.bb-variant-stock{flex:0 0 auto;padding:6px 11px;border-radius:999px;border:1px solid #b9e4cd;background:#e8f7ee;color:#166534;font-size:11px;font-weight:700;white-space:nowrap}
+.bb-variant-stock.is-out{border-color:#fecaca;background:#fef2f2;color:#b91c1c}
+.bb-variant-status{margin:0;font-size:12px;line-height:1.5;color:#52665a}
+.bb-variant-soldout{margin:-4px 0 16px;padding:12px 14px;border:1px solid #fecaca;border-radius:12px;background:#fef2f2;color:#991b1b;font-size:12.5px;line-height:1.5}
+@media(max-width:520px){.bb-variant-picker{padding:13px}.bb-variant-value{padding:8px 12px;font-size:12.5px}.bb-variant-summary strong{font-size:18px}}

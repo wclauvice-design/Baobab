@@ -32,6 +32,7 @@ import {
   UNIVERSES,
 } from "./rules";
 import { buildRuntimeTaxonomy } from "../catalog/taxonomy";
+import { ListingVariant, variantLabel } from "@baobab/shared";
 
 const hash = (token: string) =>
   createHash("sha256").update(token).digest("hex");
@@ -525,9 +526,12 @@ export class CommerceService {
         throw new ConflictException(
           "Le devis a changé. Actualisez la commande.",
         );
-      if (new Set(dto.lines.map((l) => l.productId)).size !== dto.lines.length)
+      if (
+        new Set(dto.lines.map((l) => `${l.productId}::${l.variantId || ""}`))
+          .size !== dto.lines.length
+      )
         throw new BadRequestException(
-          "Un produit ne peut apparaître qu’une fois",
+          "Un article et sa variante ne peuvent apparaître qu’une fois",
         );
       const products = await tx.product.findMany({
         where: { id: { in: dto.lines.map((l) => l.productId) } },
@@ -545,13 +549,37 @@ export class CommerceService {
           throw new BadRequestException(
             "Annonce non publiée ou fournisseur non approuvé",
           );
+        const variants = this.variantList(p);
+        const activeVariants = variants.filter((variant) => variant.active);
+        let variant: ListingVariant | undefined;
+        if (activeVariants.length) {
+          if (!l.variantId)
+            throw new BadRequestException(
+              `Choisissez une variante pour « ${p.name} »`,
+            );
+          variant = activeVariants.find(
+            (candidate) => candidate.id === l.variantId,
+          );
+          if (!variant)
+            throw new BadRequestException(
+              `Variante indisponible pour « ${p.name} »`,
+            );
+        } else if (l.variantId) {
+          throw new BadRequestException(
+            `« ${p.name} » ne possède pas de variante`,
+          );
+        }
         const qty = quantity(
           l.quantity,
           l.minimumException?.trim() ? 1 : p.minimumOrder,
           p.packSize,
         );
         const unitPrice = minor(l.unitPrice),
-          supplierPrice = minor(p.supplierPrice ?? p.price);
+          supplierPrice = minor(
+            variant
+              ? variant.supplierPrice ?? variant.price
+              : p.supplierPrice ?? p.price,
+          );
         if (unitPrice < supplierPrice)
           throw new BadRequestException(
             "Le prix ne peut pas réduire le montant promis au fournisseur",
@@ -560,6 +588,9 @@ export class CommerceService {
         supplierTotal += supplierPrice * qty;
         return {
           productId: p.id,
+          variantId: variant?.id ?? null,
+          variantLabel: variant ? variantLabel(variant) : null,
+          variantSku: variant?.sku ?? null,
           name: p.name,
           quantity: qty,
           unit: p.unit,
@@ -657,35 +688,7 @@ export class CommerceService {
         (o.quotes.find((q) => q.revision === o.acceptedRevision)
           ?.lines as any[]) || [];
       const lines = q.lines as any[];
-      const ids = [
-        ...new Set([...lines, ...previous].map((l) => l.productId)),
-      ].sort();
-      for (const productId of ids) {
-        const next =
-          lines.find((l) => l.productId === productId)?.quantity || 0;
-        const before =
-          previous.find((l) => l.productId === productId)?.quantity || 0;
-        const delta = next - before;
-        if (delta > 0) {
-          const result = await tx.product.updateMany({
-            where: {
-              id: productId,
-              moderation: "PUBLISHED",
-              stock: { gte: delta },
-              OR: [{ sellerId: null }, { seller: { status: "APPROVED" } }],
-            },
-            data: { stock: { decrement: delta } },
-          });
-          if (result.count !== 1)
-            throw new ConflictException(
-              "Stock indisponible : contactez Baobab pour actualiser le devis",
-            );
-        } else if (delta < 0)
-          await tx.product.update({
-            where: { id: productId },
-            data: { stock: { increment: -delta } },
-          });
-      }
+      await this.applyQuoteStock(tx, lines, previous);
       await tx.tradeOrder.update({
         where: { id },
         data: {
@@ -731,11 +734,7 @@ export class CommerceService {
             "Un retour logistique doit être traité avant annulation après expédition",
           );
         const q = o.quotes.find((q) => q.revision === o.acceptedRevision);
-        for (const l of q.lines as any[])
-          await tx.product.update({
-            where: { id: l.productId },
-            data: { stock: { increment: l.quantity } },
-          });
+        await this.applyQuoteStock(tx, [], (q.lines as any[]) || []);
       }
       await tx.tradeOrder.update({
         where: { id },
@@ -753,6 +752,123 @@ export class CommerceService {
     });
     return this.one(id);
   }
+  /** Copie sûre des variantes stockées en JSON. */
+  private variantList(product: any): ListingVariant[] {
+    const raw = Array.isArray(product?.variants) ? product.variants : [];
+    return raw.map((variant: any) => ({
+      ...variant,
+      values: variant?.values || {},
+      images: Array.isArray(variant?.images) ? variant.images : [],
+      active: Boolean(variant?.active),
+    }));
+  }
+
+  /**
+   * Réserve (ou restitue) le stock des lignes d'un devis.
+   * `next` correspond à la nouvelle version, `previous` à la version déjà
+   * acceptée. Le verrou optimiste protège contre les modifications
+   * concurrentes de stock.
+   */
+  private async applyQuoteStock(
+    tx: any,
+    next: any[],
+    previous: any[],
+  ) {
+    const keyOf = (line: any) =>
+      `${line.productId}::${line.variantId || ""}`;
+    const keys = [
+      ...new Set([...next, ...previous].map((line) => keyOf(line))),
+    ];
+
+    for (const key of keys) {
+      const [productId, variantId = ""] = key.split("::");
+      const sum = (lines: any[]) =>
+        lines
+          .filter((line) => keyOf(line) === key)
+          .reduce((total, line) => total + Number(line.quantity || 0), 0);
+      const delta = sum(next) - sum(previous);
+      if (!delta) continue;
+
+      const product = await tx.product.findUnique({
+        where: { id: productId },
+      });
+      if (!product) throw new NotFoundException("Produit introuvable");
+      const variants = this.variantList(product);
+      const hasActiveVariants = variants.some((variant) => variant.active);
+
+      if (delta > 0) {
+        if (!variantId && hasActiveVariants) {
+          throw new ConflictException(
+            `Choisissez une variante pour « ${product.name} »`,
+          );
+        }
+        const variant = variantId
+          ? variants.find(
+              (candidate) => candidate.id === variantId && candidate.active,
+            )
+          : undefined;
+        if (variantId && !variant) {
+          throw new ConflictException(
+            `Variante indisponible pour « ${product.name} »`,
+          );
+        }
+        if (Number(product.stock) < delta) {
+          throw new ConflictException(
+            `Stock insuffisant pour « ${product.name} »`,
+          );
+        }
+        if (variant) {
+          if (variant.stock < delta) {
+            throw new ConflictException(
+              `Stock insuffisant pour « ${product.name} » (${variantLabel(variant)})`,
+            );
+          }
+          variant.stock -= delta;
+        }
+        const reserved = await tx.product.updateMany({
+          where: {
+            id: productId,
+            catalogVersion: product.catalogVersion,
+            moderation: "PUBLISHED",
+            stock: { gte: delta },
+          },
+          data: {
+            stock: { decrement: delta },
+            ...(variant ? { variants: variants as any } : {}),
+            catalogVersion: { increment: 1 },
+          },
+        });
+        if (!reserved.count) {
+          throw new ConflictException(
+            "Stock indisponible : contactez Baobab pour actualiser le devis",
+          );
+        }
+      } else {
+        const quantityToRelease = -delta;
+        const variant = variantId
+          ? variants.find((candidate) => candidate.id === variantId)
+          : undefined;
+        if (variant) variant.stock += quantityToRelease;
+        const released = await tx.product.updateMany({
+          where: {
+            id: productId,
+            catalogVersion: product.catalogVersion,
+          },
+          data: {
+            stock: { increment: quantityToRelease },
+            ...(variant ? { variants: variants as any } : {}),
+            catalogVersion: { increment: 1 },
+          },
+        });
+        if (!released.count) {
+          throw new ConflictException(
+            "Stock modifié entre-temps. Actualisez le devis.",
+          );
+        }
+      }
+    }
+  }
+
   private validateEntry(o: any, dto: EntryDto) {
     const value = minor(dto.amount),
       f = financials(o);
