@@ -1,6 +1,7 @@
+import { ProductVideo } from './ProductVideo';
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { isVideoUrl } from '../lib/media';
+import { isVideoUrl, videoPoster } from '../lib/media';
 import { IconHeart } from './icons';
 
 interface ImageSwipeGalleryProps {
@@ -70,15 +71,11 @@ export function ImageSwipeGallery({
             className="w-full shrink-0 snap-center relative flex items-center justify-center bg-[#09110e] overflow-hidden"
           >
             {isVideoUrl(src) ? (
-              <video
+              <ProductVideo
                 src={src}
-                muted
-                playsInline
-                loop
-                autoPlay
-                preload="metadata"
-                aria-label={`${title} vidéo ${i + 1}`}
+                label={`${title} vidéo ${i + 1}`}
                 className="h-full w-full object-cover"
+                poster={videoPoster(images)} active={activeIdx === i}
               />
             ) : (
               <img
@@ -190,15 +187,7 @@ export function ImageSwipeGallery({
               }`}
             >
               {isVideoUrl(src) ? (
-                <video
-                  src={src}
-                  muted
-                  playsInline
-                  loop
-                  autoPlay
-                  preload="metadata"
-                  className="h-full w-full object-cover"
-                />
+                <span className="relative block h-full w-full"><img src={videoPoster(images)} alt="" className="h-full w-full object-cover" /><span className="absolute inset-0 flex items-center justify-center text-white bg-black/20" aria-hidden="true">▶</span></span>
               ) : (
                 <img src={src} alt="" className="h-full w-full object-cover" />
               )}

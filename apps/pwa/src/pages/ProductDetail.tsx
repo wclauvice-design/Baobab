@@ -1,3 +1,4 @@
+import { ProductVideo } from '../components/ProductVideo';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
@@ -5,7 +6,7 @@ import { useCurrency } from '../lib/currency';
 import { useCart } from '../lib/cart';
 import { useAuth } from '../lib/auth';
 import { recordView } from '../lib/history';
-import { isVideoUrl } from '../lib/media';
+import { isVideoUrl, videoPoster } from '../lib/media';
 import { PageLoader } from '../components/PageLoader';
 import { WestzoneMark, IconHeart, IconStar } from '../components/icons';
 
@@ -74,16 +75,12 @@ function ImageGallery({ images, name }: { images: string[]; name: string }) {
         onTouchEnd={onTouchEnd}
       >
         {isVideoUrl(images[active]) ? (
-          <video
+          <ProductVideo
             key={images[active]}
             src={images[active]}
-            muted
-            playsInline
-            loop
-            autoPlay
-            preload="metadata"
-            aria-label={`${name} ${active + 1}`}
+            label={`${name} ${active + 1}`}
             className="h-full w-full object-cover"
+            poster={videoPoster(images)}
           />
         ) : (
           <img

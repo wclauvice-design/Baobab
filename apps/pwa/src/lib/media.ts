@@ -21,3 +21,8 @@ export function isImageUrl(url: string | null | undefined): boolean {
 export function isMediaUrl(url: string | null | undefined): boolean {
   return isVideoUrl(url) || isImageUrl(url);
 }
+
+/** Use a real product photo when playback is blocked or still loading. */
+export function videoPoster(images: string[] = []): string {
+  return images.find((url) => Boolean(url) && !isVideoUrl(url)) || '/photos/placeholder.svg';
+}

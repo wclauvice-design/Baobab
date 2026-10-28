@@ -1,8 +1,9 @@
+import { ProductVideo } from './ProductVideo';
 import { Link } from 'react-router-dom';
 import { useCurrency } from '../lib/currency';
 import { WestzoneMark, IconStar } from './icons';
 import { isVehicleProduct } from '../lib/vehicles';
-import { isVideoUrl } from '../lib/media';
+import { isVideoUrl, videoPoster } from '../lib/media';
 import { VehicleCard } from './VehicleCard';
 
 export interface Product {
@@ -46,15 +47,11 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-slate-50">
         {product.images[0] ? (
           isVideoUrl(product.images[0]) ? (
-            <video
+            <ProductVideo
               src={product.images[0]}
-              muted
-              playsInline
-              loop
-              autoPlay
-              preload="metadata"
-              aria-label={product.name}
+              label={product.name}
               className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+              poster={videoPoster(product.images)} preview
             />
           ) : (
             <img

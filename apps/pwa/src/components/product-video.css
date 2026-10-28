@@ -1,0 +1,7 @@
+.product-video { position: relative; display: block; width: 100%; height: 100%; min-width: 0; overflow: hidden; background: #f3ebdd; }
+.product-video > video, .product-video > .product-video-poster { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.product-video > .product-video-play { position: absolute; z-index: 2; top: 50%; left: 50%; transform: translate(-50%, -50%); min-height: 44px; padding: 12px 18px; border: 1px solid #ffffff70; border-radius: 24px; background: #0c2238e8; color: white; font-size: 14px; white-space: nowrap; cursor: pointer; }
+.product-video > .product-video-badge { position: absolute; bottom: 10px; left: 10px; padding: 5px 9px; border-radius: 12px; color: white; background: #0c2238df; font-size: 12px; pointer-events: none; }
+.product-video > .product-video-error { position: absolute; inset: auto 8px 8px; padding: 12px; border-radius: 12px; background: #fffdf8f2; color: #12304c; font-size: 13px; text-align: center; }
+.product-video-error > button { display: block; margin: 6px auto 0; padding: 8px 14px; min-height: 44px; border-radius: 8px; background: #12304c; color: white; }
+.product-video button:focus-visible { outline: 3px solid #d9a441; outline-offset: 3px; }

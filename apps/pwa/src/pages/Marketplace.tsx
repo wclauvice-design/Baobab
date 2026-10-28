@@ -1,3 +1,4 @@
+import { ProductVideo } from '../components/ProductVideo';
 import { VariantPicker } from '../components/VariantPicker';
 import { ListingVariant, variantLabel, isInternalAttribute } from '@westzone/shared';
 import { FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -35,7 +36,7 @@ import {
   requestNotificationPermission,
 } from "../lib/notifications";
 import { isVehicleProduct } from "../lib/vehicles";
-import { isVideoUrl } from "../lib/media";
+import { isVideoUrl, videoPoster } from "../lib/media";
 import { applyListingSeo, resetSeo } from "../lib/seo";
 import {
   peekProduct,
@@ -527,15 +528,11 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
       <div className="listing-picture">
         <Link to={`/products/${p.id}`} state={{ product: p }}>
           {!imageFailed && isVideoUrl(p.images?.[0]) ? (
-            <video
+            <ProductVideo
               src={p.images[0]}
-              muted
-              playsInline
-              loop
-              autoPlay
-              preload="metadata"
-              aria-label={p.name}
+              label={p.name}
               className="is-real"
+              poster={videoPoster(p.images)} preview
             />
           ) : (
             <img
@@ -1561,14 +1558,10 @@ export function ListingDetail() {
               <Link key={rel.id} to={`/products/${rel.id}`} state={{ product: rel }} className="seller-showcase-card">
                 <div className="seller-showcase-img">
                   {isVideoUrl(rel.images?.[0]) ? (
-                    <video
+                    <ProductVideo
                       src={rel.images[0]}
-                      muted
-                      playsInline
-                      loop
-                      autoPlay
-                      preload="metadata"
                       className="h-full w-full object-cover"
+                      poster={videoPoster(rel.images)} label={rel.name} preview
                     />
                   ) : (
                     <img

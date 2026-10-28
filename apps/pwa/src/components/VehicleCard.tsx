@@ -1,8 +1,9 @@
+import { ProductVideo } from './ProductVideo';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCurrency } from '../lib/currency';
 import { parseVehicleData } from '../lib/vehicles';
-import { isVideoUrl } from '../lib/media';
+import { isVideoUrl, videoPoster } from '../lib/media';
 import { IconHeart } from './icons';
 
 export interface VehicleProduct {
@@ -44,15 +45,11 @@ export function VehicleCard({
       >
         {image && !failed ? (
           isVideoUrl(image) ? (
-            <video
+            <ProductVideo
               src={image}
-              muted
-              playsInline
-              loop
-              autoPlay
-              preload="metadata"
-              aria-label={product.name}
+              label={product.name}
               className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+              poster={videoPoster(product.images)} preview
             />
           ) : (
             <img

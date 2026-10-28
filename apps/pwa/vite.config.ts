@@ -28,10 +28,19 @@ export default defineConfig({
       workbox: {
         runtimeCaching: [
           {
+            // Safari needs byte-range (206) responses. Never serve video bytes
+            // from the image cache, including objects cached by older workers.
+            urlPattern: ({ request, url }) =>
+              request.destination === 'video' ||
+              request.destination === 'audio' ||
+              request.headers.has('range') ||
+              /\.(?:mp4|webm|mov|m4v|ogv|mp3|m4a)(?:$)/i.test(url.pathname),
+            handler: 'NetworkOnly',
+          },
+          {
             // Cache images (Supabase, local uploads, static webp/jpg/png)
             urlPattern: ({ request, url }) =>
               request.destination === 'image' ||
-              url.pathname.includes('/storage/v1/object/public/') ||
               /\.(?:png|jpg|jpeg|svg|webp|gif)$/i.test(url.pathname),
             handler: 'CacheFirst',
             options: {
