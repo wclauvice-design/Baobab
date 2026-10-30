@@ -238,7 +238,7 @@ export function MediaDropzone({
 
       <span style={{ fontSize: 11, color: palette.muted }}>
         {hint ||
-          'Astuce : copiez une image (site, WhatsApp, Dubizzle) puis Ctrl+V ici. Les médias remplissent automatiquement toute la zone.'}
+          'Astuce : copiez une image (site, WhatsApp) puis Ctrl+V ici. Les médias remplissent automatiquement toute la zone.'}
       </span>
       {error && <span style={{ fontSize: 11, fontWeight: 700, color: palette.error }}>{error}</span>}
     </div>

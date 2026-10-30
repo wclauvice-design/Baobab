@@ -151,7 +151,7 @@ export function Catalog() {
   }
 
   async function promptAddByUrl(productId: string) {
-    const url = window.prompt("Collez l'URL directe de l'image (Temu, Dubizzle, CDN ou lien web) :");
+    const url = window.prompt("Collez l'URL directe de l'image (CDN ou lien web) :");
     if (!url || !url.trim()) return;
 
     setBusyProductId(productId);
@@ -466,7 +466,7 @@ export function Catalog() {
                       <button
                         type="button"
                         onClick={() => promptAddByUrl(p.id)}
-                        title="Ajouter une photo par lien URL (Temu, Dubizzle, fournisseur...)"
+                        title="Ajouter une photo par lien URL (lien web)"
                         className="flex h-16 w-12 shrink-0 flex-col items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30 transition-all text-[9px] font-medium"
                       >
                         <span className="text-xs">🔗</span>

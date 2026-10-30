@@ -5,19 +5,19 @@ import { useCurrency } from '../lib/currency';
 import { parseVehicleData } from '../lib/vehicles';
 import { ImageSwipeGallery } from './ImageSwipeGallery';
 
-interface DubizzleVehicleDetailProps {
+interface VehicleDetailProps {
   product: any;
   destination: any;
   onDiscuss: () => void;
   busy?: boolean;
 }
 
-export function DubizzleVehicleDetail({
+export function VehicleDetail({
   product,
   destination,
   onDiscuss,
   busy = false,
-}: DubizzleVehicleDetailProps) {
+}: VehicleDetailProps) {
   const { format } = useCurrency();
   const [isFavorite, setIsFavorite] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
@@ -112,7 +112,7 @@ export function DubizzleVehicleDetail({
           )}
         </div>
 
-        {/* 4 CAPSULES SIGNATURE DUBIZZLE MOTORS (Specs clés immédiates) */}
+        {/* 4 CAPSULES SIGNATURE (Specs clés immédiates) */}
         <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           <div className="flex items-center gap-2 rounded-xl bg-slate-50 px-3.5 py-2.5 border border-slate-200/80">
             <span className="text-base">📅</span>
@@ -171,7 +171,7 @@ export function DubizzleVehicleDetail({
         )}
       </div>
 
-      {/* 4. CAR OVERVIEW / SPÉCIFICATIONS TECHNIQUES DU VÉHICULE (Table Dubizzle épurée) */}
+      {/* 4. CAR OVERVIEW / SPÉCIFICATIONS TECHNIQUES DU VÉHICULE (Table épurée) */}
       <div className="mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E2E8F0] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
         <h2 className="text-lg font-bold font-heading text-[#0B1E17] mb-4">
           Fiche technique détaillée
@@ -260,7 +260,7 @@ export function DubizzleVehicleDetail({
         </div>
       </div>
 
-      {/* 5. ÉQUIPEMENTS & OPTIONS (ACCORDÉONS DUBIZZLE) */}
+      {/* 5. ÉQUIPEMENTS & OPTIONS (ACCORDÉONS) */}
       <div className="mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl border border-[#E2E8F0] bg-white p-5 sm:p-7 shadow-[0_2px_16px_rgba(23,62,50,0.05)]">
         <h2 className="text-lg font-bold font-heading text-[#0B1E17] mb-4">
           Équipements & Options

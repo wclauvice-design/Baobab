@@ -78,7 +78,7 @@ export function VehicleCard({
         </button>
       )}
 
-      {/* Badges d'état Dubizzle Motors */}
+      {/* Badges d'état véhicule */}
       <div className="absolute top-2 left-2 flex flex-col gap-1 pointer-events-none z-10">
         <span
           className={`picture-tag condition-tag condition-${String(
@@ -100,7 +100,7 @@ export function VehicleCard({
       >
         <h3 title={product.name}>{product.name}</h3>
 
-        {/* Ligne de spécifications automobiles immédiates (Dubizzle Motors) */}
+        {/* Ligne de spécifications automobiles immédiates */}
         <div className="vehicle-specs-row flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 mt-1 font-medium">
           <span>{specs.year || '2024'}</span>
           <span>·</span>

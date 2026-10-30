@@ -1,0 +1,437 @@
+[
+  {
+    "id": "wz-hp-elitebook-840-g6",
+    "sellerId": "seller-westzone-official",
+    "categoryId": "cmvmjgtr5000rpyktbcm7mjqt",
+    "categoryIds": [
+      "cmvmjgtr5000rpyktbcm7mjqt"
+    ],
+    "name": "HP EliteBook 840 G6 — i5, 8 Go, 256 Go SSD (Reconditionné)",
+    "description": "Ordinateur portable professionnel HP EliteBook 840 G6, reconditionné Grade A. Châssis métallique, clavier confortable et écran 14 pouces Full HD. Configuration indicative : Intel Core i5 8e génération, 8 Go de RAM et 256 Go SSD. Chaque unité est testée avant expédition (écran, clavier, batterie, ports et performances), nettoyée et livrée avec chargeur et Windows activé.\n\nProduit sur commande : la configuration exacte est confirmée avant paiement, puis expédition sous 10 à 15 jours ouvrés. Garantie 3 mois. Idéal pour les professionnels, étudiants et entrepreneurs.",
+    "price": 299000,
+    "supplierPrice": 192794,
+    "currency": "XOF",
+    "stock": 10,
+    "images": [
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-elitebook-840-g6.png"
+    ],
+    "moderation": "PUBLISHED",
+    "subcategory": "PC portables",
+    "subcategories": [
+      "PC portables"
+    ],
+    "condition": "REFURBISHED",
+    "location": "Ouagadougou",
+    "minimumOrder": 1,
+    "packSize": 1,
+    "unit": "pièce",
+    "shippingIncluded": false,
+    "weightKg": 1.6,
+    "dimensions": null,
+    "attributes": {
+      "Marque": "HP",
+      "Modèle": "HP EliteBook 840 G6",
+      "Processeur": "Intel Core i5 8e génération",
+      "Mémoire": "8 Go RAM",
+      "Stockage": "256 Go SSD",
+      "Écran": "14\" Full HD",
+      "Système": "Windows 11",
+      "Chargeur": "Inclus",
+      "État": "Reconditionné Grade A",
+      "Garantie": "3 mois",
+      "Origine": "Dubaï (Émirats arabes unis)",
+      "Délai de livraison": "10 à 15 jours ouvrés"
+    }
+  },
+  {
+    "id": "wz-hp-elitebook-840-g8",
+    "sellerId": "seller-westzone-official",
+    "categoryId": "cmvmjgtr5000rpyktbcm7mjqt",
+    "categoryIds": [
+      "cmvmjgtr5000rpyktbcm7mjqt"
+    ],
+    "name": "HP EliteBook 840 G8 — i5 11e gén., 8 Go, 256 Go SSD (Reconditionné)",
+    "description": "HP EliteBook 840 G8 reconditionné Grade A, le best-seller de la gamme professionnelle. Processeur Intel Core i5 de 11e génération, 8 Go de RAM et 256 Go SSD NVMe pour un usage bureautique, étudiant ou entrepreneurial fluide. Écran 14 pouces Full HD, châssis métallique, Wi-Fi 6 et excellente autonomie.\n\nTesté avant expédition (écran, clavier, batterie, ports), nettoyé, livré avec chargeur et Windows activé. Produit sur commande : configuration confirmée avant paiement, expédition sous 10 à 15 jours ouvrés. Garantie 3 mois.",
+    "price": 350500,
+    "supplierPrice": 226000,
+    "currency": "XOF",
+    "stock": 10,
+    "images": [
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-elitebook-840-g8.png"
+    ],
+    "moderation": "PUBLISHED",
+    "subcategory": "PC portables",
+    "subcategories": [
+      "PC portables"
+    ],
+    "condition": "REFURBISHED",
+    "location": "Ouagadougou",
+    "minimumOrder": 1,
+    "packSize": 1,
+    "unit": "pièce",
+    "shippingIncluded": false,
+    "weightKg": 1.6,
+    "dimensions": null,
+    "attributes": {
+      "Marque": "HP",
+      "Modèle": "HP EliteBook 840 G8",
+      "Processeur": "Intel Core i5-1135G7",
+      "Mémoire": "8 Go RAM",
+      "Stockage": "256 Go SSD NVMe",
+      "Écran": "14\" Full HD",
+      "Connectivité": "Wi-Fi 6 · Bluetooth 5",
+      "Chargeur": "Inclus",
+      "État": "Reconditionné Grade A",
+      "Garantie": "3 mois",
+      "Origine": "Dubaï (Émirats arabes unis)",
+      "Délai de livraison": "10 à 15 jours ouvrés"
+    }
+  },
+  {
+    "id": "wz-hp-probook-640-g8",
+    "sellerId": "seller-westzone-official",
+    "categoryId": "cmvmjgtr5000rpyktbcm7mjqt",
+    "categoryIds": [
+      "cmvmjgtr5000rpyktbcm7mjqt"
+    ],
+    "name": "HP ProBook 640 G8 — i5 11e gén., 8 Go, 256 Go SSD (Reconditionné)",
+    "description": "HP ProBook 640 G8 reconditionné Grade A : le portable professionnel robuste pour le terrain, le bureau et les déplacements. Intel Core i5 de 11e génération, 8 Go de RAM, 256 Go SSD et écran 14 pouces Full HD. Châssis renforcé, clavier résistant et connectique complète.\n\nContrôlé et testé avant expédition, livré avec chargeur et Windows activé. Produit sur commande : configuration confirmée avant paiement, expédition sous 10 à 15 jours ouvrés. Garantie 3 mois.",
+    "price": 403000,
+    "supplierPrice": 260125,
+    "currency": "XOF",
+    "stock": 10,
+    "images": [
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-probook-640-g8.png"
+    ],
+    "moderation": "PUBLISHED",
+    "subcategory": "PC portables",
+    "subcategories": [
+      "PC portables"
+    ],
+    "condition": "REFURBISHED",
+    "location": "Ouagadougou",
+    "minimumOrder": 1,
+    "packSize": 1,
+    "unit": "pièce",
+    "shippingIncluded": false,
+    "weightKg": 2.2,
+    "dimensions": null,
+    "attributes": {
+      "Marque": "HP",
+      "Modèle": "HP ProBook 640 G8",
+      "Processeur": "Intel Core i5-1135G7",
+      "Mémoire": "8 Go RAM",
+      "Stockage": "256 Go SSD",
+      "Écran": "14\" Full HD",
+      "Châssis": "Renforcé, clavier résistant aux projections",
+      "Chargeur": "Inclus",
+      "État": "Reconditionné Grade A",
+      "Garantie": "3 mois",
+      "Origine": "Dubaï (Émirats arabes unis)",
+      "Délai de livraison": "10 à 15 jours ouvrés"
+    }
+  },
+  {
+    "id": "wz-hp-zbook-14u-g6",
+    "sellerId": "seller-westzone-official",
+    "categoryId": "cmvmjgtr5000rpyktbcm7mjqt",
+    "categoryIds": [
+      "cmvmjgtr5000rpyktbcm7mjqt"
+    ],
+    "name": "HP ZBook 14u G6 — i7, 16 Go, 512 Go SSD (Station mobile reconditionnée)",
+    "description": "Station de travail mobile HP ZBook 14u G6 reconditionnée Grade A, conçue pour les usages exigeants : bureautique avancée, conception, graphisme et montage léger. Intel Core i7 de 8e génération, 16 Go de RAM, 512 Go SSD et carte graphique dédiée selon stock. Format 14 pouces fin et léger.\n\nTestée avant expédition, livrée avec chargeur et Windows activé. Produit sur commande : configuration confirmée avant paiement, expédition sous 10 à 15 jours ouvrés. Garantie 3 mois.",
+    "price": 370000,
+    "supplierPrice": 238731,
+    "currency": "XOF",
+    "stock": 10,
+    "images": [
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-zbook-14u-g6.png"
+    ],
+    "moderation": "PUBLISHED",
+    "subcategory": "PC portables",
+    "subcategories": [
+      "PC portables"
+    ],
+    "condition": "REFURBISHED",
+    "location": "Ouagadougou",
+    "minimumOrder": 1,
+    "packSize": 1,
+    "unit": "pièce",
+    "shippingIncluded": false,
+    "weightKg": 1.9,
+    "dimensions": null,
+    "attributes": {
+      "Marque": "HP",
+      "Modèle": "HP ZBook 14u G6",
+      "Processeur": "Intel Core i7 8e génération",
+      "Mémoire": "16 Go RAM",
+      "Stockage": "512 Go SSD",
+      "Écran": "14\" Full HD",
+      "Graphique": "Carte dédiée selon stock",
+      "Chargeur": "Inclus",
+      "État": "Reconditionné Grade A",
+      "Garantie": "3 mois",
+      "Origine": "Dubaï (Émirats arabes unis)",
+      "Délai de livraison": "10 à 15 jours ouvrés"
+    }
+  },
+  {
+    "id": "wz-hp-pro-x360-fortis-11-g10-2-en-1-tactile",
+    "sellerId": "seller-westzone-official",
+    "categoryId": "cmvmjgtr5000rpyktbcm7mjqt",
+    "categoryIds": [
+      "cmvmjgtr5000rpyktbcm7mjqt"
+    ],
+    "name": "HP Pro x360 Fortis 11 G10 — 2-en-1 tactile, 8 Go, 128 Go (Reconditionné)",
+    "description": "HP Pro x360 Fortis 11 G10, ordinateur 2-en-1 tactile reconditionné Grade A : l'écran se replie à 360° pour passer du mode PC au mode tablette. Format 11,6 pouces compact et renforcé, pensé pour les étudiants, la prise de notes et la mobilité. Intel Celeron ou Pentium Silver, 8 Go de RAM et 128 Go de stockage.\n\nTesté avant expédition, livré avec chargeur et Windows activé. Produit sur commande : configuration confirmée avant paiement, expédition sous 10 à 15 jours ouvrés. Garantie 3 mois.",
+    "price": 301500,
+    "supplierPrice": 194356,
+    "currency": "XOF",
+    "stock": 10,
+    "images": [
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-pro-x360-fortis-11-g10.png"
+    ],
+    "moderation": "PUBLISHED",
+    "subcategory": "PC portables",
+    "subcategories": [
+      "PC portables"
+    ],
+    "condition": "REFURBISHED",
+    "location": "Ouagadougou",
+    "minimumOrder": 1,
+    "packSize": 1,
+    "unit": "pièce",
+    "shippingIncluded": false,
+    "weightKg": 1.7,
+    "dimensions": null,
+    "attributes": {
+      "Marque": "HP",
+      "Modèle": "HP Pro x360 Fortis 11 G10",
+      "Écran": "11,6\" tactile · rotation 360°",
+      "Processeur": "Intel Celeron / Pentium Silver",
+      "Mémoire": "8 Go RAM",
+      "Stockage": "128 Go SSD",
+      "Mode": "PC, tablette, tente, présentation",
+      "Chargeur": "Inclus",
+      "État": "Reconditionné Grade A",
+      "Garantie": "3 mois",
+      "Origine": "Dubaï (Émirats arabes unis)",
+      "Délai de livraison": "10 à 15 jours ouvrés"
+    }
+  },
+  {
+    "id": "wz-iphone-13-128",
+    "sellerId": "seller-westzone-official",
+    "categoryId": "cmvmjgr5j0000pyktduv8i8pt",
+    "categoryIds": [
+      "cmvmjgr5j0000pyktduv8i8pt"
+    ],
+    "name": "iPhone 13 128 Go — Reconditionné Grade A, batterie ≥ 85 %",
+    "description": "iPhone 13 128 Go reconditionné Grade A. Écran 6,1 pouces Super Retina, puce A15 Bionic, double appareil photo 12 Mpx et 5G. Appareil débloqué tout opérateur, IMEI propre, iCloud retiré et batterie à 85 % minimum. Contrôlé sur 30 points avant expédition.\n\nProduit sur commande : état et couleur confirmés avant paiement, expédition sous 10 à 15 jours ouvrés. Garantie 3 mois. Chargeur et câble vendus séparément.",
+    "price": 397000,
+    "supplierPrice": 256175,
+    "currency": "XOF",
+    "stock": 10,
+    "images": [
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/iphone-13-128.png"
+    ],
+    "moderation": "PUBLISHED",
+    "subcategory": "Smartphones",
+    "subcategories": [
+      "Smartphones"
+    ],
+    "condition": "REFURBISHED",
+    "location": "Ouagadougou",
+    "minimumOrder": 1,
+    "packSize": 1,
+    "unit": "pièce",
+    "shippingIncluded": false,
+    "weightKg": 0.4,
+    "dimensions": null,
+    "attributes": {
+      "Marque": "Apple",
+      "Modèle": "iPhone 13 128 Go",
+      "Stockage": "128 Go",
+      "Écran": "6,1\" Super Retina",
+      "Puce": "A15 Bionic",
+      "Batterie": "≥ 85 % de capacité",
+      "Réseau": "5G · débloqué tout opérateur",
+      "Contrôle": "IMEI propre · iCloud retiré · 30 points vérifiés",
+      "État": "Reconditionné Grade A",
+      "Garantie": "3 mois",
+      "Origine": "Dubaï (Émirats arabes unis)",
+      "Délai de livraison": "10 à 15 jours ouvrés"
+    }
+  },
+  {
+    "id": "wz-galaxy-s23-128",
+    "sellerId": "seller-westzone-official",
+    "categoryId": "cmvmjgr5j0000pyktduv8i8pt",
+    "categoryIds": [
+      "cmvmjgr5j0000pyktduv8i8pt"
+    ],
+    "name": "Samsung Galaxy S23 128 Go — Reconditionné Grade A, débloqué",
+    "description": "Samsung Galaxy S23 128 Go reconditionné Grade A. Écran 6,1 pouces AMOLED 120 Hz, Snapdragon 8 Gen 2, triple appareil photo 50 Mpx et 5G. Téléphone débloqué tout opérateur, FRP retiré, IMEI propre et batterie contrôlée.\n\nProduit sur commande : état et couleur confirmés avant paiement, expédition sous 10 à 15 jours ouvrés. Garantie 3 mois. Chargeur vendu séparément.",
+    "price": 430500,
+    "supplierPrice": 277625,
+    "currency": "XOF",
+    "stock": 10,
+    "images": [
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/galaxy-s23-128.png"
+    ],
+    "moderation": "PUBLISHED",
+    "subcategory": "Smartphones",
+    "subcategories": [
+      "Smartphones"
+    ],
+    "condition": "REFURBISHED",
+    "location": "Ouagadougou",
+    "minimumOrder": 1,
+    "packSize": 1,
+    "unit": "pièce",
+    "shippingIncluded": false,
+    "weightKg": 0.4,
+    "dimensions": null,
+    "attributes": {
+      "Marque": "Samsung",
+      "Modèle": "Samsung Galaxy S23 128 Go",
+      "Stockage": "128 Go",
+      "Écran": "6,1\" AMOLED 120 Hz",
+      "Processeur": "Snapdragon 8 Gen 2",
+      "Photo": "Triple capteur 50 Mpx",
+      "Réseau": "5G · débloqué tout opérateur",
+      "Contrôle": "FRP retiré · IMEI propre · batterie testée",
+      "État": "Reconditionné Grade A",
+      "Garantie": "3 mois",
+      "Origine": "Dubaï (Émirats arabes unis)",
+      "Délai de livraison": "10 à 15 jours ouvrés"
+    }
+  },
+  {
+    "id": "wz-kit-solaire-200w",
+    "sellerId": "seller-westzone-official",
+    "categoryId": "cat-energie-solaire-batteries",
+    "categoryIds": [
+      "cat-energie-solaire-batteries"
+    ],
+    "name": "Kit solaire portable 200 W — Station LiFePO4 + panneau 100 W",
+    "description": "Kit solaire portable pour l'essentiel du quotidien : station d'énergie 200 W avec batterie LiFePO4 et panneau solaire pliable 100 W. Recharge téléphones, lampes, ordinateurs portables, ventilateurs et petits appareils. Prises AC 220 V, USB et USB-C. Protection contre les surcharges et la décharge profonde.\n\nProduit sur commande : autonomie réelle selon les appareils, confirmée avant paiement. Expédition sous 10 à 15 jours ouvrés. Garantie 3 mois.",
+    "price": 299000,
+    "supplierPrice": 166125,
+    "currency": "XOF",
+    "stock": 10,
+    "images": [
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/kit-solaire-200w.png"
+    ],
+    "moderation": "PUBLISHED",
+    "subcategory": "Panneaux solaires",
+    "subcategories": [
+      "Panneaux solaires"
+    ],
+    "condition": "NEW",
+    "location": "Ouagadougou",
+    "minimumOrder": 1,
+    "packSize": 1,
+    "unit": "pièce",
+    "shippingIncluded": false,
+    "weightKg": 4.5,
+    "dimensions": null,
+    "attributes": {
+      "Marque": "WESTZONE",
+      "Modèle": "Kit solaire 200 W",
+      "Puissance": "Station 200 W · 220 V",
+      "Batterie": "LiFePO4",
+      "Panneau": "Solaire pliable 100 W",
+      "Prises": "AC 220 V · USB · USB-C",
+      "Protection": "Surcharge · décharge profonde · court-circuit",
+      "État": "Neuf",
+      "Garantie": "3 mois",
+      "Origine": "Dubaï (Émirats arabes unis)",
+      "Délai de livraison": "10 à 15 jours ouvrés"
+    }
+  },
+  {
+    "id": "wz-mini-projecteur-1080p",
+    "sellerId": "seller-westzone-official",
+    "categoryId": "cmvmjgvc7001hpyktiocaugvg",
+    "categoryIds": [
+      "cmvmjgvc7001hpyktiocaugvg"
+    ],
+    "name": "Mini projecteur 1080p — HDMI, USB, haut-parleur intégré",
+    "description": "Mini projecteur Full HD 1080p pour le cinéma à domicile, les matchs et les présentations. Entrées HDMI et USB, haut-parleur intégré, correction de trapèze et mise au point réglable. Compact et facile à installer sur un mur ou un écran blanc.\n\nProduit sur commande : luminosité et connectique exactes confirmées avant paiement. Expédition sous 10 à 15 jours ouvrés. Garantie 3 mois. Trépied non inclus.",
+    "price": 134500,
+    "supplierPrice": 74820,
+    "currency": "XOF",
+    "stock": 10,
+    "images": [
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/mini-projecteur-1080p.png"
+    ],
+    "moderation": "PUBLISHED",
+    "subcategory": "Projecteurs",
+    "subcategories": [
+      "Projecteurs"
+    ],
+    "condition": "NEW",
+    "location": "Ouagadougou",
+    "minimumOrder": 1,
+    "packSize": 1,
+    "unit": "pièce",
+    "shippingIncluded": false,
+    "weightKg": 1.2,
+    "dimensions": null,
+    "attributes": {
+      "Marque": "WESTZONE",
+      "Modèle": "Mini projecteur 1080p",
+      "Résolution": "Full HD 1920 × 1080",
+      "Connectique": "HDMI · USB · prise casque",
+      "Audio": "Haut-parleur intégré",
+      "Réglages": "Mise au point · correction de trapèze",
+      "État": "Neuf",
+      "Garantie": "3 mois",
+      "Origine": "Dubaï (Émirats arabes unis)",
+      "Délai de livraison": "10 à 15 jours ouvrés"
+    }
+  },
+  {
+    "id": "wz-ps5-slim",
+    "sellerId": "seller-westzone-official",
+    "categoryId": "cat-jeux-consoles",
+    "categoryIds": [
+      "cat-jeux-consoles"
+    ],
+    "name": "PlayStation 5 Slim — Lecteur Blu-ray, 1 manette",
+    "description": "PlayStation 5 Slim avec lecteur Blu-ray et une manette DualSense. Version internationale compatible 220–240 V, adaptateur de prise inclus si nécessaire. Idéale pour le gaming, le streaming et le cinéma à la maison.\n\nProduit sur commande : version et contenu du coffret confirmés avant paiement. Expédition sous 10 à 15 jours ouvrés. Garantie 3 mois.",
+    "price": 694000,
+    "supplierPrice": 433850,
+    "currency": "XOF",
+    "stock": 10,
+    "images": [
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/ps5-slim.png"
+    ],
+    "moderation": "PUBLISHED",
+    "subcategory": "Consoles",
+    "subcategories": [
+      "Consoles"
+    ],
+    "condition": "NEW",
+    "location": "Ouagadougou",
+    "minimumOrder": 1,
+    "packSize": 1,
+    "unit": "pièce",
+    "shippingIncluded": false,
+    "weightKg": 3.5,
+    "dimensions": null,
+    "attributes": {
+      "Marque": "Sony",
+      "Modèle": "PlayStation 5 Slim",
+      "Édition": "Slim avec lecteur Blu-ray",
+      "Manette": "1 DualSense incluse",
+      "Alimentation": "220–240 V · version internationale",
+      "Stockage": "1 To SSD",
+      "État": "Neuf",
+      "Garantie": "3 mois",
+      "Origine": "Dubaï (Émirats arabes unis)",
+      "Délai de livraison": "10 à 15 jours ouvrés"
+    }
+  }
+]

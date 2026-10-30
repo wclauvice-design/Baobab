@@ -246,7 +246,7 @@ export function ListingEditor() {
   async function handleRowAddByUrl(productId: string, providedUrl?: string) {
     const url =
       providedUrl ??
-      window.prompt("Collez l'URL de l'image ou de la vidéo (Temu, Dubizzle, WhatsApp ou web) :");
+      window.prompt("Collez l'URL de l'image ou de la vidéo (lien web ou WhatsApp) :");
     if (!url || !url.trim()) return;
     setBusyProductId(productId);
     setBusyMessage("Ajout par URL...");
@@ -949,7 +949,7 @@ export function ListingEditor() {
                     }}
                   >
                     <span>🔗 Par lien</span>
-                    <span style={{ fontSize: "9px", fontWeight: 400, opacity: 0.7 }}>Temu/Dubizzle</span>
+                    <span style={{ fontSize: "9px", fontWeight: 400, opacity: 0.7 }}>Lien web</span>
                   </button>
                 </div>
               </div>
@@ -1261,7 +1261,7 @@ export function ListingEditor() {
                   <button
                     type="button"
                     onClick={() => handleRowAddByUrl(p.id)}
-                    title="Ajouter une photo par lien URL (Temu, Dubizzle, WhatsApp)"
+                    title="Ajouter une photo par lien URL (lien web, WhatsApp)"
                     style={{
                       height: "52px",
                       padding: "0 8px",

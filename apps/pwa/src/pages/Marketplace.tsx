@@ -1,6 +1,6 @@
 import { ProductVideo } from '../components/ProductVideo';
 import { VariantPicker } from '../components/VariantPicker';
-import { ListingVariant, variantLabel, isInternalAttribute } from '@westzone/shared';
+import { ListingVariant, variantLabel, publicAttributes as sharedPublicAttributes } from '@westzone/shared';
 import { FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   Link,
@@ -44,7 +44,7 @@ import {
   rememberProducts,
 } from "../lib/productCache";
 import { VehicleCard } from "../components/VehicleCard";
-import { DubizzleVehicleDetail } from "../components/DubizzleVehicleDetail";
+import { VehicleDetail } from "../components/VehicleDetail";
 import { ImageSwipeGallery } from "../components/ImageSwipeGallery";
 import "./marketplace.css";
 import "./marketplace-premium.css";
@@ -491,13 +491,11 @@ function startingPrice(product: any): number {
 
 /** Les caractéristiques internes (marge, devise source) ne sont jamais publiques. */
 function publicAttributes(attributes: any): Record<string, string> {
-  if (!attributes || typeof attributes !== "object" || Array.isArray(attributes)) {
-    return {};
-  }
   return Object.fromEntries(
-    Object.entries(attributes)
-      .filter(([key]) => !isInternalAttribute(key))
-      .map(([key, value]) => [key, String(value)]),
+    Object.entries(sharedPublicAttributes(attributes)).map(([key, value]) => [
+      key,
+      String(value),
+    ]),
   );
 }
 
@@ -768,7 +766,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
         </section>
       )}
 
-      {/* 2. Réassurance & activité dynamique (Temu-inspired compact ribbon) */}
+      {/* 2. Réassurance & activité dynamique (bandeau compact) */}
       {/* 3. Catégories — chips sobres, sans emoji */}
       {!favorites && (
         <nav className="bb-cat-strip" aria-label="Catégories">
@@ -1225,7 +1223,7 @@ export function ListingDetail() {
 
   if (isVehicleProduct(p)) {
     return (
-      <DubizzleVehicleDetail
+      <VehicleDetail
         product={p}
         destination={dest}
         onDiscuss={discuss}

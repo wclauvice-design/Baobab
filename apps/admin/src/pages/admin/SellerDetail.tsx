@@ -301,7 +301,7 @@ export function SellerDetail() {
 
   // Quick row add by URL
   async function handleRowAddByUrl(productId: string) {
-    const url = window.prompt("Collez l'URL de l'image (Temu, Dubizzle, WhatsApp ou web) :");
+    const url = window.prompt("Collez l'URL de l'image (lien web ou WhatsApp) :");
     if (!url || !url.trim()) return;
     setUploadingProductId(productId);
     try {
@@ -343,7 +343,7 @@ export function SellerDetail() {
   // Modal add photo by URL
   async function handleModalAddByUrl() {
     if (!modifyingProduct) return;
-    const url = window.prompt("Collez l'URL de l'image (Temu, Dubizzle, WhatsApp ou web) :");
+    const url = window.prompt("Collez l'URL de l'image (lien web ou WhatsApp) :");
     if (!url || !url.trim()) return;
     setModalUploadingPhotos(true);
     try {
@@ -922,7 +922,7 @@ export function SellerDetail() {
                             type="button"
                             onClick={() => handleRowAddByUrl(p.id)}
                             className="flex h-5 items-center justify-center gap-1 px-1.5 rounded border border-slate-300 bg-white text-[9px] font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs"
-                            title="Ajouter une photo par lien URL (Temu, Dubizzle, WhatsApp)"
+                            title="Ajouter une photo par lien URL (lien web, WhatsApp)"
                           >
                             🔗 Lien
                           </button>
@@ -1356,7 +1356,7 @@ export function SellerDetail() {
                   >
                     <span className="text-base">🔗</span>
                     <span>Par lien</span>
-                    <span className="text-[9px] font-normal text-slate-400">Temu/Dubizzle</span>
+                    <span className="text-[9px] font-normal text-slate-400">Lien web</span>
                   </button>
                 </div>
               </div>
@@ -1715,7 +1715,7 @@ export function SellerDetail() {
                     files={newProdFiles}
                     onChangeFiles={setNewProdFiles}
                     label="Photos & vidéos réelles du produit"
-                    hint="Sélectionnez, glissez-déposez ou collez (Ctrl+V) une image ou une vidéo copiée depuis un site, WhatsApp ou Dubizzle."
+                    hint="Sélectionnez, glissez-déposez ou collez (Ctrl+V) une image ou une vidéo copiée depuis un site ou WhatsApp."
                   />
                 </div>
               </div>

@@ -31,7 +31,7 @@ function discountPercent(price: number, compareAtPrice?: number | null) {
 
 export function ProductCard({ product }: { product: Product }) {
   const { format } = useCurrency();
-  // If product is an actual vehicle, render dedicated Dubizzle Motors vehicle card
+  // If product is an actual vehicle, render the dedicated vehicle card
   if (isVehicleProduct(product)) {
     return <VehicleCard product={product} />;
   }

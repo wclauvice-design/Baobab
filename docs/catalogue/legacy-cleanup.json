@@ -1,0 +1,91 @@
+[
+  {
+    "id": "cmvrao06h0001p4rlxwmsc92q",
+    "sellerId": "seller-westzone-official",
+    "categoryId": "cmvmjgrnx0003pyktyv2968c4",
+    "categoryIds": [
+      "cmvmjgrnx0003pyktyv2968c4"
+    ],
+    "name": "Fer à repasser Panasonic NI100DXWT — 1 000 W, sans fil, blanc",
+    "description": "Fer à repasser Panasonic NI100DXWT de 1 000 W, coloris blanc. Semelle incurvée à revêtement antiadhésif pour glisser sur tous les tissus, câble pivotant conçu pour limiter l’emmêlement et fonctionnement sur secteur 220–240 V.\n\nProduit sur commande : disponibilité et type de prise confirmés avant paiement. Expédition sous 10 à 15 jours ouvrés. Garantie 3 mois.",
+    "price": 73000,
+    "supplierPrice": 48706,
+    "currency": "XOF",
+    "stock": 10,
+    "images": [
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/fer-panasonic-ni100dxwt.png"
+    ],
+    "moderation": "PUBLISHED",
+    "subcategory": "Petit Électroménager",
+    "subcategories": [
+      "Petit Électroménager"
+    ],
+    "condition": "NEW",
+    "location": "Ouagadougou",
+    "minimumOrder": 1,
+    "packSize": 1,
+    "unit": "pièce",
+    "shippingIncluded": false,
+    "weightKg": 1.2,
+    "dimensions": null,
+    "attributes": {
+      "Marque": "Panasonic",
+      "Modèle": "Fer à repasser Panasonic",
+      "Puissance": "1 000 W",
+      "Alimentation": "220–240 V · secteur",
+      "Semelle": "Revêtement antiadhésif, forme incurvée",
+      "Câble": "Pivotant, anti-emmêlement",
+      "Couleur": "Blanc",
+      "Contenu": "Fer · manuel d’utilisation",
+      "État": "Neuf",
+      "Garantie": "3 mois",
+      "Origine": "Dubaï (Émirats arabes unis)",
+      "Délai de livraison": "10 à 15 jours ouvrés"
+    }
+  },
+  {
+    "id": "cmvray52i0003p4rlzjp0c35g",
+    "sellerId": "seller-westzone-official",
+    "categoryId": "cmvmjortw000l3mdj0mnlt3mt",
+    "categoryIds": [
+      "cmvmjortw000l3mdj0mnlt3mt"
+    ],
+    "name": "Souffleur turbo portable NOPNOG — 110 000 tr/min, 4 vitesses, 5 embouts",
+    "description": "Souffleur turbo portable NOPNOG pour nettoyer claviers, ordinateurs, voitures et espaces extérieurs. Moteur jusqu’à 110 000 tr/min, quatre niveaux de vitesse, écran intelligent et cinq embouts pour adapter le flux d’air. Batterie haute capacité rechargeable en USB, tension de fonctionnement inférieure ou égale à 36 V.\n\nProduit sur commande : autonomie et contenu du kit confirmés avant paiement. Expédition sous 10 à 15 jours ouvrés. Garantie 3 mois.",
+    "price": 97000,
+    "supplierPrice": 38771,
+    "currency": "XOF",
+    "stock": 10,
+    "images": [
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/souffleur-turbo-nopnog.png"
+    ],
+    "moderation": "PUBLISHED",
+    "subcategory": "Gadgets",
+    "subcategories": [
+      "Gadgets"
+    ],
+    "condition": "NEW",
+    "location": "Ouagadougou",
+    "minimumOrder": 1,
+    "packSize": 1,
+    "unit": "pièce",
+    "shippingIncluded": false,
+    "weightKg": 0.8,
+    "dimensions": null,
+    "attributes": {
+      "Marque": "NOPNOG",
+      "Modèle": "Souffleur turbo portable",
+      "Vitesse": "Jusqu’à 110 000 tr/min",
+      "Niveaux": "4 vitesses",
+      "Écran": "Écran intelligent",
+      "Batterie": "Haute capacité · recharge USB",
+      "Tension": "≤ 36 V",
+      "Embouts": "5 inclus",
+      "Couleur": "Noir",
+      "État": "Neuf",
+      "Garantie": "3 mois",
+      "Origine": "Dubaï (Émirats arabes unis)",
+      "Délai de livraison": "10 à 15 jours ouvrés"
+    }
+  }
+]

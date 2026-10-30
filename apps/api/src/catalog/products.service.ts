@@ -1,5 +1,5 @@
 import {
-  isInternalAttribute,
+  publicAttributes,
   ListingVariant,
   publicPriceFromMerchant,
   validateListing as validateListingConfiguration,
@@ -757,7 +757,7 @@ export class ProductsService {
     const canonical = productCanonicalTaxonomy(product);
     return {
       ...safe,
-      attributes: Object.fromEntries(Object.entries(safe.attributes||{}).filter(([k])=>!isInternalAttribute(k))),
+      attributes: publicAttributes(safe.attributes),
       // Liste blanche : aucun champ interne de la variante ne peut fuiter.
       variants: ((safe.variants||[]) as ListingVariant[])
         .filter((variant) => variant.active)

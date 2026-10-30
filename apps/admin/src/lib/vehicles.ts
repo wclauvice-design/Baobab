@@ -1,6 +1,6 @@
 /**
  * Utilitaires et normalisation pour la catégorie Véhicules (Motors)
- * Format Dubizzle Motors UAE
+ * Format d'annonce automobile
  */
 
 export interface VehicleSpecs {

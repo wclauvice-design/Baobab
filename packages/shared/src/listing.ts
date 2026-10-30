@@ -64,16 +64,51 @@ export const PUBLIC_PRICE_MARKUP = 1.75;
  * exposées à l’acheteur (prix d’achat, marge, devise et taux source).
  */
 const INTERNAL_ATTRIBUTE_KEY =
-  /^(sourceprice|sourcecurrency|sourcepublicprice|fxrate|supplierprice|margin|marge|commission|purchaseprice|costprice|prixachat|prixfournisseur)$/i;
+  /^(source|vendeur|fournisseur|prixsource|prixachat|prixfournisseur|calculduprix|prixdevente|prixpublic|cif|fret|douane|landed|landedcost|cost|costprice|purchaseprice|supplierprice|sourceprice|sourcecurrency|sourcepublicprice|fxrate|margin|marge|commission)$/i;
 const INTERNAL_ATTRIBUTE_FRAGMENT =
-  /fournisseur|supplier|marge|margin|commission|fxrate|sourceprice|sourcecurrency|purchaseprice|costprice|prix\s*d['’]?\s*achat|co[uû]t\s+de\s+revient/i;
+  /fournisseur|supplier|marge|margin|commission|fxrate|sourceprice|sourcecurrency|purchaseprice|costprice|prixachat|coutderevient|landed|prixsource|calculduprix/i;
+
+/**
+ * Noms de places de marché et de fournisseurs qui ne doivent jamais apparaître
+ * dans une fiche publique (ni en clé, ni en valeur).
+ */
+export const VENDOR_MENTION =
+  /\b(temu|dubizzle|shein|aliexpress|alibaba|jumia|wish|ebay|amazon)\b/i;
+
+/** Clé d’attribut normalisée : sans accent, sans espace ni ponctuation. */
+function normalizeAttributeKey(key: string): string {
+  return String(key ?? '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\s_\-'’]+/g, '');
+}
 
 export function isInternalAttribute(key: string): boolean {
-  const value = String(key ?? '').trim();
+  const value = normalizeAttributeKey(key);
   if (!value) return false;
   return (
     INTERNAL_ATTRIBUTE_KEY.test(value) ||
     INTERNAL_ATTRIBUTE_FRAGMENT.test(value)
+  );
+}
+
+/** Attributs publiables : ni clé interne, ni valeur nommant un fournisseur. */
+export function publicAttributes(
+  attributes: unknown,
+): Record<string, unknown> {
+  if (!attributes || typeof attributes !== 'object' || Array.isArray(attributes)) {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(attributes as Record<string, unknown>).filter(
+      ([key, value]) => {
+        if (isInternalAttribute(key)) return false;
+        if (typeof value === 'string' && VENDOR_MENTION.test(value)) return false;
+        return true;
+      },
+    ),
   );
 }
 

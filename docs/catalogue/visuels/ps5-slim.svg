@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <clipPath id="belowHeader"><rect x="0" y="132" width="1080" height="868"/></clipPath>
+  </defs>
+  <rect width="1080" height="1080" fill="#FAF6ED"/>
+  <g clip-path="url(#belowHeader)">
+    <circle cx="948" cy="330" r="230" fill="#D9A441" opacity="0.14"/>
+    <circle cx="948" cy="330" r="150" fill="#B04E28" opacity="0.09"/>
+    <circle cx="90" cy="960" r="180" fill="#12304C" opacity="0.04"/>
+  </g>
+  <rect x="140" y="190" width="800" height="470" rx="34" fill="#FFFFFF" opacity="0.62"/>
+  <rect x="140" y="190" width="800" height="470" rx="34" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.35"/>
+  
+        <g transform="translate(540 425)">
+          <path d="M-70 -190 Q-150 -190 -160 -110 L-160 160 Q-160 210 -110 210 L-40 210 L-40 -190 Z" fill="#12304C"/>
+          <path d="M70 -190 Q150 -190 160 -110 L160 160 Q160 210 110 210 L40 210 L40 -190 Z" fill="#12304C"/>
+          <rect x="-24" y="-190" width="48" height="400" fill="#D9A441" opacity="0.35"/>
+          <circle cx="-100" cy="-60" r="8" fill="#FAF6ED"/>
+          <rect x="-110" y="40" width="40" height="6" rx="3" fill="#FAF6ED" opacity="0.8"/>
+        </g>
+  <text x="540" y="716" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" fill="#1B1A17">PlayStation 5 Slim</text>
+  <rect x="263" y="761" width="108" height="46" rx="23" fill="#12304C" opacity="0.055"/><rect x="263" y="761" width="108" height="46" rx="23" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.7"/><text x="317" y="792" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#12304C">Slim</text><rect x="387" y="761" width="244" height="46" rx="23" fill="#12304C" opacity="0.055"/><rect x="387" y="761" width="244" height="46" rx="23" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.7"/><text x="509" y="792" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#12304C">lecteur Blu-ray</text><rect x="647" y="761" width="170" height="46" rx="23" fill="#12304C" opacity="0.055"/><rect x="647" y="761" width="170" height="46" rx="23" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.7"/><text x="732" y="792" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#12304C">1 manette</text>
+  <text x="540" y="900" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#B04E28">694 000 FCFA</text>
+  <text x="540" y="944" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#5B5A54">Prix TTC · Garantie 3 mois</text>
+  <rect width="1080" height="132" fill="#12304C"/>
+  <rect y="132" width="1080" height="5" fill="#D9A441"/>
+  <text x="64" y="72" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700" letter-spacing="3" fill="#FAF6ED">WESTZONE</text>
+  <text x="64" y="104" font-family="Arial, Helvetica, sans-serif" font-size="17" letter-spacing="4" fill="#D9A441">AFRIQUE DE L'OUEST</text>
+  <rect x="830" y="46" width="186" height="46" rx="23" fill="#D9A441"/>
+  <text x="923" y="76" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" letter-spacing="1.5" fill="#12304C">SUR COMMANDE</text>
+  <rect y="1000" width="1080" height="80" fill="#0C2238"/>
+  <text x="540" y="1048" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="23" letter-spacing="2" fill="#FAF6ED">LIVRAISON OUAGADOUGOU 10–15 JOURS · PAIEMENT ORANGE MONEY</text>
+</svg>

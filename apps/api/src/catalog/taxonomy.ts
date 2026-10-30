@@ -36,7 +36,7 @@ export interface RuntimeTaxonomyUniverse {
  * Construit la taxonomie exposée aux interfaces en rattachant chaque
  * catégorie canonique aux catégories réellement présentes en base.
  *
- * Les catégories historiques (imports Dubizzle, doublons, anglais) ne sont
+ * Les catégories historiques (anciens imports, doublons, anglais) ne sont
  * pas supprimées : elles sont simplement rattachées à une catégorie
  * canonique, ce qui permet aux filtres de retrouver leurs produits.
  */

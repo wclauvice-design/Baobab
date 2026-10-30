@@ -99,7 +99,7 @@ Brancher un agrégateur de paiement automatique (Kolonell, CinetPay, API Orange 
 
 ## Suivi de commande
 
-Chaque changement de statut (création, confirmation de paiement, préparation, expédition, livraison, annulation, expiration) écrit une ligne dans `DeliveryEvent`, horodatée. La PWA affiche cet historique comme une timeline verticale (façon Temu) sur la page de suivi de commande (`apps/pwa/src/pages/OrderDetail.tsx`) : étapes déjà passées avec horodatage, étape courante en surbrillance, étapes à venir grisées avec leur description ; les commandes annulées/expirées affichent uniquement les événements réellement survenus.
+Chaque changement de statut (création, confirmation de paiement, préparation, expédition, livraison, annulation, expiration) écrit une ligne dans `DeliveryEvent`, horodatée. La PWA affiche cet historique comme une timeline verticale de suivi de colis sur la page de suivi de commande (`apps/pwa/src/pages/OrderDetail.tsx`) : étapes déjà passées avec horodatage, étape courante en surbrillance, étapes à venir grisées avec leur description ; les commandes annulées/expirées affichent uniquement les événements réellement survenus.
 
 ## Ce qui n'est pas connecté (volontairement, pour le MVP)
 

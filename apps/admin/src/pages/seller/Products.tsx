@@ -181,7 +181,7 @@ export function Products() {
 
   // Ajout direct par lien URL
   async function promptAddByUrl(productId: string) {
-    const url = window.prompt("Collez l'URL directe de l'image (Temu, Dubizzle, CDN ou lien web) :");
+    const url = window.prompt("Collez l'URL directe de l'image (CDN ou lien web) :");
     if (!url || !url.trim()) return;
 
     setBusyProductId(productId);
@@ -411,7 +411,7 @@ export function Products() {
             files={formFiles}
             onChangeFiles={setFormFiles}
             label="Photos & vidéos de l'article"
-            hint="Cliquez, glissez-déposez ou collez (Ctrl+V) une image ou une vidéo copiée depuis un site, WhatsApp ou Dubizzle."
+            hint="Cliquez, glissez-déposez ou collez (Ctrl+V) une image ou une vidéo copiée depuis un site ou WhatsApp."
           />
           <button className="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white shadow hover:bg-amber-600">
             Enregistrer et publier l'article
@@ -538,7 +538,7 @@ export function Products() {
                       <button
                         type="button"
                         onClick={() => promptAddByUrl(p.id)}
-                        title="Ajouter une photo par lien URL (Temu, Dubizzle, fournisseur...)"
+                        title="Ajouter une photo par lien URL (lien web)"
                         className="flex h-16 w-12 shrink-0 flex-col items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30 transition-all text-[9px] font-medium"
                       >
                         <span className="text-xs">🔗</span>

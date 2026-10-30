@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <clipPath id="belowHeader"><rect x="0" y="132" width="1080" height="868"/></clipPath>
+  </defs>
+  <rect width="1080" height="1080" fill="#FAF6ED"/>
+  <g clip-path="url(#belowHeader)">
+    <circle cx="948" cy="330" r="230" fill="#D9A441" opacity="0.14"/>
+    <circle cx="948" cy="330" r="150" fill="#B04E28" opacity="0.09"/>
+    <circle cx="90" cy="960" r="180" fill="#12304C" opacity="0.04"/>
+  </g>
+  <rect x="140" y="190" width="800" height="470" rx="34" fill="#FFFFFF" opacity="0.62"/>
+  <rect x="140" y="190" width="800" height="470" rx="34" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.35"/>
+  
+        <g transform="translate(540 440)">
+          <path d="M-210 70 L170 70 Q215 70 215 105 L215 128 L-215 128 L-215 105 Q-215 70 -175 70 Z" fill="#12304C"/>
+          <path d="M-120 70 Q-120 -30 -25 -30 L65 -30 Q155 -30 155 70 Z" fill="#B04E28"/>
+          <path d="M-70 -30 Q-70 -120 15 -120 L45 -120 Q115 -120 115 -62" fill="none" stroke="#D9A441" stroke-width="18" stroke-linecap="round"/>
+          <circle cx="-35" cy="20" r="14" fill="#FAF6ED" opacity="0.8"/>
+          <rect x="-170" y="128" width="340" height="10" rx="5" fill="#D9A441" opacity="0.65"/>
+        </g>
+  <text x="540" y="716" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" fill="#1B1A17">Fer à repasser Panasonic</text>
+  <rect x="220" y="761" width="145" height="46" rx="23" fill="#12304C" opacity="0.055"/><rect x="220" y="761" width="145" height="46" rx="23" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.7"/><text x="292.5" y="792" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#12304C">1 000 W</text><rect x="381" y="761" width="157" height="46" rx="23" fill="#12304C" opacity="0.055"/><rect x="381" y="761" width="157" height="46" rx="23" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.7"/><text x="459.5" y="792" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#12304C">sans fil</text><rect x="554" y="761" width="306" height="46" rx="23" fill="#12304C" opacity="0.055"/><rect x="554" y="761" width="306" height="46" rx="23" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.7"/><text x="707" y="792" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#12304C">semelle antiadhésive</text>
+  <text x="540" y="900" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#B04E28">73 000 FCFA</text>
+  <text x="540" y="944" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#5B5A54">Prix TTC · Garantie 3 mois</text>
+  <rect width="1080" height="132" fill="#12304C"/>
+  <rect y="132" width="1080" height="5" fill="#D9A441"/>
+  <text x="64" y="72" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700" letter-spacing="3" fill="#FAF6ED">WESTZONE</text>
+  <text x="64" y="104" font-family="Arial, Helvetica, sans-serif" font-size="17" letter-spacing="4" fill="#D9A441">AFRIQUE DE L'OUEST</text>
+  <rect x="830" y="46" width="186" height="46" rx="23" fill="#D9A441"/>
+  <text x="923" y="76" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" letter-spacing="1.5" fill="#12304C">SUR COMMANDE</text>
+  <rect y="1000" width="1080" height="80" fill="#0C2238"/>
+  <text x="540" y="1048" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="23" letter-spacing="2" fill="#FAF6ED">LIVRAISON OUAGADOUGOU 10–15 JOURS · PAIEMENT ORANGE MONEY</text>
+</svg>

@@ -6,7 +6,7 @@
  * - les catégories visibles en frontend et dans les formulaires commerçant/admin ;
  * - les sous-catégories ;
  * - les synonymes utilisés par la recherche intelligente ;
- * - le rattachement des catégories historiques de la base (Dubizzle, imports)
+ * - le rattachement des catégories historiques de la base (imports)
  *   aux catégories canoniques.
  *
  * Les catégories historiques restent en base et continuent de fonctionner :

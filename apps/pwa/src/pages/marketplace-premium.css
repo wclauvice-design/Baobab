@@ -1748,7 +1748,7 @@ html, body, #root, .market {
 }
 
 /* ==========================================================================
-   NATIVE COMPACT SHOPPING FEED (Inspired by Temu / Farfetch Mobile Experience)
+   NATIVE COMPACT SHOPPING FEED (Mobile-first experience)
    Prestige Midnight Onyx & Champagne Gold Edition
    ========================================================================== */
 
@@ -2019,7 +2019,7 @@ html, body, #root, .market {
   color: #6ee7b7;
 }
 
-/* 3. Flash Showcase 2 Columns (Temu Split Spotlight) */
+/* 3. Flash Showcase 2 Columns (Split Spotlight) */
 .app-flash-showcase {
   display: grid;
   grid-template-columns: 1fr 1fr;

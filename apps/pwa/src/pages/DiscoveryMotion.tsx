@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-// Trending search queries cycling in the search bar like Temu / AliExpress
+// Trending search queries cycling in the search bar
 export const POPULAR_SEARCHES = [
   "Toyota Land Cruiser V8 Dubaï",
   "Kit Solaire Complet 5 kVA",
@@ -98,7 +98,7 @@ function useRotation(count: number, intervalMs: number, paused: boolean) {
 }
 
 /**
- * Animated Search Bar with Vertical Rolling Suggestions (Temu-style)
+ * Animated Search Bar with Vertical Rolling Suggestions
  */
 export function DiscoverySearch({
   search,
@@ -195,7 +195,7 @@ export function DiscoverySearch({
 }
 
 /**
- * Dynamic Trust Ribbon (Compact, Space-saving, High-Conversion Temu-inspired Motion)
+ * Dynamic Trust Ribbon (Compact, Space-saving, High-Conversion Motion)
  * Replaces bulky stacked boxes with a single unified 42px interactive ribbon.
  */
 export function DynamicTrustRibbon({ paused = false }: { paused?: boolean }) {

@@ -1,6 +1,6 @@
 /**
  * Utilitaires et normalisation pour la catégorie Véhicules (Motors)
- * Inspiré de la structure Dubizzle Motors UAE
+ * Inspiré de la structure des annonces automobiles
  */
 
 export interface VehicleSpecs {
@@ -267,7 +267,7 @@ export function parseVehicleData(p: any): VehicleSpecs {
   const warranty = attrs['Garantie'] || '1 an constructeur / Assistance & Garantie Westzone';
   const targetMarket = 'Export Dubaï ➔ Burkina Faso & Afrique de l’Ouest';
 
-  // 14. Équipements / Features (Sections Dubizzle)
+  // 14. Équipements / Features (sections)
   const defaultFeatures = {
     entertainment: [
       'Écran tactile multimédia haute définition',
