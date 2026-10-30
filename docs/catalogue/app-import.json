@@ -13,7 +13,7 @@
     "currency": "XOF",
     "stock": 10,
     "images": [
-      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-elitebook-840-g6.png"
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-elitebook-840-g6-v2.png"
     ],
     "moderation": "PUBLISHED",
     "subcategory": "PC portables",
@@ -57,7 +57,7 @@
     "currency": "XOF",
     "stock": 10,
     "images": [
-      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-elitebook-840-g8.png"
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-elitebook-840-g8-v2.png"
     ],
     "moderation": "PUBLISHED",
     "subcategory": "PC portables",
@@ -101,7 +101,7 @@
     "currency": "XOF",
     "stock": 10,
     "images": [
-      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-probook-640-g8.png"
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-probook-640-g8-v2.png"
     ],
     "moderation": "PUBLISHED",
     "subcategory": "PC portables",
@@ -145,7 +145,7 @@
     "currency": "XOF",
     "stock": 10,
     "images": [
-      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-zbook-14u-g6.png"
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-zbook-14u-g6-v2.png"
     ],
     "moderation": "PUBLISHED",
     "subcategory": "PC portables",
@@ -189,7 +189,7 @@
     "currency": "XOF",
     "stock": 10,
     "images": [
-      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-pro-x360-fortis-11-g10.png"
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/hp-pro-x360-fortis-11-g10-v2.png"
     ],
     "moderation": "PUBLISHED",
     "subcategory": "PC portables",
@@ -233,7 +233,7 @@
     "currency": "XOF",
     "stock": 10,
     "images": [
-      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/iphone-13-128.png"
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/iphone-13-128-v2.png"
     ],
     "moderation": "PUBLISHED",
     "subcategory": "Smartphones",
@@ -277,7 +277,7 @@
     "currency": "XOF",
     "stock": 10,
     "images": [
-      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/galaxy-s23-128.png"
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/galaxy-s23-128-v2.png"
     ],
     "moderation": "PUBLISHED",
     "subcategory": "Smartphones",
@@ -321,7 +321,7 @@
     "currency": "XOF",
     "stock": 10,
     "images": [
-      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/kit-solaire-200w.png"
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/kit-solaire-200w-v2.png"
     ],
     "moderation": "PUBLISHED",
     "subcategory": "Panneaux solaires",
@@ -364,7 +364,7 @@
     "currency": "XOF",
     "stock": 10,
     "images": [
-      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/mini-projecteur-1080p.png"
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/mini-projecteur-1080p-v2.png"
     ],
     "moderation": "PUBLISHED",
     "subcategory": "Projecteurs",
@@ -406,7 +406,7 @@
     "currency": "XOF",
     "stock": 10,
     "images": [
-      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/ps5-slim.png"
+      "https://jptymtzrfahlhjcqpttg.supabase.co/storage/v1/object/public/product-images/catalogue/ps5-slim-v2.png"
     ],
     "moderation": "PUBLISHED",
     "subcategory": "Consoles",

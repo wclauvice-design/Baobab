@@ -18,10 +18,9 @@
           <circle cx="-35" cy="20" r="14" fill="#FAF6ED" opacity="0.8"/>
           <rect x="-170" y="128" width="340" height="10" rx="5" fill="#D9A441" opacity="0.65"/>
         </g>
-  <text x="540" y="716" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" fill="#1B1A17">Fer à repasser Panasonic</text>
-  <rect x="220" y="761" width="145" height="46" rx="23" fill="#12304C" opacity="0.055"/><rect x="220" y="761" width="145" height="46" rx="23" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.7"/><text x="292.5" y="792" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#12304C">1 000 W</text><rect x="381" y="761" width="157" height="46" rx="23" fill="#12304C" opacity="0.055"/><rect x="381" y="761" width="157" height="46" rx="23" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.7"/><text x="459.5" y="792" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#12304C">sans fil</text><rect x="554" y="761" width="306" height="46" rx="23" fill="#12304C" opacity="0.055"/><rect x="554" y="761" width="306" height="46" rx="23" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.7"/><text x="707" y="792" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#12304C">semelle antiadhésive</text>
-  <text x="540" y="900" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#B04E28">73 000 FCFA</text>
-  <text x="540" y="944" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#5B5A54">Prix TTC · Garantie 3 mois</text>
+  <text x="540" y="720" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" fill="#1B1A17">Fer à repasser Panasonic</text>
+  <text x="540" y="832" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#B04E28">73 000 FCFA</text>
+  <text x="540" y="876" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#5B5A54">Prix TTC · Garantie 3 mois</text>
   <rect width="1080" height="132" fill="#12304C"/>
   <rect y="132" width="1080" height="5" fill="#D9A441"/>
   <text x="64" y="72" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700" letter-spacing="3" fill="#FAF6ED">WESTZONE</text>

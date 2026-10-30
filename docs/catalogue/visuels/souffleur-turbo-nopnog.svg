@@ -20,10 +20,9 @@
           <circle cx="-72" cy="0" r="20" fill="#FAF6ED" opacity="0.85"/>
           <rect x="-140" y="66" width="70" height="12" rx="6" fill="#D9A441"/>
         </g>
-  <text x="540" y="716" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" fill="#1B1A17">Souffleur turbo portable</text>
-  <rect x="232" y="761" width="232" height="46" rx="23" fill="#12304C" opacity="0.055"/><rect x="232" y="761" width="232" height="46" rx="23" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.7"/><text x="348" y="792" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#12304C">110 000 tr/min</text><rect x="480" y="761" width="182" height="46" rx="23" fill="#12304C" opacity="0.055"/><rect x="480" y="761" width="182" height="46" rx="23" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.7"/><text x="571" y="792" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#12304C">4 vitesses</text><rect x="678" y="761" width="170" height="46" rx="23" fill="#12304C" opacity="0.055"/><rect x="678" y="761" width="170" height="46" rx="23" fill="none" stroke="#D9A441" stroke-width="1.5" opacity="0.7"/><text x="763" y="792" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#12304C">5 embouts</text>
-  <text x="540" y="900" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#B04E28">97 000 FCFA</text>
-  <text x="540" y="944" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#5B5A54">Prix TTC · Garantie 3 mois</text>
+  <text x="540" y="720" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" fill="#1B1A17">Souffleur turbo portable</text>
+  <text x="540" y="832" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#B04E28">97 000 FCFA</text>
+  <text x="540" y="876" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#5B5A54">Prix TTC · Garantie 3 mois</text>
   <rect width="1080" height="132" fill="#12304C"/>
   <rect y="132" width="1080" height="5" fill="#D9A441"/>
   <text x="64" y="72" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700" letter-spacing="3" fill="#FAF6ED">WESTZONE</text>
