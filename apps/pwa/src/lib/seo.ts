@@ -10,7 +10,7 @@ export const SITE_TITLE =
   "WESTZONE — Marketplace & conciergerie pour l'Afrique de l'Ouest";
 
 export const SITE_DESCRIPTION =
-  "WESTZONE connecte les acheteurs d'Afrique de l'Ouest aux marchés mondiaux : électronique, mode, maison, véhicules et équipements, avec devis concierge, fret maîtrisé et paiement protégé.";
+  "WESTZONE connecte les acheteurs d'Afrique de l'Ouest aux marchés mondiaux : électronique, informatique, énergie solaire et maison, avec devis transparent, fret aérien Dubaï → Ouagadougou et prix rendu sans frais caché.";
 
 type MetaTarget = { attr: "name" | "property"; key: string };
 
@@ -53,7 +53,7 @@ export function applyListingSeo(listing: ListingSeoInput) {
   const title = `${name} — WESTZONE`;
   const description = truncate(
     listing.description ||
-      `${name} disponible sur WESTZONE, la marketplace et conciergerie d'achat de l'Afrique de l'Ouest. Devis transparent, fret maîtrisé et paiement protégé.`,
+      `${name} disponible sur WESTZONE, la marketplace et conciergerie d'achat de l'Afrique de l'Ouest. Devis transparent, fret aérien Dubaï → Ouagadougou et prix rendu sans frais caché.`,
     158,
   );
   const image = absoluteImage(listing.images);
