@@ -1198,16 +1198,20 @@ export function ListingDetail() {
   const estimatedFreight = freight.cost;
   const productSubtotal = p ? Math.round(Number(p.price) * qty) : 0;
   // Le prix catalogue est un prix RENDU OUAGADOUGOU : le fret aérien express
-  // (12 500 FCFA/kg) et le dédouanement y sont déjà inclus. Le simulateur ne
-  // facture donc qu'un éventuel supplément (autre destination ou autre mode),
-  // ce qui évite d'afficher deux totaux contradictoires.
-  const INCLUDED_FREIGHT_PER_KG = 12_500;
-  const freightSupplement = p?.shippingIncluded
-    ? 0
-    : Math.max(
-        0,
-        estimatedFreight - Math.round(INCLUDED_FREIGHT_PER_KG * totalWeight),
-      );
+  // et le dédouanement y sont déjà inclus. On calcule donc la part de fret
+  // déjà payée avec le MÊME simulateur (poids minimum facturable, poids
+  // volumétrique) puis on n'ajoute qu'un éventuel supplément. Résultat : pour
+  // Ouagadougou en express, le total affiché est exactement le prix de la fiche.
+  const includedFreight = p?.shippingIncluded
+    ? estimatedFreight
+    : estimateFreight({
+        mode: "EXPRESS",
+        destination: DESTINATIONS.find((d) => d.id === "BF") || DESTINATIONS[0],
+        quantity: qty,
+        unitWeightKg: p?.weightKg,
+        dimensions: p?.dimensions,
+      }).cost;
+  const freightSupplement = Math.max(0, estimatedFreight - includedFreight);
   const estimatedGrandTotal = productSubtotal + freightSupplement;
 
   // Synchronisation automatique si le mode actuel n'est pas autorisé pour ce poids
@@ -1530,7 +1534,7 @@ export function ListingDetail() {
                 <span>
                   {freightSupplement > 0
                     ? `Supplément ${freight.modeLabel}`
-                    : "Fret aérien & douane (Ouagadougou)"}
+                    : "Fret aérien & douane (inclus)"}
                   <br />
                   <small style={{ color: "var(--muted)" }}>
                     Poids total : ~{totalWeight.toFixed(1)} kg
