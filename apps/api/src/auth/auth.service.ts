@@ -51,12 +51,18 @@ export class AuthService {
 
   /**
    * Connexion rapide dev-login : strictement désactivée si ENABLE_DEV_LOGIN !== 'true'.
-   * Supporte une liste blanche DEV_LOGIN_WHITELIST pour sécuriser les tests.
+   * La liste blanche DEV_LOGIN_WHITELIST est obligatoire : sans elle (et sans
+   * DEV_LOGIN_ALLOW_ALL=true en local), le mode est refusé (fail-closed) pour
+   * qu'aucun numéro ne puisse être usurpé.
    */
   async devLogin(phone: string) {
     const isDevLoginEnabled = this.config.get('ENABLE_DEV_LOGIN') === 'true';
     if (!isDevLoginEnabled) {
       throw new ForbiddenException('Le mode dev-login est désactivé. Veuillez vous connecter via vérification OTP.');
+    }
+
+    if (typeof phone !== 'string') {
+      throw new BadRequestException('Numéro de téléphone requis');
     }
 
     const normalizedPhone = phone.trim().replace(/\s+/g, '');
@@ -69,6 +75,22 @@ export class AuthService {
       .split(',')
       .map(p => p.trim().replace(/\s+/g, ''))
       .filter(Boolean);
+
+    const isProduction =
+      this.config.get('NODE_ENV') === 'production' ||
+      this.config.get('ENVIRONMENT') === 'production';
+    // Fail-closed : sans liste blanche explicite (ou autorisation locale
+    // explicite), le dev-login reste fermé. Une variable oubliée ne doit
+    // jamais ouvrir la connexion de n'importe quel numéro.
+    const allowAll = this.config.get('DEV_LOGIN_ALLOW_ALL') === 'true';
+
+    if (whitelist.length === 0 && !allowAll) {
+      throw new ForbiddenException(
+        isProduction
+          ? 'Le mode dev-login est désactivé en production. Veuillez vous connecter via vérification OTP.'
+          : 'Le mode dev-login est désactivé. Renseignez DEV_LOGIN_WHITELIST ou DEV_LOGIN_ALLOW_ALL=true.',
+      );
+    }
 
     if (whitelist.length > 0 && !whitelist.includes(normalizedPhone)) {
       throw new ForbiddenException('Ce numéro n\'est pas autorisé en mode dev-login.');

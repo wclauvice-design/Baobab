@@ -1,7 +1,7 @@
 import { ProductVideo } from '../components/ProductVideo';
 import { VariantPicker } from '../components/VariantPicker';
 import { ListingVariant, variantLabel, publicAttributes as sharedPublicAttributes } from '@westzone/shared';
-import { FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Link,
   NavLink,
@@ -40,9 +40,11 @@ import { isVideoUrl, videoPoster } from "../lib/media";
 import { applyListingSeo, resetSeo } from "../lib/seo";
 import {
   peekProduct,
+  peekProducts,
   rememberProduct,
   rememberProducts,
 } from "../lib/productCache";
+import { SUPPORT_WHATSAPP_LABEL, whatsappHref } from "../lib/contact";
 import { VehicleCard } from "../components/VehicleCard";
 import { VehicleDetail } from "../components/VehicleDetail";
 import { ImageSwipeGallery } from "../components/ImageSwipeGallery";
@@ -190,16 +192,36 @@ export function useUserDestination() {
   return { current, select, all: DESTINATIONS };
 }
 
-export const STORY_CATEGORIES = [
-  { id: "all", label: "Tout voir", emoji: "✨", universe: "", categoryKey: "", subcategoryKey: "", fallbackSubcategory: "" },
-  { id: "motors", label: "Véhicules", emoji: "🚗", universe: "motors", categoryKey: "", subcategoryKey: "", fallbackSubcategory: "" },
-  { id: "solar", label: "Solaire", emoji: "⚡", universe: "classifieds", categoryKey: "energie-solaire", subcategoryKey: "", fallbackSubcategory: "Énergie Solaire & Batteries" },
-  { id: "ac", label: "Climatiseurs", emoji: "❄️", universe: "classifieds", categoryKey: "electromenager", subcategoryKey: "climatisation-chauffage", fallbackSubcategory: "Électroménager" },
-  { id: "phones", label: "Smartphones", emoji: "📱", universe: "classifieds", categoryKey: "telephones-tablettes", subcategoryKey: "", fallbackSubcategory: "Téléphones & Tablettes" },
-  { id: "laptops", label: "Ordinateurs", emoji: "💻", universe: "classifieds", categoryKey: "informatique-pc", subcategoryKey: "", fallbackSubcategory: "Informatique & PC" },
-  { id: "trade", label: "Outillage", emoji: "🛠️", universe: "trade", categoryKey: "outillage", subcategoryKey: "", fallbackSubcategory: "" },
-  { id: "home", label: "Mobilier", emoji: "🛋️", universe: "home", categoryKey: "salons-mobilier", subcategoryKey: "", fallbackSubcategory: "" },
-];
+/** Catégorie du bandeau d'accueil, toujours adossée à des annonces réelles. */
+export interface StoryCategory {
+  slug: string;
+  label: string;
+  universe: string;
+  count: number;
+}
+
+/**
+ * Bandeau de catégories dérivé du catalogue réel : aucune puce ne mène vers
+ * une catégorie vide, et l'ordre suit le nombre d'annonces disponibles.
+ */
+export function storyCategoriesFrom(products: any[]): StoryCategory[] {
+  const counts = new Map<string, StoryCategory>();
+  for (const product of products) {
+    const canonical = product?.canonicalCategory;
+    const slug = canonical?.slug || product?.category?.slug;
+    if (!slug) continue;
+    const entry =
+      counts.get(slug) || {
+        slug,
+        label: canonical?.label || product?.category?.name || slug,
+        universe: canonical?.universeId || product?.category?.universe || "",
+        count: 0,
+      };
+    entry.count += 1;
+    counts.set(slug, entry);
+  }
+  return Array.from(counts.values()).sort((a, b) => b.count - a.count);
+}
 
 interface TaxonomyView {
   universe: any;
@@ -572,7 +594,7 @@ function ProductTile({ p, index = 0 }: { p: any; index?: number }) {
         </strong>
         <span className="listing-meta">
           <Icon name="pin" size={11} />
-          {p.location || "Dubaï"} · {p.shippingIncluded ? "Livraison incluse" : "Expédié"}
+          {p.location || "Dubaï"} · Sur commande 10–15 j
         </span>
       </div>
     </article>
@@ -595,7 +617,7 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
   const { ids: favoriteIds } = useFavorites();
   const { current: currentDest } = useUserDestination();
   const universe = params.get("universe") || "",
-    search = params.get("search") || "",
+    search = params.get("search") || params.get("q") || "",
     categoryKey = params.get("categoryKey") || "",
     subcategoryKey = params.get("subcategoryKey") || "";
   useEffect(() => {
@@ -678,6 +700,19 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
   const shown = favorites
     ? products.filter((p) => favoriteIds.includes(p.id))
     : products;
+  // Catalogue connu (fil courant + cache local) pour n'afficher que des
+  // catégories réellement pourvues, même quand un filtre est actif.
+  const catalogue = useMemo(() => {
+    const map = new Map<string, any>();
+    for (const item of [...peekProducts(), ...products]) {
+      if (item?.id) map.set(String(item.id), item);
+    }
+    return Array.from(map.values());
+  }, [products]);
+  const storyCategories = useMemo(
+    () => storyCategoriesFrom(catalogue),
+    [catalogue],
+  );
   const conditionLabels: Record<string, string> = {
     NEW: "Neuf",
     USED: "Occasion",
@@ -767,51 +802,53 @@ export function Marketplace({ favorites = false }: { favorites?: boolean }) {
       )}
 
       {/* 2. Réassurance & activité dynamique (bandeau compact) */}
-      {/* 3. Catégories — chips sobres, sans emoji */}
+      {/* 3. Catégories — chips sobres, uniquement des catégories pourvues */}
       {!favorites && (
         <nav className="bb-cat-strip" aria-label="Catégories">
-          {STORY_CATEGORIES.map((cat) => {
-          const isSelected =
-            !cat.universe && !cat.categoryKey && !cat.subcategoryKey
-              ? !universe && !categoryKey && !subcategoryKey
-              : cat.subcategoryKey
-                ? subcategoryKey === cat.subcategoryKey
-                : cat.categoryKey
-                  ? categoryKey === cat.categoryKey && !subcategoryKey
-                  : universe === cat.universe && !categoryKey;
-          return (
-            <button
-              key={cat.id}
-              type="button"
-              className={`bb-chip ${isSelected ? "active" : ""}`}
-              aria-pressed={isSelected}
-              onClick={() => {
-                const next = new URLSearchParams(params);
-                if (cat.universe) next.set("universe", cat.universe);
-                else next.delete("universe");
-                if (config?.taxonomy) {
-                  if (cat.categoryKey) next.set("categoryKey", cat.categoryKey);
-                  else next.delete("categoryKey");
-                  if (cat.subcategoryKey)
-                    next.set("subcategoryKey", cat.subcategoryKey);
-                  else next.delete("subcategoryKey");
-                  next.delete("subcategory");
-                } else {
-                  next.delete("categoryKey");
-                  next.delete("subcategoryKey");
-                  if (cat.fallbackSubcategory)
-                    next.set("subcategory", cat.fallbackSubcategory);
-                  else next.delete("subcategory");
-                }
-                setParams(next);
-              }}
-            >
-              <span className="bb-chip-icon" aria-hidden="true">{cat.emoji}</span>
-              <span className="bb-chip-label">{cat.label}</span>
-            </button>
-          );
-        })}
-      </nav>
+          <button
+            type="button"
+            className={`bb-chip ${!universe && !categoryKey && !subcategoryKey ? "active" : ""}`}
+            aria-pressed={!universe && !categoryKey && !subcategoryKey}
+            onClick={() => {
+              const next = new URLSearchParams(params);
+              next.delete("universe");
+              next.delete("categoryKey");
+              next.delete("subcategoryKey");
+              next.delete("subcategory");
+              setParams(next);
+            }}
+          >
+            <span className="bb-chip-icon" aria-hidden="true">✨</span>
+            <span className="bb-chip-label">Tout voir</span>
+          </button>
+          {storyCategories.map((cat) => {
+            const isSelected = categoryKey === cat.slug && !subcategoryKey;
+            return (
+              <button
+                key={cat.slug}
+                type="button"
+                className={`bb-chip ${isSelected ? "active" : ""}`}
+                aria-pressed={isSelected}
+                onClick={() => {
+                  const next = new URLSearchParams(params);
+                  if (config?.taxonomy) {
+                    next.set("categoryKey", cat.slug);
+                    if (cat.universe) next.set("universe", cat.universe);
+                    next.delete("subcategoryKey");
+                    next.delete("subcategory");
+                  } else {
+                    next.delete("categoryKey");
+                    next.delete("subcategoryKey");
+                    next.set("subcategory", cat.label);
+                  }
+                  setParams(next);
+                }}
+              >
+                <span className="bb-chip-label">{cat.label}</span>
+              </button>
+            );
+          })}
+        </nav>
       )}
 
       {/* 4. Fil */}
@@ -1078,7 +1115,8 @@ export function ListingDetail() {
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [shippingMode, setShippingMode] = useState<ShippingMode>("EXPRESS"),
-    [sellerProducts, setSellerProducts] = useState<any[]>([]);
+    [sellerProducts, setSellerProducts] = useState<any[]>([]),
+    [sellerTotal, setSellerTotal] = useState(0);
   useEffect(() => {
     let active = true;
     // Affichage instantané depuis le cache, sans écran de chargement.
@@ -1106,15 +1144,13 @@ export function ListingDetail() {
             .then((all: any[]) => {
               if (!active) return;
               rememberProducts(all);
-              setSellerProducts(
-                all
-                  .filter(
-                    (item: any) =>
-                      (item.sellerId === sellerId || item.seller?.id === sellerId) &&
-                      item.id !== fresh.id
-                  )
-                  .slice(0, 4)
+              const matching = all.filter(
+                (item: any) =>
+                  (item.sellerId === sellerId || item.seller?.id === sellerId) &&
+                  item.id !== fresh.id
               );
+              setSellerTotal(matching.length + 1);
+              setSellerProducts(matching.slice(0, 4));
             })
             .catch(() => {});
         }
@@ -1161,7 +1197,18 @@ export function ListingDetail() {
   const totalWeight = freight.realWeightKg;
   const estimatedFreight = freight.cost;
   const productSubtotal = p ? Math.round(Number(p.price) * qty) : 0;
-  const estimatedGrandTotal = p?.shippingIncluded ? productSubtotal : productSubtotal + estimatedFreight;
+  // Le prix catalogue est un prix RENDU OUAGADOUGOU : le fret aérien express
+  // (12 500 FCFA/kg) et le dédouanement y sont déjà inclus. Le simulateur ne
+  // facture donc qu'un éventuel supplément (autre destination ou autre mode),
+  // ce qui évite d'afficher deux totaux contradictoires.
+  const INCLUDED_FREIGHT_PER_KG = 12_500;
+  const freightSupplement = p?.shippingIncluded
+    ? 0
+    : Math.max(
+        0,
+        estimatedFreight - Math.round(INCLUDED_FREIGHT_PER_KG * totalWeight),
+      );
+  const estimatedGrandTotal = productSubtotal + freightSupplement;
 
   // Synchronisation automatique si le mode actuel n'est pas autorisé pour ce poids
   useEffect(() => {
@@ -1302,10 +1349,8 @@ export function ListingDetail() {
               </>
             ) : needsVariant ? (
               "Sélectionnez une combinaison disponible pour connaître le prix exact."
-            ) : p.stock > 0 ? (
-              `${p.stock} disponible${p.stock > 1 ? "s" : ""}`
             ) : (
-              "Rupture de stock"
+              "Sur commande · expédition Dubaï sous 10 à 15 jours"
             )}
           </p>
 
@@ -1318,7 +1363,7 @@ export function ListingDetail() {
             </div>
             <div className="flex items-center gap-1 text-slate-500">
               <Icon name="pin" size={14} />
-              <span>Disponible à {p.location || "Dubaï"}</span>
+              <span>Dubaï → {p.location || "Ouagadougou"} · 10–15 j</span>
             </div>
           </div>
 
@@ -1363,7 +1408,8 @@ export function ListingDetail() {
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-xs sm:text-sm">
             {Object.entries({
               État: p.condition === "NEW" ? "Neuf" : p.condition === "USED" ? "Occasion" : "Reconditionné",
-              Localisation: p.location || "Dubaï",
+              Localisation: `Dubaï (entrepôt) → ${p.location || "Ouagadougou"}`,
+              Délai: "10 à 15 jours (précommande)",
               Conditionnement: `${p.packSize || 1} ${p.unit || "pièce"}`,
               ...(p.weightKg ? { "Poids unitaire": `${p.weightKg} kg` } : {}),
               ...(p.dimensions ? { "Dimensions": p.dimensions } : {}),
@@ -1408,7 +1454,7 @@ export function ListingDetail() {
             <span className="text-xs text-slate-500">
               {availableStock > 0 ? (
                 <>
-                  En stock : <strong className="text-[#0B1E17]">{availableStock}</strong>
+                  Précommande · max <strong className="text-[#0B1E17]">{availableStock}</strong>
                   {" · "}
                 </>
               ) : (
@@ -1482,7 +1528,9 @@ export function ListingDetail() {
               </div>
               <div>
                 <span>
-                  {freight.modeLabel}
+                  {freightSupplement > 0
+                    ? `Supplément ${freight.modeLabel}`
+                    : "Fret aérien & douane (Ouagadougou)"}
                   <br />
                   <small style={{ color: "var(--muted)" }}>
                     Poids total : ~{totalWeight.toFixed(1)} kg
@@ -1490,12 +1538,17 @@ export function ListingDetail() {
                     {freight.basis === "volumetric" ? " (poids volumétrique)" : ""}
                   </small>
                 </span>
-                <b>{p.shippingIncluded ? "Inclus" : money(estimatedFreight)}</b>
+                <b>{freightSupplement > 0 ? money(freightSupplement) : "Inclus"}</b>
               </div>
               <div className="freight-total">
-                <span>Total estimé rendu {dest.name.split(" ")[0]}</span>
+                <span>Total rendu {dest.name.split(" ")[0]}*</span>
                 <strong>{money(estimatedGrandTotal)}</strong>
               </div>
+              <small style={{ display: "block", marginTop: 8, color: "var(--muted)" }}>
+                * Prix affiché déjà rendu Ouagadougou : fret aérien et douane
+                inclus. Pour une autre destination, le supplément éventuel est
+                confirmé par devis avant commande.
+              </small>
             </div>
           </div>
 
@@ -1517,7 +1570,7 @@ export function ListingDetail() {
                 className="flex-1 rounded-2xl bg-[#25D366] py-3.5 px-4 text-center text-sm font-bold text-white hover:bg-[#20bd5a] transition-colors shadow-lg shadow-[#25D366]/20 flex items-center justify-center gap-2"
                 onClick={e=>{if(!variantReady){e.preventDefault();setError("Choisissez une variante disponible.");}}}
                 aria-disabled={!variantReady}
-                href={`https://wa.me/${config.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`}
+                href={whatsappHref(message, config?.whatsapp)}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -1548,7 +1601,7 @@ export function ListingDetail() {
           <div className="seller-showcase-header">
             <h3>Autres articles de {p.seller?.shopName || "cette boutique"}</h3>
             <Link to={`/shop/${p.sellerId || p.seller?.id || "seller-westzone-official"}`}>
-              Voir toute la boutique ({sellerProducts.length + 1}) →
+              Voir toute la boutique ({sellerTotal || sellerProducts.length + 1}) →
             </Link>
           </div>
           <div className="seller-showcase-grid">
@@ -1580,7 +1633,7 @@ export function ListingDetail() {
       <div className="bb-detail-cta">
         <div className="bb-detail-cta-price">
           <strong>{money(p.price)}</strong>
-          <small>{p.shippingIncluded ? "Douane & livraison incluses" : "Hors fret · devis immédiat"}</small>
+          <small>{p.shippingIncluded ? "Douane & livraison incluses" : "Rendu Ouaga · fret & douane inclus"}</small>
         </div>
         <button type="button" onClick={discuss} disabled={busy || !variantReady}>
           {busy ? "Ouverture…" : "Demander un devis"}
@@ -2244,9 +2297,9 @@ export function Tracking({ account = false }: { account?: boolean }) {
                 Ouvrir la messagerie dédiée
               </Link>
               <a
-                href={`https://wa.me/22676950089?text=${encodeURIComponent(
+                href={whatsappHref(
                   `Bonjour Westzone, j'ai une question/réclamation concernant ma commande réf: ${order.reference || id}`
-                )}`}
+                )}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="market-button full"
@@ -2259,7 +2312,7 @@ export function Tracking({ account = false }: { account?: boolean }) {
                   textAlign: "center"
                 }}
               >
-                Assistance WhatsApp (+226 76 95 00 89)
+                Assistance WhatsApp ({SUPPORT_WHATSAPP_LABEL})
               </a>
             </div>
           </div>
@@ -2436,19 +2489,36 @@ export function MarketAccount() {
 }
 
 
+/** Produits déjà connus pour cette boutique (affichage immédiat, sans réseau). */
+function storefrontProducts(id?: string) {
+  if (!id) return [] as any[];
+  return peekProducts().filter(
+    (p: any) => p?.sellerId === id || p?.seller?.id === id,
+  );
+}
+
 export function Storefront() {
   const { id } = useParams<{ id: string }>();
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>(() => storefrontProducts(id));
   const [seller, setSeller] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => products.length === 0);
   const [search, setSearch] = useState("");
   const [selectedCat, setSelectedCat] = useState("ALL");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
+    let active = true;
+    const cached = storefrontProducts(id);
+    if (cached.length > 0) {
+      setProducts(cached);
+      setLoading(false);
+      if (cached[0].seller) setSeller(cached[0].seller);
+    } else {
+      setLoading(true);
+    }
     call("/products")
       .then((allProducts) => {
+        if (!active) return;
         rememberProducts(allProducts);
         const matching = allProducts.filter(
           (p: any) =>
@@ -2473,7 +2543,15 @@ export function Storefront() {
           });
         }
       })
-      .finally(() => setLoading(false));
+      .catch(() => {
+        // Le cache local, s'il existe, reste affiché.
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   function handleShare() {
@@ -2500,7 +2578,7 @@ export function Storefront() {
     <div className="storefront-container">
       {/* 1. Couverture & identité */}
       <div className="storefront-cover">
-        <span className="storefront-cover-label">Sélectionneur vérifié · Dubaï</span>
+        <span className="storefront-cover-label">Boutique officielle · Dubaï</span>
       </div>
       <div className="storefront-head">
         <div className="storefront-avatar">
@@ -2512,12 +2590,12 @@ export function Storefront() {
           <span className="storefront-badge">Vérifié</span>
         </h1>
         <p className="storefront-meta">
-          {seller?.city || "Dubaï"}, Émirats · Depuis 2023 · Réponse &lt; 2 h
+          {seller?.city || "Dubaï"}, Émirats · Réponse &lt; 2 h
         </p>
       </div>
 
       <div className="storefront-stats">
-        <div><b>{products.length}</b><span>articles</span></div>
+        <div><b>{loading && products.length === 0 ? "…" : products.length}</b><span>articles</span></div>
         <div><b>{categories.length}</b><span>catégories</span></div>
         <div><b>100 %</b><span>vérifié</span></div>
       </div>
@@ -2527,9 +2605,9 @@ export function Storefront() {
           {copied ? "Lien copié" : "Partager la boutique"}
         </button>
         <a
-          href={`https://wa.me/971568934905?text=${encodeURIComponent(
+          href={whatsappHref(
             `Bonjour, je visite la vitrine de la boutique ${shopName} sur Westzone et je souhaite commander un article.`
-          )}`}
+          )}
           target="_blank"
           rel="noreferrer"
           className="storefront-btn-whatsapp"
@@ -2538,16 +2616,16 @@ export function Storefront() {
         </a>
       </div>
 
-      {/* 2. Réassurance */}
+      {/* 2. Réassurance — uniquement des engagements tenus */}
       <div className="storefront-reassurance">
         <div className="reassurance-pill">
-          <span>✓</span> Photos réelles & conformité garantie
+          <span>✓</span> Visuels de présentation · photos réelles sur demande
         </div>
         <div className="reassurance-pill">
-          <span>✓</span> Paiement sécurisé via Westzone
+          <span>✓</span> Acompte Orange Money · solde à la réception
         </div>
         <div className="reassurance-pill">
-          <span>✓</span> Expédition suivie Dubaï → Afrique
+          <span>✓</span> Expédition suivie Dubaï → Afrique de l'Ouest
         </div>
       </div>
 

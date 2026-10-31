@@ -1,67 +1,51 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-// Trending search queries cycling in the search bar
+// Recherches populaires : uniquement des produits réellement en boutique.
 export const POPULAR_SEARCHES = [
-  "Toyota Land Cruiser V8 Dubaï",
-  "Kit Solaire Complet 5 kVA",
-  "iPhone 15 Pro Max 256 Go",
-  "Jetour Dashing 1.5T 2024",
-  "Climatiseur Inverter Gree 1.5 CV",
-  "Groupe Électrogène Diesel 7 kW",
-  "Robes & Tissus Dubaï Gold Souk",
-  "Toyota Hilux Double Cabine 4x4",
-  "Panneaux Solaires 550W Jinko",
-  "Motos & Tricycles de livraison",
-  "Ordinateurs Portables & Écrans",
+  "iPhone 13",
+  "Samsung Galaxy S23",
+  "PlayStation 5 Slim",
+  "Kit solaire 200 W",
+  "Mini projecteur 1080p",
+  "PC portable HP",
+  "Fer à repasser",
 ];
 
-// Reassurance guarantees highlighted in the interactive trust bar
+// Réassurance : uniquement des engagements réellement tenus par WESTZONE.
 export const CORE_GUARANTEES = [
   {
     icon: "💳",
-    title: "Paiement à la livraison*",
-    badge: "Confiance",
-    summary: "Réglez un acompte logistique, payez le solde après vérification chez vous.",
+    title: "Acompte Orange Money",
+    badge: "Paiement",
+    summary: "Réservez avec un acompte Orange Money, réglez le solde à la réception.",
     detail:
-      "Selon le type de marchandise et votre ville de destination, sécurisez votre commande avec un acompte logistique et réglez le solde en main propre à la livraison après vérification.",
+      "La commande est confirmée dès réception de l'acompte Orange Money (frais opérateur 1,5 %). Le solde se règle à la réception, après vérification du colis.",
   },
   {
     icon: "🛡️",
-    title: "Sécurité & Transparence 100%",
-    badge: "Paiement Protégé",
-    summary: "Fonds sécurisés jusqu'à validation et réception conforme.",
+    title: "Prix rendu, sans frais caché",
+    badge: "Transparence",
+    summary: "Fret aérien Dubaï → Ouagadougou et dédouanement inclus dans le prix.",
     detail:
-      "Vos paiements restent protégés par Westzone. Le commerçant n'est crédité qu'une fois votre marchandise inspectée, vérifiée et validée conforme à votre commande.",
+      "Le prix affiché est le prix rendu à Ouagadougou : produit, fret aérien, douane et livraison. Pour une autre ville, le supplément éventuel est confirmé par devis avant commande.",
   },
   {
-    icon: "📹",
-    title: "Inspection vidéo en direct de Dubaï",
+    icon: "📷",
+    title: "Photos et vidéo avant départ",
     badge: "Zéro surprise",
-    summary: "Vidéo et photos réelles de vos colis au garage avant tout départ.",
+    summary: "Les images de l'article réel vous sont envoyées avant l'expédition.",
     detail:
-      "Notre équipe à Jebel Ali et Deira déballe, teste et filme vos articles avec votre nom et numéro de commande avant la fermeture du carton ou conteneur.",
+      "Sur simple demande WhatsApp, nous envoyons photos et vidéo de l'article exact avant emballage. Les visuels de la boutique sont des illustrations, jamais des photos de fournisseur.",
   },
   {
     icon: "✈️",
-    title: "Fret Express & Maritime Dédouané",
-    badge: "Douane incluse",
-    summary: "Express 3–6 jours ou Maritime groupé sans aucun frais caché.",
+    title: "Fret express Dubaï → Ouaga",
+    badge: "Logistique",
+    summary: "12 500 FCFA/kg, 3 à 6 jours ouvrés, dédouanement inclus.",
     detail:
-      "Deux modes logistiques transparents : Fret Aérien Express (3 à 6 jours) pour vos besoins urgents ou Maritime au m³ (45 à 50 jours) pour les gros volumes, sans frais cachés.",
+      "Deux options : aérien express (3 à 6 jours) ou groupage cargo (14 à 16 jours). Le poids retenu et le mode choisi figurent sur le devis, sans frais ajouté à la livraison.",
   },
-];
-
-// Combined stream of live social proof and key guarantees
-export const STREAM_FOCAL_POINTS = [
-  { icon: "🚗", city: "Ouagadougou", text: "Toyota Hilux inspectée au showroom Dubaï & validée", time: "il y a 2 min", tag: "LIVE" },
-  { icon: "🛡️", city: "Sécurité", text: "Paiement protégé · Solde réglé après vérification", time: "Garantie", tag: "CONFIANCE" },
-  { icon: "⚡", city: "Abidjan", text: "10 kits solaires 5 kVA Hybride expédiés en fret express", time: "il y a 5 min", tag: "LIVE" },
-  { icon: "📹", city: "Zéro surprise", text: "Inspection vidéo en direct de votre colis avant départ", time: "Audit", tag: "GARANTIE" },
-  { icon: "🚢", city: "Lomé", text: "Arrivage conteneur Jetour Dashing au port de transit", time: "il y a 11 min", tag: "LIVE" },
-  { icon: "📦", city: "Cotonou", text: "Colis électronique remis en main propre au destinataire", time: "il y a 28 min", tag: "LIVE" },
-  { icon: "✈️", city: "Douane 100% gérée", text: "Fret maritime & aérien régulier chaque semaine", time: "Transit", tag: "LOGISTIQUE" },
-  { icon: "🔧", city: "Bamako", text: "Commande confirmée · Pièces détachées Toyota d'origine", time: "il y a 39 min", tag: "LIVE" },
 ];
 
 function useRotation(count: number, intervalMs: number, paused: boolean) {

@@ -98,3 +98,9 @@ export function peekProduct(id: string | null | undefined): any | null {
   hydrate();
   return memory.get(String(id)) || null;
 }
+
+/** Tous les produits connus du cache (affichage immédiat d'une vitrine). */
+export function peekProducts(): any[] {
+  hydrate();
+  return Array.from(memory.values());
+}

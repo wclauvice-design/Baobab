@@ -6,8 +6,7 @@ import { useCurrency } from '../lib/currency';
 import { useUnreadMessages } from '../lib/unreadMessages';
 import { usePendingClientCounts } from '../lib/clientCounts';
 import { IconChat, IconHeart, IconHistory, IconLocation, IconOrders, IconSettings, IconStar } from '../components/icons';
-
-const SUPPORT_WHATSAPP_NUMBER = '22676950089';
+import { SUPPORT_WHATSAPP_LABEL, whatsappHref } from '../lib/contact';
 
 interface Coupon {
   id: string;
@@ -67,10 +66,10 @@ export function Account() {
         </div>
         <div className="flex gap-2">
           <a
-            href={`https://wa.me/${SUPPORT_WHATSAPP_NUMBER}`}
+            href={whatsappHref()}
             target="_blank"
             rel="noreferrer"
-            title="Contacter le support"
+            title={`Contacter le support (${SUPPORT_WHATSAPP_LABEL})`}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-base-800 text-slate-300 transition-transform duration-200 hover:-translate-y-0.5 hover:text-amber-400"
           >
             <IconChat className="h-4 w-4" />

@@ -7,6 +7,7 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { SMS_PROVIDER } from './sms/sms-provider.interface';
 import { ConsoleSmsProvider } from './sms/console-sms.provider';
+import { HttpSmsProvider } from './sms/http-sms.provider';
 
 @Module({
   imports: [
@@ -25,7 +26,16 @@ import { ConsoleSmsProvider } from './sms/console-sms.provider';
   providers: [
     AuthService,
     JwtStrategy,
-    { provide: SMS_PROVIDER, useClass: ConsoleSmsProvider },
+    {
+      // Passerelle SMS réelle dès que SMS_GATEWAY_URL est configuré ;
+      // sinon repli sur le journal de console (dev uniquement).
+      provide: SMS_PROVIDER,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) =>
+        config.get<string>('SMS_GATEWAY_URL')
+          ? new HttpSmsProvider(config)
+          : new ConsoleSmsProvider(),
+    },
   ],
   exports: [AuthService],
 })

@@ -32,8 +32,12 @@ export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Get()
-  findAll(@Query() params: { search?: string; categoryId?: string; categoryKey?: string; universe?: string; condition?: string; subcategory?: string; subcategoryKey?: string; minPrice?: string; maxPrice?: string; sort?: string }) {
-    return this.productsService.findAll(params);
+  findAll(@Query() params: { search?: string; q?: string; categoryId?: string; categoryKey?: string; universe?: string; condition?: string; subcategory?: string; subcategoryKey?: string; minPrice?: string; maxPrice?: string; sort?: string }) {
+    // `q` est l'alias public standard (liens externes, partages) de `search`.
+    return this.productsService.findAll({
+      ...params,
+      search: params.search || params.q,
+    });
   }
 
   @Patch(':id/moderation')

@@ -4,6 +4,7 @@ import { formatXof } from '../lib/format';
 import { useCurrency } from '../lib/currency';
 import { parseVehicleData } from '../lib/vehicles';
 import { ImageSwipeGallery } from './ImageSwipeGallery';
+import { whatsappHref } from '../lib/contact';
 
 interface VehicleDetailProps {
   product: any;
@@ -41,15 +42,13 @@ export function VehicleDetail({
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const whatsappMessage = encodeURIComponent(
-    `Bonjour Westzone Conciergerie,\nJe souhaite réserver le véhicule suivant :\n*${product.name}*\nPrix : *${formatXof(
+  const whatsappMessage = `Bonjour Westzone Conciergerie,\nJe souhaite réserver le véhicule suivant :\n*${product.name}*\nPrix : *${formatXof(
       price
     )}*\nAnnée : ${specs.year} | Kilométrage : ${specs.mileage} | Carburant : ${
       specs.fuelType
     }\nDestination souhaitée : ${
       destination?.name || 'Afrique de l’Ouest'
-    }.\nPouvez-vous m’envoyer le rapport d'inspection de Dubaï et la facture proforma ?`
-  );
+    }.\nPouvez-vous m’envoyer le rapport d'inspection de Dubaï et la facture proforma ?`;
 
   const rawDescription = (product.description || '').trim();
   const isLongDesc = rawDescription.length > 240;
@@ -410,7 +409,7 @@ export function VehicleDetail({
           <div className="flex-1 flex items-center gap-2 sm:justify-end">
             {/* WhatsApp Concierge VIP */}
             <a
-              href={`https://wa.me/22676950089?text=${whatsappMessage}`}
+              href={whatsappHref(whatsappMessage)}
               target="_blank"
               rel="noreferrer"
               className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 sm:px-6 py-3.5 text-xs sm:text-sm font-bold text-white hover:bg-[#20bd5a] shadow-md shadow-[#25D366]/20 active:scale-98 transition-all"

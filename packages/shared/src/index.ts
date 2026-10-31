@@ -76,7 +76,9 @@ export const SUPPORTED_CURRENCIES: Record<SupportedCurrency, CurrencyConfig> = {
     symbol: 'AED',
     label: 'AED (Dubaï)',
     flag: '🇦🇪',
-    rateFromXof: 1 / 165,
+    // Taux indicatif au 31/10/2026 (1 EUR ≈ 4,26 AED, parité XOF fixe).
+    // À rafraîchir avec le taux du jour avant toute campagne publique.
+    rateFromXof: 1 / 154,
     decimals: 0,
   },
   EUR: {
@@ -92,7 +94,8 @@ export const SUPPORTED_CURRENCIES: Record<SupportedCurrency, CurrencyConfig> = {
     symbol: '$',
     label: 'USD ($)',
     flag: '🇺🇸',
-    rateFromXof: 1 / 600,
+    // Taux indicatif au 31/10/2026 (1 EUR ≈ 1,16 USD).
+    rateFromXof: 1 / 565,
     decimals: 2,
   },
 };
